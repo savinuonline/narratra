@@ -25,7 +25,7 @@ class IntroPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '"Close Your Eyes and Let the Story Unfold!"',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
