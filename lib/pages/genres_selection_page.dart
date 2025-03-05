@@ -38,8 +38,9 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
     return Scaffold(
       // App bar with a more playful title
       appBar: AppBar(
-        title: const Text('Discover Your Next Read'),
-        elevation: 0, // for a cleaner look with the gradient
+        // Removed the title by using an empty widget.
+        title: const SizedBox.shrink(),
+        elevation: 0,
       ),
       body: Container(
         // Gradient background for a modern look
