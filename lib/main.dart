@@ -4,7 +4,16 @@ import 'pages/genres_selection_page.dart';
 import 'pages/home_screen.dart';
 import 'models/user_model.dart';
 
-void main() {
+Future<void> main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase before runApp()
+  await Firebase.initializeApp(
+    // Pass the default options if you're using the FlutterFire CLI
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
