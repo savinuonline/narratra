@@ -7,6 +7,7 @@ class IntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //backgroundColor: Colors.white,
       body: Column(
         children: [
           //logo
@@ -48,7 +49,7 @@ class IntroPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return const LoginPage();
+                      return LoginPage();
                     },
                   ),
                 ),
