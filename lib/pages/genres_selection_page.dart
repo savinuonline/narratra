@@ -73,48 +73,32 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                 style: TextStyle(fontSize: 16, color: Colors.black87),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Main content area
+            const SizedBox(height: 40),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    // Genre chips
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: allGenres.map((genre) {
-                        final bool isSelected = selectedGenres.contains(genre.name);
-                        return GenreButton(
-                          genre: genre,
-                          selected: isSelected,
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                selectedGenres.remove(genre.name);
-                              } else {
-                                selectedGenres.add(genre.name);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 40),
-
-                    // Optional illustration to fill space (replace URL or use local asset)
-                    Image.network(
-                      "https://raw.githubusercontent.com/devefy/Flutter-Illustrations/master/illustrations/reading_side.png",
-                      height: 200,
-                    ),
-                  ],
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: allGenres.map((genre) {
+                    final bool isSelected = selectedGenres.contains(genre.name);
+                    return GenreButton(
+                      genre: genre,
+                      selected: isSelected,
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            selectedGenres.remove(genre.name);
+                          } else {
+                            selectedGenres.add(genre.name);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
             ),
-
-            // Continue button at the bottom center
             Padding(
               padding: const EdgeInsets.only(bottom: 24),
               child: ElevatedButton(
