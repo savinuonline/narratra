@@ -1,18 +1,35 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/intro_page.dart';
+import 'pages/genres_selection_page.dart';
+import 'pages/home_screen.dart';
+import 'models/user_model.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
+
+  // For now, we create a dummy user. Later, update this with real user info.
+  UserModel get dummyUser => UserModel(
+    uid: 'dummyUID',
+    displayName: 'Test User',
+    selectedGenres: ['Literary Fiction', 'Romance'],
+  );
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: IntroPage(),
+    return MaterialApp(
+      title: 'Audiobook App',
+      // Start with the preferences (genres) page
+      initialRoute: '/preferences',
+      routes: {
+        // Load your genres selection page first
+        '/preferences': (context) => const GenresSelectionPage(),
+        // When navigating to '/home', pass the dummy user to the HomeScreen
+        '/home': (context) => HomeScreen(user: dummyUser),
+      },
     );
   }
 }
