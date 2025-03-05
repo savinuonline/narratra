@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Simple data class for each genre
 class GenreData {
@@ -14,6 +15,8 @@ class GenreData {
 }
 
 class GenresSelectionPage extends StatefulWidget {
+  const GenresSelectionPage({Key? key}) : super(key: key);
+
   @override
   _GenresSelectionPageState createState() => _GenresSelectionPageState();
 }
@@ -61,10 +64,9 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            // A subtitle for instructions
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+            const SizedBox(height: 30),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 "Pick the categories you love, so we can tailor your reading recommendations just for you.",
                 textAlign: TextAlign.center,
