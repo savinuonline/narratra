@@ -36,7 +36,6 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar with a more playful title
       appBar: AppBar(
         // Removed the title by using an empty widget.
         title: const SizedBox.shrink(),
