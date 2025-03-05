@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "872325044778",
+    "project_id": "narratradb",
+    "storage_bucket": "narratradb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872325044778:android:866933226e9aa84368c153",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCS5fQ5UzXAwY0rWe5bm0l9LGvVKkvdU3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
