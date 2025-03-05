@@ -45,7 +45,6 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
         elevation: 0,
       ),
       body: Container(
-        // Gradient background for a modern look
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.white, Colors.blue.shade50],
@@ -56,7 +55,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // A headline to draw user’s attention
+            // Retained the "What Are You Into?" headline in the body.
             const Text(
               "What Are You Into?",
               style: TextStyle(
@@ -100,10 +99,10 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.only(bottom: 90),
               child: ElevatedButton(
                 onPressed: () {
-                  // Here you can save selectedGenres to Firebase or pass them to the home page
+                  // Save selectedGenres to backend here if needed
                   Navigator.pushReplacementNamed(context, '/home');
                 },
                 style: ElevatedButton.styleFrom(
@@ -126,7 +125,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
   }
 }
 
-/// A custom widget for a single genre chip/button.
+/// A custom widget for a single genre button with larger size and icon.
 class GenreButton extends StatelessWidget {
   final GenreData genre;
   final bool selected;
@@ -142,27 +141,30 @@ class GenreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = genre.color;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        width: 140, // Larger width
+        height: 140, // Larger height
         decoration: BoxDecoration(
           color: selected ? color.shade700 : color.shade100,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               genre.icon,
               color: selected ? Colors.white : color.shade700,
+              size: 48, // Bigger icon
             ),
-            const SizedBox(width: 6),
+            const SizedBox(height: 8),
             Text(
               genre.name,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: selected ? Colors.white : color.shade700,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
