@@ -1,5 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // Only if generated via FlutterFire CLI
 import 'pages/genres_selection_page.dart';
 import 'pages/home_screen.dart';
 import 'models/user_model.dart';
