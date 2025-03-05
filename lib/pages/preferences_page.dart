@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PreferencesPage extends StatelessWidget {
-  const PreferencesPage({super.key});
+  PreferencesPage({super.key});
+
+  final user = FirebaseAuth.instance.currentUser;
 
   //Sign user out
   void signUserOut() {
@@ -21,7 +23,12 @@ class PreferencesPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(child: Text("Preferences Page")),
+      body: Center(
+        child: Text(
+          "LOGGED IN AS: ${user?.email!}",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 }

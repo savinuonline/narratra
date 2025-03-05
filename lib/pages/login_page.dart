@@ -110,7 +110,7 @@ class LoginPage extends StatelessWidget {
                     //Google
                     SqureTile(imagePath: 'lib/images/GoogleLogo.png'),
 
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
 
                     //Apple
                     SqureTile(imagePath: 'lib/images/AppleLogo.png'),
