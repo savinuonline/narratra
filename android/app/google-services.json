@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "975619388552",
+    "project_id": "narratra-19951",
+    "storage_bucket": "narratra-19951.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975619388552:android:eb38f65068d011bd9a5b3d",
+        "android_client_info": {
+          "package_name": "com.example.narratra"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqHjn920QVJojTo89aTCeIpAsYov78gv4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
