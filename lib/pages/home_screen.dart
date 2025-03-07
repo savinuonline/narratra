@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Placeholder Book $index',
       author: 'Author $index',
       genre: 'Fiction',
-      imageUrl: 'assets/images/books.jpg', // local asset image path
+      imageUrl: 'assets/images/books.png', // local asset image path
       description: 'This is a description for placeholder book $index. It gives a brief overview of the story and the content.',
     ),
   );
