@@ -9,7 +9,7 @@ class DownloadPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 20),
           Text(
             "Download & Storage",
             style: TextStyle(
@@ -18,7 +18,7 @@ class DownloadPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20,),
+          const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -59,7 +59,7 @@ class DownloadPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20,),
+          const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(

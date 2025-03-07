@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
-class ActionsPage extends StatelessWidget {
+class ActionsPage extends StatefulWidget {
   const ActionsPage({super.key});
+
+  @override
+  State<ActionsPage> createState() => _ActionsPageState();
+}
+
+class _ActionsPageState extends State<ActionsPage> {
+  bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 20),
           Text(
             "Actions",
             style: TextStyle(
@@ -18,7 +25,7 @@ class ActionsPage extends StatelessWidget {
             ),
           ),
 
-        const SizedBox(height: 20,),
+        const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -30,8 +37,9 @@ class ActionsPage extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Colors.red.shade100,
                   ),
-                  child: Icon(Ionicons.book_outline, size: 26,
-                  color: const Color.fromARGB(255, 214, 7, 7),),
+                  child: Icon(Ionicons.moon_outline, size: 26,
+                  color: const Color.fromARGB(255, 214, 7, 7),
+                  ),
                 
                 ),
                 SizedBox(width: 12),
@@ -46,20 +54,20 @@ class ActionsPage extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 227, 227, 227),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Icon(Ionicons.chevron_forward_outline),
+                Switch(
+                  value: isDarkMode,
+                  onChanged: (value) {
+                    setState(() {
+                      isDarkMode = value;
+                    });
+                  },
+                  activeColor: Colors.black,
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 20,),
+          const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -100,7 +108,7 @@ class ActionsPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20,),
+          const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
