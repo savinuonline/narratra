@@ -99,7 +99,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 90),
+              padding: const EdgeInsets.only(bottom: 50),
               child: ElevatedButton(
                 onPressed: () {
                   // Save selectedGenres to backend here if needed
