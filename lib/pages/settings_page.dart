@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: const Color.fromARGB(255, 227, 227, 227),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(Ionicons.chevron_forward_outline),
@@ -110,7 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: const Color.fromARGB(255, 227, 227, 227),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(Ionicons.chevron_forward_outline),
