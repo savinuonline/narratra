@@ -19,6 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           icon: Icon(Ionicons.chevron_back_outline),
         ),
+        leadingWidth:100,
       ),
     );
   }
