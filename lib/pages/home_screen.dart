@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
+import 'player_screen.dart'; // Import the player screen
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
@@ -28,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Placeholder Book $index',
       author: 'Author $index',
       genre: 'Fiction',
-      imageUrl: 'images/books.jpg', // local asset images path
-      description: 'Description for placeholder book $index',
+      imageUrl: 'assets/images/books.jpg', // local asset image path
+      description: 'This is a description for placeholder book $index. It gives a brief overview of the story and the content.',
     ),
   );
 
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               _buildSearchBar(),
               const SizedBox(height: 16),
-              // For each category, show a title and a horizontal list of books
+              // Build each category with a horizontal list of books
               ...categories.map((cat) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 180, // Fixed height for horizontal cards
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        primary: false, // Avoid conflicts with the vertical scroll
+                        primary: false,
                         shrinkWrap: true,
                         physics: const BouncingScrollPhysics(),
                         itemCount: placeholderBooks.length,
@@ -107,7 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 16),
                         itemBuilder: (context, index) {
                           final book = placeholderBooks[index];
-                          return _buildHorizontalBookCard(book);
+                          return GestureDetector(
+                            onTap: () => _showBookDetails(book),
+                            child: _buildHorizontalBookCard(book),
+                          );
                         },
                       ),
                     ),
@@ -119,6 +123,69 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Pops up a modal bottom sheet with book details and a play button.
+  void _showBookDetails(Book book) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Wrap(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      book.title,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text("Author: ${book.author}",
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text("Genre: ${book.genre}",
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(book.description,
+                  style: const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.justify),
+              const SizedBox(height: 16),
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PlayerScreen(book: book)),
+                    );
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text("Play"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -205,8 +272,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book cover loaded from asset
-            Image.asset(
+            // Book cover loaded from asset or network
+            book.imageUrl.startsWith('assets/')
+                ? Image.asset(
+              book.imageUrl,
+              height: 90,
+              width: 140,
+              fit: BoxFit.cover,
+            )
+                : Image.network(
               book.imageUrl,
               height: 90,
               width: 140,
