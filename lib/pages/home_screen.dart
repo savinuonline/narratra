@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
-import '../services/firebase_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
@@ -13,146 +12,191 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final FirebaseService _firebaseService = FirebaseService();
-  late Future<List<Book>> _recommendedBooksFuture;
+  // The 4 categories
+  final List<String> categories = [
+    "Trending",
+    "Recommends",
+    "Today For You",
+    "Free Books",
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _recommendedBooksFuture =
-        _firebaseService.getRecommendedBooks(widget.user.uid);
-  }
+  // Placeholder books used for each category, now using asset images
+  final List<Book> placeholderBooks = List.generate(
+    6,
+        (index) => Book(
+      id: 'book_$index',
+      title: 'Placeholder Book $index',
+      author: 'Author $index',
+      genre: 'Fiction',
+      imageUrl: 'images/books.jpg', // local asset images path
+      description: 'Description for placeholder book $index',
+    ),
+  );
 
-  Future<void> _refreshRecommendations() async {
+  // Bottom navigation index
+  int _selectedIndex = 0;
+
+  // Handle bottom nav taps
+  void _onNavItemTapped(int index) {
     setState(() {
-      _recommendedBooksFuture =
-          _firebaseService.getRecommendedBooks(widget.user.uid);
+      _selectedIndex = index;
     });
+    // In a real app, navigate or switch pages based on index.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove the default AppBar if you want a custom top section
-      body: SafeArea(
-        child: FutureBuilder<List<Book>>(
-          future: _recommendedBooksFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error loading recommendations'));
-            }
-
-            final books = snapshot.data ?? [];
-            if (books.isEmpty) {
-              return const Center(child: Text('No recommendations yet'));
-            }
-
-            // Wrap everything in a SingleChildScrollView
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGreetingSection(),
-                  const SizedBox(height: 24),
-                  _buildRecommendedSection(books),
-                  const SizedBox(height: 24),
-                  _buildNewlyArrivedSection(books),
-                ],
-              ),
-            );
-          },
-        ),
+      // Bottom navigation bar with 5 items: Explore, Search, Library, Play, Profile.
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book),
+            label: 'Explore',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Library',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.play_arrow),
+            label: 'Play',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _refreshRecommendations,
-        child: const Icon(Icons.refresh),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          // The entire page scrolls vertically
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGreetingSection(),
+              const SizedBox(height: 16),
+              _buildSearchBar(),
+              const SizedBox(height: 16),
+              // For each category, show a title and a horizontal list of books
+              ...categories.map((cat) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle(cat),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 180, // Fixed height for horizontal cards
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        primary: false, // Avoid conflicts with the vertical scroll
+                        shrinkWrap: true,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: placeholderBooks.length,
+                        separatorBuilder: (context, index) =>
+                        const SizedBox(width: 16),
+                        itemBuilder: (context, index) {
+                          final book = placeholderBooks[index];
+                          return _buildHorizontalBookCard(book);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                );
+              }).toList(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  /// Top greeting + avatar
+  /// Greeting section at the top
   Widget _buildGreetingSection() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Greeting texts
+        // Greeting text
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Hello Savinu!",
-              style: TextStyle(
+              "Hello, ${widget.user.displayName}!",
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade900,
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              "Good Evening!",
+              "Good Evening",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 color: Colors.grey.shade600,
               ),
             ),
           ],
         ),
-        // Profile avatar (placeholder image)
-        CircleAvatar(
-          radius: 22,
-          backgroundImage: NetworkImage(
-            "https://via.placeholder.com/150",
-          ),
-        )
-      ],
-    );
-  }
-
-  /// Horizontal list of recommended books
-  Widget _buildRecommendedSection(List<Book> books) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "RECOMMENDED FOR YOU",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 240, // Enough space for the horizontal card
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: books.length,
-            separatorBuilder: (context, _) => const SizedBox(width: 16),
-            itemBuilder: (context, index) {
-              final book = books[index];
-              return _buildHorizontalBookCard(book);
-            },
-          ),
+        // Avatar from local asset
+        const CircleAvatar(
+          radius: 26,
+          backgroundImage: AssetImage('assets/images/avatar.png'),
         ),
       ],
     );
   }
 
-  /// Card style for horizontal "recommended" items
+  /// Search bar placeholder
+  Widget _buildSearchBar() {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: "Search audiobooks...",
+        prefixIcon: const Icon(Icons.search),
+        filled: true,
+        fillColor: Colors.grey.shade200,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  /// Category title widget
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  /// Horizontal book card widget using asset images
   Widget _buildHorizontalBookCard(Book book) {
     return Container(
-      width: 160,
+      width: 140,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 4,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -161,21 +205,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book cover
-            Image.network(
+            // Book cover loaded from asset
+            Image.asset(
               book.imageUrl,
-              height: 120,
-              width: 160,
+              height: 90,
+              width: 140,
               fit: BoxFit.cover,
             ),
-            // Book details
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 book.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -189,114 +230,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Example rating row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-              child: Row(
-                children: const [
-                  Icon(Icons.star, color: Colors.amber, size: 16),
-                  Icon(Icons.star, color: Colors.amber, size: 16),
-                  Icon(Icons.star, color: Colors.amber, size: 16),
-                  Icon(Icons.star_half, color: Colors.amber, size: 16),
-                  Icon(Icons.star_outline, color: Colors.amber, size: 16),
-                ],
-              ),
-            )
           ],
         ),
-      ),
-    );
-  }
-
-  /// Vertical list for "Our Newly Arrived"
-  Widget _buildNewlyArrivedSection(List<Book> books) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Our Newly Arrived",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // We'll just create a vertical list of cards
-        Column(
-          children: books.map((book) => _buildVerticalBookCard(book)).toList(),
-        )
-      ],
-    );
-  }
-
-  /// Card style for vertical "newly arrived" items
-  Widget _buildVerticalBookCard(Book book) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Book cover
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              book.imageUrl,
-              height: 100,
-              width: 70,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Book details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  book.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Author: ${book.author}",
-                  style: TextStyle(color: Colors.grey.shade700),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Genre: ${book.genre}",
-                  style: TextStyle(color: Colors.grey.shade700),
-                ),
-                const SizedBox(height: 4),
-                // Example of a duration or rating
-                Row(
-                  children: const [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text("4h 45m"),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
       ),
     );
   }
