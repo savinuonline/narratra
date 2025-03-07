@@ -54,10 +54,92 @@ class ActionsPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(Ionicons.chevron_forward_outline),
-                )
-                ],
+                ),
+              ],
             ),
           ),
+
+          const SizedBox(height: 20,),
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.shade100,
+                  ),
+                  child: Icon(Ionicons.person_add_outline, size: 26,
+                  color: const Color.fromARGB(255, 214, 7, 7),),
+                
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Add Account", 
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    )),
+                  ],
+                ),
+                const Spacer(),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 227, 227, 227),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(Ionicons.chevron_forward_outline),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20,),
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.shade100,
+                  ),
+                  child: Icon(Ionicons.log_out_outline, size: 26,
+                  color: const Color.fromARGB(255, 214, 7, 7),),
+                
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Log out", 
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    )),
+                  ],
+                ),
+                const Spacer(),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 227, 227, 227),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(Ionicons.chevron_forward_outline),
+                ),
+              ],
+            ),
+          )
 
       ]
     );  
