@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:frontend/pages/download_page.dart';
+import 'package:frontend/pages/actions_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -121,6 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           
           DownloadPage(),
+          ActionsPage(),
         ],
       ),    
     );
