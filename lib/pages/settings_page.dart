@@ -49,10 +49,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.shade100,
+                    color: const Color.fromARGB(255, 218, 245, 204),
                   ),
                   child: Icon(Ionicons.play_circle_outline, size: 26,
-                  color: const Color.fromARGB(255, 214, 7, 7),),
+                  color: const Color.fromARGB(255, 3, 116, 16),),
                 
                 ),
                 SizedBox(width: 12),
@@ -90,10 +90,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.shade100,
+                    color: const Color.fromARGB(255, 218, 245, 204),
                   ),
                   child: Icon(Ionicons.mic_outline, size: 26,
-                  color: const Color.fromARGB(255, 214, 7, 7),),
+                  color: const Color.fromARGB(255, 3, 94, 14),),
                 
                 ),
                 SizedBox(width: 12),
