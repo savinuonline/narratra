@@ -26,7 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Settings", style: TextStyle(
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
           ),
