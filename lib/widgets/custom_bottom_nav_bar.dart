@@ -13,7 +13,7 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: const Color(0xFF3dc2ec), // Accent/Background color from palette
+      backgroundColor: const Color(0xfff6f6f6), // Accent/Background color from palette
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
@@ -33,10 +33,7 @@ class CustomBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.bookmark),
           label: 'Library',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.play_arrow),
-          label: 'Play',
-        ),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profile',

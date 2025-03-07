@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onNavItemTapped,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.black,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
@@ -68,12 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.bookmark),
             label: 'Library',
           ),
+
           BottomNavigationBarItem(
-            icon: Icon(Icons.play_arrow),
-            label: 'Play',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_2_outlined),
             label: 'Profile',
           ),
         ],
