@@ -28,10 +28,10 @@ class DownloadPage extends StatelessWidget {
                   width: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.shade100,
+                    color: const Color.fromARGB(255, 180, 209, 249),
                   ),
-                  child: Icon(Ionicons.mic_outline, size: 26,
-                  color: const Color.fromARGB(255, 214, 7, 7),),
+                  child: Icon(Ionicons.download_outline, size: 26,
+                  color: const Color.fromARGB(255, 29, 14, 172),),
                 
                 ),
                 SizedBox(width: 12),
