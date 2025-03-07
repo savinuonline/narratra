@@ -1,18 +1,16 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // Only if generated via FlutterFire CLI
+import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
 import 'pages/home_screen.dart';
 import 'models/user_model.dart';
 
 Future<void> main() async {
-  // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase before runApp()
+  // Initialize Firebase
   await Firebase.initializeApp(
-    // Pass the default options if you're using the FlutterFire CLI
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
@@ -22,7 +20,7 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // For now, we create a dummy user. Later, update this with real user info.
+  // Dummy user for testing
   UserModel get dummyUser => UserModel(
     uid: 'dummyUID',
     displayName: 'Test User',
@@ -33,12 +31,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Audiobook App',
-      // Start with the preferences (genres) page
+      debugShowCheckedModeBanner: false,
+      // Enable Material 3 and set up a custom color scheme
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: const ColorScheme(
+          brightness: Brightness.light,
+          primary: Color(0xFF402e7a),        // Primary color from palette
+          onPrimary: Colors.white,
+          secondary: Color(0xFF4b70f5),      // Secondary color
+          onSecondary: Colors.white,
+          error: Colors.red,
+          onError: Colors.white,
+          background: Color(0xFF3dc2ec),       // Accent/Background color
+          onBackground: Colors.black,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF3dc2ec),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF402e7a),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+      ),
       initialRoute: '/preferences',
       routes: {
-        // Load your genres selection page first
         '/preferences': (context) => const GenresSelectionPage(),
-        // When navigating to '/home', pass the dummy user to the HomeScreen
         '/home': (context) => HomeScreen(user: dummyUser),
       },
     );
