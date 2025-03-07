@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/firebase_options.dart';
-import 'package:frontend/pages/intro_page.dart';
+import 'package:frontend/pages/settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: IntroPage(),
+      home: SettingsPage(),
     );
   }
 }
