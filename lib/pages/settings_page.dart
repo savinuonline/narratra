@@ -30,7 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(0),
+        padding: const EdgeInsets.all(30),
       
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
