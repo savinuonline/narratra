@@ -42,12 +42,26 @@ class _SettingsPageState extends State<SettingsPage> {
             width: double.infinity,
             child: Row(
               children: [
-                Icon(Ionicons.play_circle_outline, size: 26, color: const Color.fromARGB(255, 214, 7, 7),),
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.shade100,
+                  ),
+                  child: Icon(Ionicons.play_circle_outline, size: 26,
+                  color: const Color.fromARGB(255, 214, 7, 7),),
+                
+                ),
                 SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Playback Speed", style: TextStyle(fontSize: 20)),
+                    Text("Playback Speed", 
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    )),
                   ],
                 ),
                 const Spacer(),
@@ -69,12 +83,26 @@ class _SettingsPageState extends State<SettingsPage> {
             width: double.infinity,
             child: Row(
               children: [
-                Icon(Ionicons.mic_outline, size: 26),
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.shade100,
+                  ),
+                  child: Icon(Ionicons.mic_outline, size: 26,
+                  color: const Color.fromARGB(255, 214, 7, 7),),
+                
+                ),
                 SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Change Voice Actor", style: TextStyle(fontSize: 20)),
+                    Text("Change Voice Actor", 
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    )),
                   ],
                 ),
                 const Spacer(),
