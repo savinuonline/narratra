@@ -30,14 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.32.0
+  google_fonts: ^5.1.0
   firebase_auth: ^4.17.7
-  cloud_firestore: ^4.15.7
   firebase_dynamic_links: ^5.4.8
   share_plus: ^7.2.2
   cupertino_icons: ^1.0.8
-  firebase_core: ^3.12.1
-  cloud_firestore: ^5.6.5
+  firebase_core: ^2.32.0
+  cloud_firestore: ^4.15.7
 
 dev_dependencies:
   flutter_test:

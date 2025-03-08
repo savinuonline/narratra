@@ -1,11 +1,22 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/firebase_options.dart';
-import 'package:frontend/pages/intro_page.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:frontend/screens/rewards/reward_dashboard.dart';
+import 'package:frontend/services/reward_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:frontend/services/reward_service.dart';
+
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+     WidgetsFlutterBinding.ensureInitialized();
+     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+     RewardService rewardService = RewardService();
+     await rewardService.initializeTestUserData(); // Initialize test data ONCE
+
+     runApp(const MyApp());
+
   runApp(const MyApp());
 }
 
@@ -17,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Rewards App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: NavigationModule(),
+      home: RewardDashboard(),
     );
   }
 }

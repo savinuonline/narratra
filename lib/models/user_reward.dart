@@ -1,11 +1,14 @@
 class UserReward {
   final String userId;
-  final int points;
-  final int level;
-  final int dailyGoal;
-  final int dailyGoalProgress;
-  final DateTime lastLoginBonusDate;
+  int points;
+  int level;
+  int dailyGoal;
+  int dailyGoalProgress;
+  DateTime lastLoginBonusDate;
   final String referralCode;
+  final int pointsToNextLevel;
+  final bool canClaimDailyBonus;
+  List<String> referrals;
 
   UserReward({
     required this.userId,
@@ -15,7 +18,10 @@ class UserReward {
     this.dailyGoalProgress = 0,
     DateTime? lastLoginBonusDate,
     this.referralCode = '',
-  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000);
+    this.referrals = const [],
+  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000),
+       this.pointsToNextLevel = 100,
+       this.canClaimDailyBonus = true;
 
   factory UserReward.fromMap(Map<String, dynamic> map) {
     return UserReward(
@@ -42,6 +48,5 @@ class UserReward {
     };
   }
 
-  int get pointsToNextLevel => (level * 1000) - points;
   double get goalProgress => dailyGoal > 0 ? dailyGoalProgress / dailyGoal : 0;
 }
