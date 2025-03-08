@@ -32,7 +32,7 @@ android {
     compileSdk = 35 // Ensure you have a valid compile SDK version
 
     defaultConfig {
-        applicationId = "com.example.frontend"  // Replace with your actual package name
+        applicationId = "com.example.narratra"
         minSdk = 23
         targetSdk = 34
         versionCode = 1

@@ -7,15 +7,13 @@ import 'package:frontend/services/reward_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/services/reward_service.dart';
 
-
 void main() async {
-     WidgetsFlutterBinding.ensureInitialized();
-     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseDynamicLinks.instance.getInitialLink();
 
-     RewardService rewardService = RewardService();
-     await rewardService.initializeTestUserData(); // Initialize test data ONCE
-
-     runApp(const MyApp());
+  RewardService rewardService = RewardService();
+  await rewardService.initializeTestUserData(); // Initialize test data ONCE
 
   runApp(const MyApp());
 }

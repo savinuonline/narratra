@@ -5,25 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/user_reward.dart';
 
-
 class RewardService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDynamicLinks _dynamicLinks = FirebaseDynamicLinks.instance;
 
-
-
-Future<void> initializeTestUserData() async {
-    String testUserId = 'test_user_id_123'; // MUST MATCH the ID in getUserRewards()
+  Future<void> initializeTestUserData() async {
+    String testUserId =
+        'test_user_id_123'; // MUST MATCH the ID in getUserRewards()
 
     UserReward initialRewardData = UserReward(
-        userId: testUserId,
-        points: 200, // Initial points
-        level: 1,
-        dailyGoal: 1000,
-        dailyGoalProgress: 500,
-        referrals: [],
-        lastLoginBonusDate: DateTime.now().subtract(const Duration(days: 2)), // Claimable daily bonus
+      userId: testUserId,
+      points: 200, // Initial points
+      level: 1,
+      dailyGoal: 1000,
+      dailyGoalProgress: 500,
+      referrals: [],
+      lastLoginBonusDate: DateTime.now().subtract(
+        const Duration(days: 2),
+      ), // Claimable daily bonus
     );
 
     await _firestore
@@ -32,29 +32,47 @@ Future<void> initializeTestUserData() async {
         .set(initialRewardData.toMap());
 
     print("Test user data initialized for user ID: $testUserId");
-}
-
+  }
 
   // Create referral link
   Future<String> createReferralLink() async {
     final User? user = _auth.currentUser;
-    if (user == null) throw Exception('User not authenticated');
+    String userId;
 
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://yourapp.page.link',
-      link: Uri.parse('https://yourapp.com/refer?uid=${user.uid}'),
-      androidParameters: AndroidParameters(packageName: 'com.yourapp.android'),
-      iosParameters: IOSParameters(bundleId: 'com.yourapp.ios'),
-      socialMetaTagParameters: SocialMetaTagParameters(
-        title: 'Join me on Narratra.!',
-        description: 'Use my referral link to get bonus points!',
-      ),
-    );
+    if (user == null) {
+      userId = 'test_user_id_123';
+      print("WARNING: Using default test user ID: $userId");
+    } else {
+      userId = user.uid;
+    }
 
-    final ShortDynamicLink shortLink = await _dynamicLinks.buildShortLink(
-      parameters,
-    );
-    return shortLink.shortUrl.toString();
+    try {
+      final DynamicLinkParameters parameters = DynamicLinkParameters(
+        uriPrefix: 'https://narratra.page.link',
+        link: Uri.parse('https://narratra.com/refer?uid=$userId'),
+        androidParameters: AndroidParameters(
+          packageName:
+              'com.example.narratra',
+          minimumVersion: 0,
+        ),
+        iosParameters: IOSParameters(
+          bundleId: 'com.example.narratra',
+          minimumVersion: '0',
+        ),
+        socialMetaTagParameters: SocialMetaTagParameters(
+          title: 'Join me on Narratra!',
+          description: 'Use my referral link to get bonus points!',
+        ),
+      );
+
+      final shortLink = await FirebaseDynamicLinks.instance.buildShortLink(
+        parameters,
+      );
+      return shortLink.shortUrl.toString();
+    } catch (e) {
+      print('Error generating referral link: $e');
+      throw Exception('Failed to generate referral link: $e');
+    }
   }
 
   // Share referral link
@@ -140,7 +158,6 @@ Future<void> initializeTestUserData() async {
     return true;
   }
 
-
   late DateTime lastLoginBonusDate;
 
   Stream<UserReward> get userRewardsStream {
@@ -148,11 +165,14 @@ Future<void> initializeTestUserData() async {
     String userId; // Declare userId
 
     if (user == null) {
-        // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
-        userId = 'test_user_id_123'; // Use the SAME hardcoded ID as in getUserRewards()
-        print("WARNING (Stream): Using default test user ID: $userId. Authentication is bypassed!");
+      // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
+      userId =
+          'test_user_id_123'; // Use the SAME hardcoded ID as in getUserRewards()
+      print(
+        "WARNING (Stream): Using default test user ID: $userId. Authentication is bypassed!",
+      );
     } else {
-        userId = user.uid;
+      userId = user.uid;
     }
 
     return _firestore
@@ -160,7 +180,7 @@ Future<void> initializeTestUserData() async {
         .doc(userId) // Use the resolved userId (either test or actual)
         .snapshots()
         .map((doc) => UserReward.fromMap(doc.data() ?? {}));
-}
+  }
 
   // Get current user reward data
   Future<UserReward> getUserRewards() async {
@@ -168,14 +188,18 @@ Future<void> initializeTestUserData() async {
     String userId;
 
     if (user == null) {
-        // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
-        userId = 'test_user_id_123'; // Use a hardcoded ID (replace with your own string)
-        print("WARNING: Using default test user ID: $userId.  Authentication is bypassed!");
+      // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
+      userId =
+          'test_user_id_123'; // Use a hardcoded ID (replace with your own string)
+      print(
+        "WARNING: Using default test user ID: $userId.  Authentication is bypassed!",
+      );
     } else {
-        userId = user.uid;
+      userId = user.uid;
     }
 
-    final doc = await _firestore.collection('user_rewards').doc(user?.uid).get();
+    final doc =
+        await _firestore.collection('user_rewards').doc(user?.uid).get();
 
     if (doc.exists) {
       return UserReward.fromMap(doc.data()!);
@@ -242,7 +266,6 @@ Future<void> initializeTestUserData() async {
     return dailyBonus; // Return the bonus awarded (0 if already claimed)
   }
 
-
   // Update daily goal
   Future<void> updateDailyGoal(int newGoal) async {
     final rewards = await getUserRewards();
@@ -280,7 +303,6 @@ Future<void> initializeTestUserData() async {
     await saveUserRewards(rewards);
   }
 
-
   // Check and update level if needed
   void checkAndUpdateLevel(UserReward rewards) {
     final newLevel = (rewards.points / 1000).floor() + 1;
@@ -314,7 +336,6 @@ Future<void> initializeTestUserData() async {
     });
   }
 
-
   Future<void> setGoalProgress(int progress) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) throw Exception('User not authenticated');
@@ -340,5 +361,84 @@ Future<void> initializeTestUserData() async {
     // Generate a simple referral code using timestamp and user ID
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '${userId.substring(0, 6)}$timestamp'.substring(0, 8);
+  }
+
+  // Initialize rewards for new user
+  Future<void> initializeUserRewards() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final userRewardsRef = _firestore.collection('user_rewards').doc(user.uid);
+    final userRewardsDoc = await userRewardsRef.get();
+
+    if (!userRewardsDoc.exists) {
+      final referralCode = _generateReferralCode(user.uid);
+      await userRewardsRef.set(
+        UserReward(userId: user.uid, referralCode: referralCode).toMap(),
+      );
+    }
+  }
+
+  // Claim daily bonus
+  Future<void> claimDailyBonus() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) throw Exception('User not authenticated');
+
+    final userDoc = _firestore.collection('user_rewards').doc(userId);
+
+    await _firestore.runTransaction((transaction) async {
+      final docSnapshot = await transaction.get(userDoc);
+      if (!docSnapshot.exists) throw Exception('User rewards not found');
+
+      final userData = UserReward.fromMap(docSnapshot.data()!);
+      if (!userData.canClaimDailyBonus) {
+        throw Exception('Daily bonus already claimed');
+      }
+
+      transaction.update(userDoc, {
+        'points': userData.points + 50,
+        'lastLoginBonusDate': DateTime.now().toIso8601String(),
+      });
+    });
+  }
+
+  // Generate referral code
+  String _generateReferralCode(String userId) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '${userId.substring(0, 4)}${timestamp.toString().substring(timestamp.toString().length - 4)}'
+        .toUpperCase();
+  }
+
+  // Process referral code
+  Future<void> processReferralCode(String referralCode) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final referrerDoc =
+        await _firestore
+            .collection('user_rewards')
+            .where('referralCode', isEqualTo: referralCode)
+            .limit(1)
+            .get();
+
+    if (referrerDoc.docs.isEmpty) throw Exception('Invalid referral code');
+
+    final referrerId = referrerDoc.docs.first.id;
+    if (referrerId == user.uid) throw Exception('Cannot use own referral code');
+
+    final batch = _firestore.batch();
+    final referrerRef = _firestore.collection('user_rewards').doc(referrerId);
+    final newUserRef = _firestore.collection('user_rewards').doc(user.uid);
+
+    // Add points to referrer
+    batch.update(referrerRef, {
+      'points': FieldValue.increment(100),
+      'referrals': FieldValue.arrayUnion([user.uid]),
+    });
+
+    // Add points to new user
+    batch.update(newUserRef, {'points': FieldValue.increment(50)});
+
+    await batch.commit();
   }
 }

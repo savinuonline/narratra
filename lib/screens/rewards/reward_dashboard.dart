@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../rewards/points_tab.dart';
-import '../rewards/referral_tab.dart';
 import '../rewards/goals_tab.dart';
 
 class RewardDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: RichText(
@@ -36,12 +35,11 @@ class RewardDashboard extends StatelessWidget {
           bottom: TabBar(
             tabs: [
               Tab(icon: Icon(Icons.star), text: 'Points'),
-              Tab(icon: Icon(Icons.share), text: 'Refer'),
               Tab(icon: Icon(Icons.flag), text: 'Goals'),
             ],
           ),
         ),
-        body: TabBarView(children: [PointsTab(), ReferralTab(), GoalsTab()]),
+        body: TabBarView(children: [PointsTab(), GoalsTab()]),
       ),
     );
   }

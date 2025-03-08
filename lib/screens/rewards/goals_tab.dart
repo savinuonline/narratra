@@ -23,7 +23,6 @@ class GoalsTab extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Daily Reading Goal',
@@ -32,15 +31,9 @@ class GoalsTab extends StatelessWidget {
                       SizedBox(height: 16),
                       LinearProgressIndicator(
                         value: rewards.goalProgress,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                        minHeight: 8,
                       ),
                       SizedBox(height: 8),
-                      Text(
-                        '${(rewards.goalProgress * 100).toInt()}% Complete',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 16),
                       Text(
                         '${rewards.dailyGoalProgress} / ${rewards.dailyGoal} minutes',
                         style: TextStyle(
@@ -48,37 +41,17 @@ class GoalsTab extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 24),
-
-              Text(
-                'Set Daily Goal',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Slider(
-                        value: rewards.dailyGoal.toDouble(),
-                        min: 10,
-                        max: 240,
-                        divisions: 23,
-                        label: '${rewards.dailyGoal} minutes',
-                        onChanged: (value) {
-                          RewardService().updateDailyGoal(value.toInt());
-                        },
-                      ),
-                      Text(
-                        'Slide to set your daily reading goal',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
+                      if (rewards.goalProgress >= 1.0)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Goal completed! +100 points',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

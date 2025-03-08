@@ -4,11 +4,9 @@ class UserReward {
   int level;
   int dailyGoal;
   int dailyGoalProgress;
-  DateTime lastLoginBonusDate;
+  final DateTime lastLoginBonusDate;
   final String referralCode;
-  final int pointsToNextLevel;
-  final bool canClaimDailyBonus;
-  List<String> referrals;
+  final List<String> referrals;
 
   UserReward({
     required this.userId,
@@ -19,9 +17,7 @@ class UserReward {
     DateTime? lastLoginBonusDate,
     this.referralCode = '',
     this.referrals = const [],
-  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000),
-       this.pointsToNextLevel = 100,
-       this.canClaimDailyBonus = true;
+  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000);
 
   factory UserReward.fromMap(Map<String, dynamic> map) {
     return UserReward(
@@ -33,6 +29,7 @@ class UserReward {
       lastLoginBonusDate:
           DateTime.tryParse(map['lastLoginBonusDate'] ?? '') ?? DateTime(2000),
       referralCode: map['referralCode'] ?? '',
+      referrals: List<String>.from(map['referrals'] ?? []),
     );
   }
 
@@ -45,8 +42,17 @@ class UserReward {
       'dailyGoalProgress': dailyGoalProgress,
       'lastLoginBonusDate': lastLoginBonusDate.toIso8601String(),
       'referralCode': referralCode,
+      'referrals': referrals,
     };
   }
 
+  int get pointsToNextLevel => (level * 1000) - points;
   double get goalProgress => dailyGoal > 0 ? dailyGoalProgress / dailyGoal : 0;
+  bool get canClaimDailyBonus => !isSameDay(lastLoginBonusDate, DateTime.now());
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
 }

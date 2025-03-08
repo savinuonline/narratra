@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PointsTab extends StatelessWidget {
   @override
@@ -74,6 +75,57 @@ class PointsTab extends StatelessWidget {
 
               SizedBox(height: 24),
 
+              // Referral Section
+              Text(
+                'Refer & Earn',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.card_giftcard, color: Colors.purple),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Share with friends',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Both you and your friend get a free audiobook!',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () => _shareReferralLink(context),
+                        icon: Icon(Icons.share),
+                        label: Text('Share Referral Link'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 44),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 24),
+
               // Daily Bonus Section
               Text(
                 'Daily Rewards',
@@ -128,6 +180,21 @@ class PointsTab extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _shareReferralLink(BuildContext context) async {
+    try {
+      final referralCode = await RewardService().generateReferralCode();
+      final message =
+          'Join me on Narratra! Use my referral code: $referralCode\n'
+          'Download the app now and get a free audiobook!';
+
+      await Share.share(message, subject: 'Get a free audiobook on Narratra!');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate referral link')),
+      );
+    }
   }
 
   Future<void> _redeemReward(BuildContext context, int points) async {
