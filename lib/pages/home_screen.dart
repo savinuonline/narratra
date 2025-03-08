@@ -73,104 +73,31 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildGreetingSection(),
               const SizedBox(height: 16),
               _buildSearchBar(),
-              const SizedBox(height: 16),
-              // Build each category with a horizontal list of books
-              ...categories.map((cat) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(cat),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 180, // Fixed height for horizontal cards
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        primary: false,
-                        shrinkWrap: true,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: placeholderBooks.length,
-                        separatorBuilder: (context, index) =>
-                        const SizedBox(width: 16),
-                        itemBuilder: (context, index) {
-                          final book = placeholderBooks[index];
-                          return GestureDetector(
-                            onTap: () => _showBookDetails(book),
-                            child: _buildHorizontalBookCard(book),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                );
-              }).toList(),
+              const SizedBox(height: 24),
+              CategorySection(
+                title: "Trending",
+                booksFuture: trendingBooksFuture,
+                onBookTap: _showBookDetails,
+              ),
+              CategorySection(
+                title: "Recommends",
+                booksFuture: recommendedBooksFuture,
+                onBookTap: _showBookDetails,
+              ),
+              CategorySection(
+                title: "Today For You",
+                booksFuture: todayBooksFuture,
+                onBookTap: _showBookDetails,
+              ),
+              CategorySection(
+                title: "Free Books",
+                booksFuture: freeBooksFuture,
+                onBookTap: _showBookDetails,
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  /// Pops up a modal bottom sheet with book details and a play button.
-  void _showBookDetails(Book book) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Wrap(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      book.title,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  )
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text("Author: ${book.author}",
-                  style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              Text("Genre: ${book.genre}",
-                  style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              Text(book.description,
-                  style: const TextStyle(fontSize: 14),
-                  textAlign: TextAlign.justify),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PlayerScreen(book: book)),
-                    );
-                  },
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text("Play"),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
