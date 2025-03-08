@@ -14,7 +14,6 @@ class FirebaseService {
         return UserModel.fromMap(doc.data()!);
       }
     } catch (e) {
-      // Handle error
       rethrow;
     }
     return null;
@@ -27,7 +26,6 @@ class FirebaseService {
         'selectedGenres': genres,
       }, SetOptions(merge: true));
     } catch (e) {
-      // Handle error
       rethrow;
     }
   }
@@ -59,5 +57,35 @@ class FirebaseService {
     }).toList();
 
     return recommended;
+  }
+
+  // -------------- NEW METHODS BELOW --------------
+
+  // Example: For demonstration only.
+  // In a real app, you might store a "views" or "popularity" field in Firestore
+  // and query or sort by that field to get trending.
+  Future<List<Book>> getTrendingBooks() async {
+    final allBooks = await getAllBooks();
+    // Sort or filter as needed. For now, just return them all.
+    return allBooks;
+  }
+
+  // Example: For demonstration only.
+  // Maybe "Today For You" is a random or curated subset.
+  // Or you could store a daily pick in Firestore.
+  Future<List<Book>> getTodayForYouBooks() async {
+    final allBooks = await getAllBooks();
+    // Return them all or pick some subset.
+    // For now, returning them all for demonstration.
+    return allBooks;
+  }
+
+  // Example: For demonstration only.
+  // If your Book model has a "price" or "isFree" field, filter accordingly.
+  Future<List<Book>> getFreeBooks() async {
+    final allBooks = await getAllBooks();
+    // Filter out only free books if you have a price field.
+    // For now, returning everything.
+    return allBooks;
   }
 }

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
-import 'player_screen.dart'; // Import the player screen
+import '../services/firebase_service.dart'; // Assume you have methods to fetch books
+import 'player_screen.dart'; // Screen for playing audiobooks
+import '../widgets/custom_bottom_nav_bar.dart'; // Custom bottom nav bar module
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
 
-  const HomeScreen({Key? key, required this.user}) : super(key: key);
+  // Fix the "key could be a super parameter" lint
+  const HomeScreen({super.key, required this.user});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -22,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Book>> todayBooksFuture;
   late Future<List<Book>> freeBooksFuture;
 
-  // Bottom navigation index
+  // Fix the undefined name '_selectedIndex'
   int _selectedIndex = 0;
 
   @override
@@ -104,53 +107,65 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Greeting section at the top
-  Widget _buildGreetingSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Greeting text
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Hello, ${widget.user.displayName}!",
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+  PreferredSizeWidget _buildCustomAppBar() {
+    return AppBar(
+      titleSpacing: 16,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Hello, ${widget.user.displayName}!",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            const SizedBox(height: 4),
-            Text(
-              "Good Evening",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Good Evening",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white70,
             ),
-          ],
-        ),
-        // Avatar from local asset
-        const CircleAvatar(
-          radius: 26,
-          backgroundImage: AssetImage('assets/images/avatar.png'),
+          ),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundImage: const AssetImage('lib/images/MadolDoova.jpg'),
+          ),
         ),
       ],
     );
   }
 
-  /// Search bar placeholder
   Widget _buildSearchBar() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: "Search audiobooks...",
-        prefixIcon: const Icon(Icons.search),
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25),
-          borderSide: BorderSide.none,
+    return Container(
+      decoration: BoxDecoration(
+        // Fix "withOpacity" to "withAlpha(25)" or "withAlpha(230)"
+        color: Colors.white.withAlpha(230),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(25),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: "Search audiobooks...",
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.white.withAlpha(230),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );
@@ -237,11 +252,19 @@ class CategorySection extends StatelessWidget {
       ],
     );
   }
+}
 
-  /// Horizontal book card widget using asset images
-  Widget _buildHorizontalBookCard(Book book) {
+// A card widget to display a book's cover, title, and author.
+class BookCard extends StatelessWidget {
+  final Book book;
+
+  const BookCard({Key? key, required this.book}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: 140,
+      width: 120,
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -256,7 +279,7 @@ class CategorySection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // Display the book cover image from asset (or network if needed)
             if (book.imageUrl.startsWith('lib/'))
@@ -275,20 +298,30 @@ class CategorySection extends StatelessWidget {
               ),
             // Book title
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Text(
                 book.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
                 maxLines: 2,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            // Book author
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
               child: Text(
-                "Author: ${book.author}",
-                style: TextStyle(color: Colors.grey.shade700),
+                book.author,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade700,
+                ),
                 maxLines: 1,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
