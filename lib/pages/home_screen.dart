@@ -25,12 +25,25 @@ class _HomeScreenState extends State<HomeScreen> {
   // Bottom navigation index
   int _selectedIndex = 0;
 
-  // Handle bottom nav taps
-  void _onNavItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    // In a real app, navigate or switch pages based on index.
+  @override
+  void initState() {
+    super.initState();
+    trendingBooksFuture = _firebaseService.getTrendingBooks();
+    recommendedBooksFuture =
+        _firebaseService.getRecommendedBooks(widget.user.uid);
+    todayBooksFuture = _firebaseService.getTodayForYouBooks();
+    freeBooksFuture = _firebaseService.getFreeBooks();
+  }
+
+  void _showBookDetails(Book book) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => BookDetailSheet(book: book),
+    );
   }
 
   @override
