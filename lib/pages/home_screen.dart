@@ -13,26 +13,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // The 4 categories
-  final List<String> categories = [
-    "Trending",
-    "Recommends",
-    "Today For You",
-    "Free Books",
-  ];
+  // For demonstration purposes, we'll use a FirebaseService to get books.
+  // In a real implementation, these methods should query your backend.
+  final FirebaseService _firebaseService = FirebaseService();
 
-  // Placeholder books used for each category, now using asset images
-  final List<Book> placeholderBooks = List.generate(
-    6,
-        (index) => Book(
-      id: 'book_$index',
-      title: 'Placeholder Book $index',
-      author: 'Author $index',
-      genre: 'Fiction',
-      imageUrl: 'assets/images/books.png', // local asset image path
-      description: 'This is a description for placeholder book $index. It gives a brief overview of the story and the content.',
-    ),
-  );
+  late Future<List<Book>> trendingBooksFuture;
+  late Future<List<Book>> recommendedBooksFuture;
+  late Future<List<Book>> todayBooksFuture;
+  late Future<List<Book>> freeBooksFuture;
 
   // Bottom navigation index
   int _selectedIndex = 0;
