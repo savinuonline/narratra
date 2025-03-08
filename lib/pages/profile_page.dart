@@ -23,7 +23,34 @@ class ProfilePage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Center(child: Text("", style: TextStyle(fontSize: 20))),
-    );
+      body: Column(
+        children: [
+          Padding: const EdgeInsets.all(20.0),
+          child: row(
+            MainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage("assets/profile.jpg"),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      Radius: 0,
+                      backgroundColor: colors.blueAccent,
+                      child: Icon(Icon.edit, Color: colors.white, size: 16)
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), 
+    ),
+        
   }
 }
