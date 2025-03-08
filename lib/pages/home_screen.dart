@@ -48,6 +48,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Define your navigation items once
+    final List<NavigationItem> navigationItems = [
+      NavigationItem(icon: 'Home.svg', label: 'Home'),
+      NavigationItem(icon: 'Search.svg', label: 'Search'),
+      NavigationItem(icon: 'Library.svg', label: 'Library'),
+      NavigationItem(icon: 'Profile.svg', label: 'Profile'),
+    ];
+
     return Scaffold(
       // Bottom navigation bar with 5 items: Explore, Search, Library, Play, Profile.
       bottomNavigationBar: BottomNavigationBar(
