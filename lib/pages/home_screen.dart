@@ -155,15 +155,86 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  /// Category title widget
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-      ),
+// A widget that builds a category section with a horizontally scrolling list of book cards.
+class CategorySection extends StatelessWidget {
+  final String title;
+  final Future<List<Book>> booksFuture;
+  final ValueChanged<Book> onBookTap;
+
+  const CategorySection({
+    Key? key,
+    required this.title,
+    required this.booksFuture,
+    required this.onBookTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FutureBuilder<List<Book>>(
+          future: booksFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SizedBox(
+                height: 220,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return SizedBox(
+                height: 220,
+                child: Center(
+                  child: Text(
+                    'Error loading $title',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return SizedBox(
+                height: 220,
+                child: Center(
+                  child: Text(
+                    'No books available in $title',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            }
+            final books = snapshot.data!;
+            return SizedBox(
+              height: 220,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: books.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final book = books[index];
+                  return GestureDetector(
+                    onTap: () => onBookTap(book),
+                    child: BookCard(book: book),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 
