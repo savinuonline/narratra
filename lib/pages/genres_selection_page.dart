@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// Import your Firebase service
+import '../services/firebase_service.dart';
+// If you have a user model, import that as well
+import '../models/user_model.dart';
 
 /// Simple data class for each genre
 class GenreData {
@@ -14,14 +18,35 @@ class GenreData {
   });
 }
 
+// If you only have a user ID:
 class GenresSelectionPage extends StatefulWidget {
-  const GenresSelectionPage({Key? key}) : super(key: key);
+  final String uid;
+
+  const GenresSelectionPage({
+    Key? key,
+    required this.uid,
+  }) : super(key: key);
 
   @override
   _GenresSelectionPageState createState() => _GenresSelectionPageState();
 }
 
+// If you have a full user model instead:
+// class GenresSelectionPage extends StatefulWidget {
+//   final UserModel user;
+//
+//   const GenresSelectionPage({
+//     Key? key,
+//     required this.user,
+//   }) : super(key: key);
+//
+//   @override
+//   _GenresSelectionPageState createState() => _GenresSelectionPageState();
+// }
+
 class _GenresSelectionPageState extends State<GenresSelectionPage> {
+  final FirebaseService _firebaseService = FirebaseService();
+
   /// Only the 6 requested genres
   final List<GenreData> allGenres = [
     GenreData(
@@ -64,11 +89,12 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Removed the title by using an empty widget.
+        // If you want no title text, just shrink it:
         title: const SizedBox.shrink(),
         elevation: 0,
       ),
       body: Container(
+        // A simple gradient background
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.white, Colors.blue.shade50],
@@ -79,7 +105,6 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // Retained the "What Are You Into?" headline in the body.
             const Text(
               "What Are You Into?",
               style: TextStyle(
@@ -97,6 +122,8 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
               ),
             ),
             const SizedBox(height: 40),
+
+            // Genre chips
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -122,16 +149,30 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                 ),
               ),
             ),
+
+            // Continue button
             Padding(
               padding: const EdgeInsets.only(bottom: 50),
               child: ElevatedButton(
-                onPressed: () {
-                  // Save selectedGenres to backend here if needed
+                onPressed: () async {
+                  // 1) Convert selectedGenres to a List
+                  final genresList = selectedGenres.toList();
+
+                  // 2) Update user doc in Firestore with these genres
+                  await _firebaseService.updateUserGenres(
+                    widget.uid, // or widget.user.uid if you have a user model
+                    genresList,
+                  );
+
+                  // 3) Then navigate to home
                   Navigator.pushReplacementNamed(context, '/home');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
@@ -168,8 +209,8 @@ class GenreButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 140, // Larger width
-        height: 140, // Larger height
+        width: 140,
+        height: 140,
         decoration: BoxDecoration(
           color: selected ? color.shade700 : color.shade100,
           borderRadius: BorderRadius.circular(20),
@@ -180,7 +221,7 @@ class GenreButton extends StatelessWidget {
             Icon(
               genre.icon,
               color: selected ? Colors.white : color.shade700,
-              size: 48, // Bigger icon
+              size: 48,
             ),
             const SizedBox(height: 8),
             Text(
