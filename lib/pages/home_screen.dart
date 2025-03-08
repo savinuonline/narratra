@@ -57,42 +57,24 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      // Bottom navigation bar with 5 items: Explore, Search, Library, Play, Profile.
-      bottomNavigationBar: BottomNavigationBar(
+      appBar: _buildCustomAppBar(),
+      bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _selectedIndex,
-        onTap: _onNavItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.black,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Explore',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Library',
-          ),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_2_outlined),
-            label: 'Profile',
-          ),
-        ],
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          // Add any additional navigation logic if needed.
+        },
+        navigationItems: navigationItems,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          // The entire page scrolls vertically
+          padding: const EdgeInsets.all(16),
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildGreetingSection(),
-              const SizedBox(height: 16),
               _buildSearchBar(),
               const SizedBox(height: 24),
               CategorySection(
