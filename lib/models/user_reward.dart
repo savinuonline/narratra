@@ -1,37 +1,36 @@
 class UserReward {
-  String userId;
-  int points;
-  int level;
-  int dailyGoal;
-  int dailyGoalProgress;
-  DateTime lastLoginBonusDate;
-  List<String> referrals;
+  final String userId;
+  final int points;
+  final int level;
+  final int dailyGoal;
+  final int dailyGoalProgress;
+  final DateTime lastLoginBonusDate;
+  final String referralCode;
 
   UserReward({
     required this.userId,
     this.points = 0,
     this.level = 1,
-    this.dailyGoal = 100,
+    this.dailyGoal = 30,
     this.dailyGoalProgress = 0,
-    required this.lastLoginBonusDate,
-    this.referrals = const [],
-  });
+    DateTime? lastLoginBonusDate,
+    this.referralCode = '',
+  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000);
 
-  factory UserReward.fromJson(Map<String, dynamic> json) {
+  factory UserReward.fromMap(Map<String, dynamic> map) {
     return UserReward(
-      userId: json['userId'],
-      points: json['points'] ?? 0,
-      level: json['level'] ?? 1,
-      dailyGoal: json['dailyGoal'] ?? 100,
-      dailyGoalProgress: json['dailyGoalProgress'] ?? 0,
-      lastLoginBonusDate: json['lastLoginBonusDate'] != null 
-          ? DateTime.parse(json['lastLoginBonusDate']) 
-          : DateTime.now().subtract(const Duration(days: 1)),
-      referrals: List<String>.from(json['referrals'] ?? []),
+      userId: map['userId'] ?? '',
+      points: map['points'] ?? 0,
+      level: map['level'] ?? 1,
+      dailyGoal: map['dailyGoal'] ?? 30,
+      dailyGoalProgress: map['dailyGoalProgress'] ?? 0,
+      lastLoginBonusDate:
+          DateTime.tryParse(map['lastLoginBonusDate'] ?? '') ?? DateTime(2000),
+      referralCode: map['referralCode'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'userId': userId,
       'points': points,
@@ -39,10 +38,10 @@ class UserReward {
       'dailyGoal': dailyGoal,
       'dailyGoalProgress': dailyGoalProgress,
       'lastLoginBonusDate': lastLoginBonusDate.toIso8601String(),
-      'referrals': referrals,
+      'referralCode': referralCode,
     };
   }
 
-  int get pointsToNextLevel => level * 1000 - points;
-  double get goalProgress => dailyGoalProgress / dailyGoal;
+  int get pointsToNextLevel => (level * 1000) - points;
+  double get goalProgress => dailyGoal > 0 ? dailyGoalProgress / dailyGoal : 0;
 }

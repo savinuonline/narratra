@@ -4,8 +4,6 @@ import '../rewards/referral_tab.dart';
 import '../rewards/goals_tab.dart';
 
 class RewardDashboard extends StatelessWidget {
-  const RewardDashboard({super.key});
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -21,13 +19,7 @@ class RewardDashboard extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            PointsTab(),
-            ReferralTab(),
-            GoalsTab(),
-          ],
-        ),
+        body: TabBarView(children: [PointsTab(), ReferralTab(), GoalsTab()]),
       ),
     );
   }

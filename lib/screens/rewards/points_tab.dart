@@ -1,181 +1,208 @@
 import 'package:flutter/material.dart';
-import '../../../services/reward_service.dart';
-import '../../../models/user_reward.dart';
-import '../../../widgets/redeem_points_item.dart';
+import '../../services/reward_service.dart';
+import '../../models/user_reward.dart';
 
-class PointsTab extends StatefulWidget {
-  const PointsTab({super.key});
-
-  @override
-  _PointsTabState createState() => _PointsTabState();
-}
-
-class _PointsTabState extends State<PointsTab> {
-  late RewardService _rewardService;
-  UserReward? _userReward;
-  bool _isLoading = true;
-  String _message = '';
-  
-  @override
-  void initState() {
-    super.initState();
-    _rewardService = RewardService();
-    _loadRewards();
-  }
-  
-  Future<void> _loadRewards() async {
-    setState(() => _isLoading = true);
-    try {
-      final rewards = await _rewardService.getUserRewards();
-      setState(() {
-        _userReward = rewards;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _message = 'Error loading rewards: $e';
-        _isLoading = false;
-      });
-    }
-  }
-  
-  Future<void> _claimDailyBonus() async {
-    try {
-      final pointsAwarded = await _rewardService.claimDailyLoginBonus();
-      if (pointsAwarded > 0) {
-        setState(() {
-          _message = 'Daily bonus claimed! +$pointsAwarded points';
-        });
-        await _loadRewards();
-      } else {
-        setState(() {
-          _message = 'You already claimed your daily bonus today.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _message = 'Error claiming bonus: $e';
-      });
-    }
-  }
-  
-  Future<void> _redeemPoints(int points) async {
-    try {
-      final success = await _rewardService.redeemPoints(points);
-      if (success) {
-        setState(() {
-          _message = 'Successfully redeemed $points points!';
-        });
-        await _loadRewards();
-      } else {
-        setState(() {
-          _message = 'Not enough points to redeem.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _message = 'Error redeeming points: $e';
-      });
-    }
-  }
-  
+class PointsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    
-    if (_userReward == null) {
-      return Center(child: Text('No reward data available'));
-    }
-    
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Level and points card
-          Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+    return StreamBuilder<UserReward>(
+      stream: RewardService().userRewardsStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final rewards = snapshot.data!;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Points Card
+              Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade700, Colors.blue.shade900],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Current Points',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      Text(
+                        '${rewards.points}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Level ${rewards.level}',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value:
+                            1 -
+                            (rewards.pointsToNextLevel /
+                                (rewards.level * 1000)),
+                        backgroundColor: Colors.white24,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '${rewards.pointsToNextLevel} points to next level',
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Daily Bonus Section
+              Text(
+                'Daily Rewards',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.calendar_today, color: Colors.amber),
+                  title: Text('Daily Login Bonus'),
+                  subtitle: Text('50 points'),
+                  trailing: ElevatedButton(
+                    onPressed:
+                        rewards.canClaimDailyBonus
+                            ? () => RewardService().claimDailyLoginBonus()
+                            : null,
+                    child: Text('Claim'),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Redeem Points Section
+              Text(
+                'Redeem Points',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(height: 12),
+              GridView.count(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                childAspectRatio: 1.5,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
                 children: [
-                  Text(
-                    'Level ${_userReward!.level}',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  _RewardCard(
+                    title: 'Free Audiobook',
+                    points: 1000,
+                    onRedeem: () => _redeemReward(context, 1000),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    '${_userReward!.points} Points',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  _RewardCard(
+                    title: 'Premium Month',
+                    points: 2000,
+                    onRedeem: () => _redeemReward(context, 2000),
                   ),
-                  SizedBox(height: 16),
-                  LinearProgressIndicator(
-                    value: 1 - (_userReward!.pointsToNextLevel / (1000.0)),
-                    minHeight: 10,
-                  ),
-                  SizedBox(height: 8),
-                  Text('${_userReward!.pointsToNextLevel} points to next level'),
                 ],
               ),
-            ),
+            ],
           ),
-          
-          SizedBox(height: 16),
-          
-          // Daily login bonus
-          ElevatedButton.icon(
-            icon: Icon(Icons.add),
-            label: Text('Claim Daily Bonus'),
-            onPressed: _claimDailyBonus,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12),
+        );
+      },
+    );
+  }
+
+  Future<void> _redeemReward(BuildContext context, int points) async {
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Redeem Reward'),
+            content: Text(
+              'Are you sure you want to redeem this reward for $points points?',
             ),
-          ),
-          
-          if (_message.isNotEmpty) ...[
-            SizedBox(height: 16),
-            Text(
-              _message,
-              style: TextStyle(
-                color: _message.contains('Error') ? Colors.red : Colors.green,
-                fontWeight: FontWeight.bold,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('Cancel'),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-          
-          SizedBox(height: 24),
-          
-          // Redeem points section
-          Text(
-            'Redeem Your Points',
-            style: Theme.of(context).textTheme.titleLarge,
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Redeem'),
+              ),
+            ],
           ),
-          SizedBox(height: 8),
-          
-          RedeemPointsItem(
-            title: '1 Week Premium',
-            points: 500,
-            onRedeem: () => _redeemPoints(500),
-            isEnabled: _userReward!.points >= 500,
+    );
+
+    if (confirm == true) {
+      final success = await RewardService().redeemPoints(points);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? 'Reward redeemed successfully!' : 'Not enough points',
           ),
-          
-          RedeemPointsItem(
-            title: '1 Month Premium',
-            points: 1500,
-            onRedeem: () => _redeemPoints(1500),
-            isEnabled: _userReward!.points >= 1500,
+        ),
+      );
+    }
+  }
+}
+
+class _RewardCard extends StatelessWidget {
+  final String title;
+  final int points;
+  final VoidCallback onRedeem;
+
+  const _RewardCard({
+    required this.title,
+    required this.points,
+    required this.onRedeem,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: onRedeem,
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Text(
+                '$points pts',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          
-          RedeemPointsItem(
-            title: 'Special Badge',
-            points: 300,
-            onRedeem: () => _redeemPoints(300),
-            isEnabled: _userReward!.points >= 300,
-          ),
-        ],
+        ),
       ),
     );
   }

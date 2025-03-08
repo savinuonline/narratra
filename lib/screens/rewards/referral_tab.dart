@@ -1,129 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../services/reward_service.dart';
-import '../../../models/user_reward.dart';
 
-class ReferralTab extends StatefulWidget {
-  const ReferralTab({super.key});
-
-  @override
-  _ReferralTabState createState() => _ReferralTabState();
-}
-
-class _ReferralTabState extends State<ReferralTab> {
-  late RewardService _rewardService;
-  UserReward? _userReward;
-  bool _isLoading = true;
-  String? _referralLink;
-  
-  @override
-  void initState() {
-    super.initState();
-    _rewardService = RewardService();
-    _loadData();
-  }
-  
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    try {
-      final rewards = await _rewardService.getUserRewards();
-      final link = await _rewardService.createReferralLink();
-      setState(() {
-        _userReward = rewards;
-        _referralLink = link;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-  
+class ReferralTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
-            elevation: 4,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Icon(Icons.group_add, size: 48, color: Theme.of(context).primaryColor),
+                  Icon(Icons.card_giftcard, size: 48, color: Colors.blue),
                   SizedBox(height: 16),
                   Text(
-                    'Invite Friends & Earn Points',
+                    'Invite Friends',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'For each friend who joins using your link, you\'ll earn 100 points!',
+                    'Share Narratra with friends and both get rewards!',
                     textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'You have invited: ${_userReward?.referrals.length ?? 0} friends',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final link = await RewardService().createReferralLink();
+                      Share.share(
+                        'Join me on Narratra! Use my referral link: $link',
+                      );
+                    },
+                    icon: Icon(Icons.share),
+                    label: Text('Share Referral Link'),
                   ),
                 ],
               ),
             ),
           ),
-          
+
           SizedBox(height: 24),
-          
-          if (_referralLink != null) ...[
-            Text(
-              'Your Referral Link:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
+
+          Text(
+            'Referral Benefits',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: Text(
-                      _referralLink!,
-                      style: TextStyle(fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  ListTile(
+                    leading: Icon(Icons.star, color: Colors.amber),
+                    title: Text('You Get'),
+                    subtitle: Text('100 points + 1 free audiobook'),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.copy),
-                    onPressed: () {
-                      // Implement copy to clipboard
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Link copied to clipboard')),
-                      );
-                    },
+                  Divider(),
+                  ListTile(
+                    leading: Icon(Icons.star, color: Colors.amber),
+                    title: Text('Your Friend Gets'),
+                    subtitle: Text('1 free audiobook to start'),
                   ),
                 ],
               ),
             ),
-            
-            SizedBox(height: 24),
-            
-            ElevatedButton.icon(
-              icon: Icon(Icons.share),
-              label: Text('Share Your Referral Link'),
-              onPressed: () => _rewardService.shareReferralLink(context),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
