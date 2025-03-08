@@ -132,12 +132,16 @@ class _HomeScreenState extends State<HomeScreen> {
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: CircleAvatar(
-            radius: 22,
-            backgroundImage: const AssetImage('lib/images/MadolDoova.jpg'),
+          child: IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // Add your notification action here.
+              // For example, navigate to a notifications screen or show a dialog.
+            },
           ),
         ),
       ],
+
     );
   }
 
