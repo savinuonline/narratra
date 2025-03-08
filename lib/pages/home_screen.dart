@@ -258,20 +258,22 @@ class CategorySection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book cover loaded from asset or network
-            book.imageUrl.startsWith('assets/')
-                ? Image.asset(
-              book.imageUrl,
-              height: 90,
-              width: 140,
-              fit: BoxFit.cover,
-            )
-                : Image.network(
-              book.imageUrl,
-              height: 90,
-              width: 140,
-              fit: BoxFit.cover,
-            ),
+            // Display the book cover image from asset (or network if needed)
+            if (book.imageUrl.startsWith('lib/'))
+              Image.asset(
+                book.imageUrl,
+                height: 150,
+                width: 120,
+                fit: BoxFit.cover,
+              )
+            else
+              Image.network(
+                book.imageUrl,
+                height: 150,
+                width: 120,
+                fit: BoxFit.cover,
+              ),
+            // Book title
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
