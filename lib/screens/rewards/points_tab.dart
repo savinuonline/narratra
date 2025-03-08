@@ -10,18 +10,6 @@ class PointsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black), // Icon color
-          onPressed: () => Navigator.pushReplacementNamed(context, '/profile'),
-        ),
-        title: const Text(
-          "Rewards",
-          style: TextStyle(color: Colors.black),
-        ), // Title and color
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: StreamBuilder<UserReward>(
         stream: RewardService().userRewardsStream,
         builder: (context, snapshot) {
@@ -276,26 +264,29 @@ class PointsTab extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Add some preview rewards
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.5,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  children: [
-                    _RewardCard(
-                      title: 'Free Audiobook',
-                      points: 1000,
-                      onRedeem: () => _redeemReward(context, 1000),
-                    ),
-                    _RewardCard(
-                      title: 'Premium Month',
-                      points: 2000,
-                      onRedeem: () => _redeemReward(context, 2000),
-                    ),
-                  ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _RewardCard(
+                        title: 'Free Audiobook',
+                        points: 1000,
+                        onRedeem: () => _redeemReward(context, 1000),
+                      ),
+                      const SizedBox(width: 12),
+                      _RewardCard(
+                        title: 'Premium Month',
+                        points: 2000,
+                        onRedeem: () => _redeemReward(context, 2000),
+                      ),
+                      const SizedBox(width: 12),
+                      _RewardCard(
+                        title: '50% Off Coupon',
+                        points: 500,
+                        onRedeem: () => _redeemReward(context, 500),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],

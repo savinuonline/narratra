@@ -9,37 +9,30 @@ class RedeemRewardsPage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom header
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Available Rewards',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Available Rewards',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
 
-            // Categories
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            // Categories in a single row
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   _CategoryChip(label: 'All', isSelected: true),
+                  const SizedBox(width: 8),
                   _CategoryChip(label: 'Books'),
+                  const SizedBox(width: 8),
                   _CategoryChip(label: 'Premium'),
+                  const SizedBox(width: 8),
                   _CategoryChip(label: 'Gift Cards'),
                 ],
               ),
@@ -47,7 +40,7 @@ class RedeemRewardsPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Rewards Grid
+            // Vertical scrollable grid
             Expanded(
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -57,7 +50,7 @@ class RedeemRewardsPage extends StatelessWidget {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: 6, // Number of rewards
+                itemCount: 6,
                 itemBuilder: (context, index) {
                   return _EnhancedRewardCard(
                     title: _getRewardTitle(index),
