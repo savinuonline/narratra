@@ -5,7 +5,6 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:frontend/screens/rewards/reward_dashboard.dart';
 import 'package:frontend/services/reward_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:frontend/services/reward_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

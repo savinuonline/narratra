@@ -11,8 +11,7 @@ class RewardService {
   final FirebaseDynamicLinks _dynamicLinks = FirebaseDynamicLinks.instance;
 
   Future<void> initializeTestUserData() async {
-    String testUserId =
-        'test_user_id_123'; // MUST MATCH the ID in getUserRewards()
+    String testUserId = 'test_user_id_123';
 
     UserReward initialRewardData = UserReward(
       userId: testUserId,
@@ -37,26 +36,20 @@ class RewardService {
   // Create referral link
   Future<String> createReferralLink() async {
     final User? user = _auth.currentUser;
-    String userId;
+    String userId = user?.uid ?? 'test_user_id_123';
 
-    if (user == null) {
-      userId = 'test_user_id_123';
-      print("WARNING: Using default test user ID: $userId");
-    } else {
-      userId = user.uid;
-    }
+    print("Creating referral link for user ID: $userId");
 
     try {
-      final DynamicLinkParameters parameters = DynamicLinkParameters(
+      final parameters = DynamicLinkParameters(
         uriPrefix: 'https://narratra.page.link',
         link: Uri.parse('https://narratra.com/refer?uid=$userId'),
         androidParameters: AndroidParameters(
-          packageName:
-              'com.example.narratra',
+          packageName: 'com.example.frontend',
           minimumVersion: 0,
         ),
         iosParameters: IOSParameters(
-          bundleId: 'com.example.narratra',
+          bundleId: 'com.example.frontend',
           minimumVersion: '0',
         ),
         socialMetaTagParameters: SocialMetaTagParameters(
@@ -65,13 +58,19 @@ class RewardService {
         ),
       );
 
-      final shortLink = await FirebaseDynamicLinks.instance.buildShortLink(
-        parameters,
-      );
+      print('Dynamic Link Parameters: $parameters'); // Added for debugging
+
+      final shortLink = await _dynamicLinks.buildShortLink(parameters);
+      print(
+        'Short Link Generated: ${shortLink.shortUrl}',
+      ); // Added for debugging
       return shortLink.shortUrl.toString();
-    } catch (e) {
-      print('Error generating referral link: $e');
-      throw Exception('Failed to generate referral link: $e');
+    } on FirebaseException catch (e) {
+      print('Firebase Exception: $e'); // More specific error handling
+      return 'https://narratra.com/refer?uid=$userId'; // Fallback URL
+    } on Exception catch (e) {
+      print('Generic Exception: $e'); // Catch other unexpected errors
+      return 'https://narratra.com/refer?uid=$userId'; // Fallback URL
     }
   }
 

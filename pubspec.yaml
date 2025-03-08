@@ -2,7 +2,14 @@ name: frontend
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
+publish_to: "none"
+
+flutter_launcher_icons:
+  android: "launcher_icon" # This enables the Android icon generation.
+  ios: true # This enables the iOS icon generation.
+  image_path: "lib/assets/icons/icon.png" # Path to your icon image.
+  remove_alpha_ios: true
+  adaptive_icon_background: "#ffffff" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -32,11 +39,12 @@ dependencies:
     sdk: flutter
   google_fonts: ^5.1.0
   firebase_auth: ^4.17.7
-  firebase_dynamic_links: ^5.4.8
+  firebase_dynamic_links: ^5.5.7
   share_plus: ^7.2.2
   cupertino_icons: ^1.0.8
   firebase_core: ^2.32.0
   cloud_firestore: ^4.15.7
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
