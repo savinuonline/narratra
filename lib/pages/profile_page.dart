@@ -25,32 +25,33 @@ class ProfilePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding: const EdgeInsets.all(20.0),
-          child: row(
-            MainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              stack(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage("assets/profile.jpg"),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      Radius: 0,
-                      backgroundColor: colors.blueAccent,
-                      child: Icon(Icon.edit, Color: colors.white, size: 16)
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage("assets/profile.jpg"),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.edit, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
-      ), 
-    ),
-        
+      ),
+    );
   }
 }
