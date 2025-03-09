@@ -112,7 +112,7 @@ class _RewardDashboardState extends State<RewardDashboard>
           tabs: [
             Tab(
               icon: SvgPicture.asset(
-                'assets/icons/points.svg',
+                'lib/assets/icons/points.svg',
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(
@@ -122,11 +122,18 @@ class _RewardDashboardState extends State<RewardDashboard>
                   BlendMode.srcIn,
                 ),
               ),
-              text: 'Points',
+              child: Text(
+                'Points',
+                style: GoogleFonts.nunito(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
             ),
             Tab(
               icon: SvgPicture.asset(
-                'assets/icons/goals.svg',
+                'lib/assets/icons/goals.svg',
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(

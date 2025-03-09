@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -71,8 +73,8 @@ class PointsTab extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Row(
-                              // Row for Points and value
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Current Points',
@@ -82,13 +84,11 @@ class PointsTab extends StatelessWidget {
                                     color: Colors.white70,
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 8,
-                                ), // Space between "Current Points" and the number
+                                const SizedBox(height: 4),
                                 Text(
                                   '${rewards.points}',
                                   style: GoogleFonts.nunito(
-                                    fontSize: 24, // Match username size
+                                    fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
@@ -167,17 +167,22 @@ class PointsTab extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.people, color: Colors.purple),
+                            SvgPicture.asset(
+                              'lib/assets/icons/gift_card.svg',
+                              width: 24,
+                              height: 60,
+                              color: Color.fromARGB(255, 23, 132, 221),
+                            ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Share with friends',
-                                    style: TextStyle(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   Text(
@@ -210,7 +215,7 @@ class PointsTab extends StatelessWidget {
                                 icon: const Icon(Icons.redeem),
                                 label: const Text('Redeem Code'),
                                 style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size(0, 44),
+                                  minimumSize: const Size(0, 47),
                                 ),
                               ),
                             ),

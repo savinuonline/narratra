@@ -141,7 +141,7 @@ class RewardService {
   Stream<UserReward> get userRewardsStream {
     return _auth.authStateChanges().asyncMap((user) {
       if (user == null) {
-        throw('No authenticated user');
+        throw ('No authenticated user');
       }
 
       return _firestore
@@ -243,11 +243,23 @@ class RewardService {
   // Update daily goal
   Future<void> updateDailyGoal(int newGoal) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      print('No authenticated user found');
+      return;
+    }
 
-    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+    try {
+      print('Updating daily goal to: $newGoal minutes');
 
-    await docRef.update({'dailyGoal': newGoal});
+      await _firestore.collection('user_rewards').doc(user.uid).update({
+        'dailyGoal': newGoal,
+      });
+
+      print('Daily goal updated successfully');
+    } catch (e) {
+      print('Error updating daily goal: $e');
+      throw Exception('Failed to update daily goal: $e');
+    }
   }
 
   // Update goal progress and award points
@@ -285,10 +297,17 @@ class RewardService {
     }
   }
 
-  bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
+  bool isSameDay(DateTime dateTime1, DateTime dateTime2) {
+    // Add debug prints to see what's happening
+    print(
+      'Comparing dates: ${dateTime1.toString()} with ${dateTime2.toString()}',
+    );
+
+    if (dateTime1 == null) return false;
+
+    return dateTime1.year == dateTime2.year &&
+        dateTime1.month == dateTime2.month &&
+        dateTime1.day == dateTime2.day;
   }
 
   // Reset daily goal progress at midnight
