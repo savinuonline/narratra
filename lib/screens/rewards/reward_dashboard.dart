@@ -61,6 +61,10 @@ class _RewardDashboardState extends State<RewardDashboard>
         bottom: TabBar(
           controller: _tabController,
           labelColor: Color(0xFF3A5EF0),
+          labelStyle: GoogleFonts.montserrat(
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+          ),
           unselectedLabelColor: Colors.grey,
           indicatorColor: Color(0xFF3A5EF0),
           tabs: [

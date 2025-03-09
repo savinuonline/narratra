@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'dart:math'; // For Random
+import 'dart:math';
 import '../models/user_reward.dart';
 
 class RewardService {
@@ -11,28 +11,6 @@ class RewardService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDynamicLinks _dynamicLinks = FirebaseDynamicLinks.instance;
 
-  Future<void> initializeTestUserData() async {
-    String testUserId = 'test_user_id_123';
-
-    UserReward initialRewardData = UserReward(
-      userId: testUserId,
-      points: 200, // Initial points
-      level: 1,
-      dailyGoal: 1000,
-      dailyGoalProgress: 500,
-      referrals: [],
-      lastLoginBonusDate: DateTime.now().subtract(
-        const Duration(days: 2),
-      ), // Claimable daily bonus
-    );
-
-    await _firestore
-        .collection('user_rewards')
-        .doc(testUserId)
-        .set(initialRewardData.toMap());
-
-    print("Test user data initialized for user ID: $testUserId");
-  }
 
   // Create referral link
   Future<String> createReferralLink() async {
@@ -268,9 +246,12 @@ class RewardService {
 
   // Update daily goal
   Future<void> updateDailyGoal(int newGoal) async {
-    final rewards = await getUserRewards();
-    rewards.dailyGoal = newGoal;
-    await saveUserRewards(rewards);
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+
+    await docRef.update({'dailyGoal': newGoal});
   }
 
   // Update goal progress and award points
@@ -278,12 +259,10 @@ class RewardService {
     final rewards = await getUserRewards();
     rewards.dailyGoalProgress += progressIncrement;
 
-    // Cap at daily goal
     if (rewards.dailyGoalProgress > rewards.dailyGoal) {
       rewards.dailyGoalProgress = rewards.dailyGoal;
     }
 
-    // Award points based on progress (1 point per 1% of goal)
     final previousProgress =
         (rewards.dailyGoalProgress - progressIncrement) / rewards.dailyGoal;
     final currentProgress = rewards.dailyGoalProgress / rewards.dailyGoal;
@@ -292,7 +271,6 @@ class RewardService {
     final currentPercent = (currentProgress * 100).floor();
 
     if (currentPercent > previousPercent) {
-      // Award points for each percentage point gained
       final pointsToAdd = currentPercent - previousPercent;
       rewards.points += pointsToAdd;
 
@@ -311,7 +289,6 @@ class RewardService {
     }
   }
 
-  // Helper to check if two dates are the same day
   bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&

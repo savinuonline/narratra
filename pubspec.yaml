@@ -45,6 +45,7 @@ dependencies:
   firebase_core: ^2.32.0
   cloud_firestore: ^4.15.7
   flutter_svg: ^2.0.9
+  fl_chart: ^0.70.2
 
 dev_dependencies:
   flutter_test:

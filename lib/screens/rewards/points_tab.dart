@@ -313,24 +313,6 @@ class PointsTab extends StatelessWidget {
     );
   }
 
-  Future<void> _shareReferralLink(BuildContext context) async {
-    try {
-      final referralLink =
-          await RewardService().createReferralLink(); // Get the dynamic link
-      final message =
-          'Join me on Narratra! Use my referral link: $referralLink\n'
-          'Download the app now and get bonus points!';
-
-      await Share.share(message, subject: 'Get bonus points on Narratra!');
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to generate referral link')),
-        );
-      }
-    }
-  }
-
   Future<void> _redeemReward(BuildContext context, int points) async {
     // Show confirmation dialog
     final confirm = await showDialog<bool>(
