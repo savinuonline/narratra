@@ -14,6 +14,25 @@ class PointsTab extends StatelessWidget {
       body: StreamBuilder<UserReward>(
         stream: RewardService().userRewardsStream,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print('Error in StreamBuilder: ${snapshot.error}');
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Error loading rewards'),
+                  ElevatedButton(
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                    child: const Text('Return to Login'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }

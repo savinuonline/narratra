@@ -20,17 +20,10 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
 
   Future<void> _signUp() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter email & password')));
-      return;
-    }
-
     setState(() => _isLoading = true);
 
     try {
-      // Create user in Firebase Auth
+      // 1. Create authentication record
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -38,36 +31,50 @@ class _SignUpPageState extends State<SignUpPage> {
 
       final user = userCredential.user;
       if (user != null) {
-        // Optionally, set the display name
-        await user.updateDisplayName(_displayNameController.text.trim());
+        // 2. Set display name if provided
+        if (_displayNameController.text.isNotEmpty) {
+          await user.updateDisplayName(_displayNameController.text.trim());
+        }
 
-        // Create/update user document in Firestore
-        final userDoc = _firestore.collection('user_rewards').doc(user.uid);
+        // 3. Create user document in Firestore
+        await FirebaseFirestore.instance
+            .collection('user_rewards')
+            .doc(user.uid)
+            .set({
+              'userId': user.uid,
+              'displayName': _displayNameController.text.trim(),
+              'points': 0,
+              'level': 1,
+              'dailyGoal': 30,
+              'dailyGoalProgress': 0,
+              'lastLoginBonusDate': DateTime.now().toIso8601String(),
+              'freeAudiobooks': 0,
+              'premiumAudiobooks': 0,
+              'usedInviteCodes': [],
+              'generatedInviteCodes': [],
+              'inviteRewardCount': 0,
+            });
 
-        await userDoc.set({
-          'userId': user.uid,
-          'displayName': _displayNameController.text.trim(),
-          'points': 0,
-          'dailyGoal': 30, // default daily goal
-          'dailyGoalProgress': 0,
-          'freeAudiobooks': 0,
-          'premiumAudiobooks': 0,
-          // add other necessary default fields
-        }, SetOptions(merge: true));
+        print('User document created successfully for ${user.uid}');
 
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Sign-up successful!')));
+          Navigator.pushReplacementNamed(context, '/rewardDashboard');
+        }
+      }
+    } catch (e) {
+      print('Error during sign up: $e');
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Sign-up successful!')));
-
-        // Navigate to the rewards dashboard
-        Navigator.pushReplacementNamed(context, '/rewardDashboard');
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Signup error')));
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

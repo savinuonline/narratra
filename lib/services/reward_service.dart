@@ -139,31 +139,28 @@ class RewardService {
   late DateTime lastLoginBonusDate;
 
   Stream<UserReward> get userRewardsStream {
-    final user = _auth.currentUser;
-    if (user == null) {
-      print('No authenticated user found');
-      return Stream.error('No authenticated user');
-    }
-
-    print('Fetching rewards for user: ${user.uid}');
-    return _firestore.collection('user_rewards').doc(user.uid).snapshots().map((
-      doc,
-    ) {
-      if (!doc.exists) {
-        print('No rewards document exists for user ${user.uid}');
-        // Initialize default rewards
-        initializeUserRewards();
-        return UserReward(
-          userId: user.uid,
-          points: 0,
-          level: 1,
-          dailyGoal: 30,
-          dailyGoalProgress: 0,
-          lastLoginBonusDate: DateTime.now(),
-        );
+    return _auth.authStateChanges().asyncMap((user) {
+      if (user == null) {
+        throw('No authenticated user');
       }
-      print('Found rewards document for user ${user.uid}');
-      return UserReward.fromMap(doc.data() ?? {});
+
+      return _firestore
+          .collection('user_rewards')
+          .doc(user.uid)
+          .snapshots()
+          .map((doc) {
+            if (!doc.exists) {
+              print('Document does not exist for user ${user.uid}');
+              throw Exception('User document not found');
+            }
+            print('Loading rewards for user ${user.uid}');
+            return UserReward.fromMap(doc.data()!);
+          })
+          .handleError((error) {
+            print('Error loading rewards: $error');
+            throw error;
+          })
+          .first;
     });
   }
 
@@ -344,24 +341,30 @@ class RewardService {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final docRef = _firestore.collection('user_rewards').doc(user.uid);
-    final doc = await docRef.get();
+    try {
+      final docRef = _firestore.collection('user_rewards').doc(user.uid);
+      final doc = await docRef.get();
 
-    if (!doc.exists) {
-      print('Initializing default rewards for user ${user.uid}');
-      await docRef.set({
-        'userId': user.uid,
-        'points': 0,
-        'level': 1,
-        'dailyGoal': 30,
-        'dailyGoalProgress': 0,
-        'lastLoginBonusDate': DateTime.now().toIso8601String(),
-        'freeAudiobooks': 0,
-        'premiumAudiobooks': 0,
-        'inviteRewardCount': 0,
-        'usedInviteCodes': [],
-        'generatedInviteCodes': [],
-      });
+      if (!doc.exists) {
+        print('Creating new user document for ${user.uid}');
+        await docRef.set({
+          'userId': user.uid,
+          'points': 0,
+          'level': 1,
+          'dailyGoal': 30,
+          'dailyGoalProgress': 0,
+          'lastLoginBonusDate': DateTime.now().toIso8601String(),
+          'freeAudiobooks': 0,
+          'premiumAudiobooks': 0,
+          'inviteRewardCount': 0,
+          'usedInviteCodes': [],
+          'generatedInviteCodes': [],
+        });
+        print('User document created successfully');
+      }
+    } catch (e) {
+      print('Error initializing user rewards: $e');
+      throw e;
     }
   }
 

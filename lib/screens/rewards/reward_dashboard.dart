@@ -25,7 +25,7 @@ class _RewardDashboardState extends State<RewardDashboard>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() {}); // Rebuild to update SVG colors
+        setState(() {});
       }
     });
     _loadUserData();
@@ -34,14 +34,35 @@ class _RewardDashboardState extends State<RewardDashboard>
   Future<void> _loadUserData() async {
     _user = FirebaseAuth.instance.currentUser;
     if (_user != null) {
-      final userDoc =
-          await FirebaseFirestore.instance
-              .collection('user_rewards')
-              .doc(_user!.uid)
-              .get();
-      setState(() {
-        _userDoc = userDoc;
-      });
+      final docRef = FirebaseFirestore.instance
+          .collection('user_rewards')
+          .doc(_user!.uid);
+      final userDoc = await docRef.get();
+      if (!userDoc.exists) {
+        await docRef.set({
+          'userId': _user!.uid,
+          'displayName': _user!.displayName ?? 'User',
+          'points': 0,
+          'level': 1,
+          'dailyGoal': 30,
+          'dailyGoalProgress': 0,
+          'lastLoginBonusDate': DateTime.now().toIso8601String(),
+          'freeAudiobooks': 0,
+          'premiumAudiobooks': 0,
+          'usedInviteCodes': [],
+          'generatedInviteCodes': [],
+          'inviteRewardCount': 0,
+        });
+        // Get the newly created document
+        final newDoc = await docRef.get();
+        setState(() {
+          _userDoc = newDoc;
+        });
+      } else {
+        setState(() {
+          _userDoc = userDoc;
+        });
+      }
     }
   }
 
