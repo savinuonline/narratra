@@ -141,7 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-
     );
   }
 
@@ -387,6 +386,31 @@ class BookDetailSheet extends StatelessWidget {
               textAlign: TextAlign.justify,
             ),
             const SizedBox(height: 16),
+
+            // >>>>>> Like button added here <<<<<<
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  // Example: call a "likeBook" method from your FirebaseService
+                  // e.g.: await FirebaseService().likeBook(book.id, userId);
+                  // For demonstration, we just close the sheet:
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.thumb_up),
+                label: const Text("Like"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {
