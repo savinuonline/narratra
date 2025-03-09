@@ -12,7 +12,7 @@ void main() async {
   await FirebaseDynamicLinks.instance.getInitialLink();
 
   RewardService rewardService = RewardService();
-  await rewardService.initializeTestUserData(); // Initialize test data ONCE
+  await rewardService.initializeTestUserData();
 
   runApp(const MyApp());
 }

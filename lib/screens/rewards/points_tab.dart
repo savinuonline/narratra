@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 
 class PointsTab extends StatelessWidget {
   @override
@@ -85,7 +86,7 @@ class PointsTab extends StatelessWidget {
                                 valueColor: const AlwaysStoppedAnimation<Color>(
                                   Colors.white,
                                 ),
-                                minHeight: 10, // Slightly thicker bar
+                                minHeight: 10,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -147,10 +148,7 @@ class PointsTab extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(
-                              Icons.people, // Hugging People Icon
-                              color: Colors.purple,
-                            ),
+                            const Icon(Icons.people, color: Colors.purple),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
@@ -164,7 +162,7 @@ class PointsTab extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    'Both you and your friend get bonus points!',
+                                    'Both you and your friend get a free audiobook!',
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                 ],
@@ -173,13 +171,31 @@ class PointsTab extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => _shareReferralLink(context),
-                          icon: const Icon(Icons.share),
-                          label: const Text('Share Referral Link'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 44),
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    () => _generateAndShareInviteCode(context),
+                                icon: const Icon(Icons.share),
+                                label: const Text('Share Invite'),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(0, 44),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _showRedeemDialog(context),
+                                icon: const Icon(Icons.redeem),
+                                label: const Text('Redeem Code'),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(0, 44),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -373,6 +389,102 @@ class PointsTab extends StatelessWidget {
     return (rewards.points - currentLevelBasePoints) /
         (nextLevelPoints - currentLevelBasePoints).toDouble();
   }
+
+  Future<void> _generateAndShareInviteCode(BuildContext context) async {
+    try {
+      final inviteCode = await RewardService().generateInviteCode();
+      final message =
+          'Join me on Narratra! Use my invite code: $inviteCode\n'
+          'We both get a free audiobook when you sign up!';
+
+      await Share.share(message, subject: 'Get a free audiobook on Narratra!');
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate invite code: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showRedeemDialog(BuildContext context) async {
+    final TextEditingController codeController = TextEditingController();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Redeem Invite Code'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Enter the 8-digit invite code from your friend'),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: codeController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Invite Code',
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                    LengthLimitingTextInputFormatter(8),
+                  ],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    letterSpacing: 4,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (codeController.text.length == 8) {
+                    Navigator.pop(context, codeController.text);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a valid 8-digit code'),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Redeem'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty && context.mounted) {
+      try {
+        await RewardService().redeemInviteCode(result);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Success! You received a free audiobook!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+  }
 }
 
 class RedeemRewardsPage extends StatelessWidget {
@@ -382,40 +494,17 @@ class RedeemRewardsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Redeem Rewards'),
-        backgroundColor: Colors.blue,
+        title: Text(
+          'Your Rewards',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: Colors.white12,
       ),
       body: SingleChildScrollView(
         // Scrollable content
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Horizontal Scrollable Rewards
-            SizedBox(
-              height: 160, // Adjust the height as needed
-              child: ListView(
-                scrollDirection: Axis.horizontal, // Horizontal scrolling
-                children: [
-                  _RewardCard(
-                    title: 'Free Audiobook',
-                    points: 1000,
-                    onRedeem: () {},
-                  ),
-                  _RewardCard(
-                    title: 'Premium Month',
-                    points: 2000,
-                    onRedeem: () {},
-                  ),
-                  _RewardCard(
-                    title: '50% Off Coupon',
-                    points: 500,
-                    onRedeem: () {},
-                  ),
-
-                  // Add more reward cards here
-                ],
-              ),
-            ),
             const SizedBox(
               height: 24,
             ), // Add space between horizontal and grid view
@@ -428,6 +517,21 @@ class RedeemRewardsPage extends StatelessWidget {
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               children: [
+                _RewardCard(
+                  title: 'Free Audiobook',
+                  points: 1000,
+                  onRedeem: () {},
+                ),
+                _RewardCard(
+                  title: 'Premium Month',
+                  points: 2000,
+                  onRedeem: () {},
+                ),
+                _RewardCard(
+                  title: '50% Off Coupon',
+                  points: 500,
+                  onRedeem: () {},
+                ),
                 _RewardCard(
                   title: 'Gift Card \$5',
                   points: 2500,

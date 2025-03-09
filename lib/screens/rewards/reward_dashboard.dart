@@ -19,7 +19,7 @@ class _RewardDashboardState extends State<RewardDashboard>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() {}); // Rebuild to update SVG colors
+        setState(() {});
       }
     });
   }

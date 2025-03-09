@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:math'; // For Random
 import '../models/user_reward.dart';
 
 class RewardService {
@@ -439,5 +440,80 @@ class RewardService {
     batch.update(newUserRef, {'points': FieldValue.increment(50)});
 
     await batch.commit();
+  }
+
+  // Generate a new invite code
+  Future<String> generateInviteCode() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    // Generate random 8-character alphanumeric code
+    final Random random = Random();
+    const String chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final String code =
+        List.generate(8, (index) => chars[random.nextInt(chars.length)]).join();
+
+    // Save the generated code to Firestore
+    await _firestore.collection('user_rewards').doc(user.uid).update({
+      'generatedInviteCodes': FieldValue.arrayUnion([code]),
+    });
+
+    return code;
+  }
+
+  // Redeem an invite code
+  Future<void> redeemInviteCode(String code) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    // Check if code has been used by this user already
+    final userDoc =
+        await _firestore.collection('user_rewards').doc(user.uid).get();
+    if (userDoc.exists) {
+      final userData = userDoc.data();
+      if (userData != null &&
+          userData['usedInviteCodes'] != null &&
+          (userData['usedInviteCodes'] as List).contains(code)) {
+        throw Exception('You have already used this invite code');
+      }
+    }
+
+    // Find who generated this code
+    final querySnapshot =
+        await _firestore
+            .collection('user_rewards')
+            .where('generatedInviteCodes', arrayContains: code)
+            .get();
+
+    if (querySnapshot.docs.isEmpty) {
+      throw Exception('Invalid invite code');
+    }
+
+    final inviterDoc = querySnapshot.docs.first;
+    final inviterId = inviterDoc.id;
+
+    // Prevent self-referral
+    if (inviterId == user.uid) {
+      throw Exception('You cannot use your own invite code');
+    }
+
+    // Update both users in a transaction
+    return _firestore.runTransaction((transaction) async {
+      // Add free audiobook to new user
+      transaction.update(_firestore.collection('user_rewards').doc(user.uid), {
+        'freeAudiobooks': FieldValue.increment(1),
+        'usedInviteCodes': FieldValue.arrayUnion([code]),
+      });
+
+      // Add premium audiobook to inviter
+      transaction.update(_firestore.collection('user_rewards').doc(inviterId), {
+        'premiumAudiobooks': FieldValue.increment(1),
+        'inviteRewardCount': FieldValue.increment(1),
+      });
+    });
   }
 }

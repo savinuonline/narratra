@@ -9,6 +9,12 @@ class UserReward {
   final int pointsToNextLevel;
   final bool canClaimDailyBonus;
   List<String> referrals;
+  final String? inviteCode;
+  final List<String> usedInviteCodes;
+  final List<String> generatedInviteCodes;
+  final int freeAudiobooks;
+  final int premiumAudiobooks;
+  final int inviteRewardCount;
 
   UserReward({
     required this.userId,
@@ -19,6 +25,12 @@ class UserReward {
     DateTime? lastLoginBonusDate,
     this.referralCode = '',
     this.referrals = const [],
+    this.inviteCode,
+    this.usedInviteCodes = const [],
+    this.generatedInviteCodes = const [],
+    this.freeAudiobooks = 0,
+    this.premiumAudiobooks = 0,
+    this.inviteRewardCount = 0,
   }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000),
        this.pointsToNextLevel = 100,
        this.canClaimDailyBonus = true;
@@ -33,6 +45,14 @@ class UserReward {
       lastLoginBonusDate:
           DateTime.tryParse(map['lastLoginBonusDate'] ?? '') ?? DateTime(2000),
       referralCode: map['referralCode'] ?? '',
+      inviteCode: map['inviteCode'],
+      usedInviteCodes: List<String>.from(map['usedInviteCodes'] ?? []),
+      generatedInviteCodes: List<String>.from(
+        map['generatedInviteCodes'] ?? [],
+      ),
+      freeAudiobooks: map['freeAudiobooks'] ?? 0,
+      premiumAudiobooks: map['premiumAudiobooks'] ?? 0,
+      inviteRewardCount: map['inviteRewardCount'] ?? 0,
     );
   }
 
@@ -45,6 +65,12 @@ class UserReward {
       'dailyGoalProgress': dailyGoalProgress,
       'lastLoginBonusDate': lastLoginBonusDate.toIso8601String(),
       'referralCode': referralCode,
+      'inviteCode': inviteCode,
+      'usedInviteCodes': usedInviteCodes,
+      'generatedInviteCodes': generatedInviteCodes,
+      'freeAudiobooks': freeAudiobooks,
+      'premiumAudiobooks': premiumAudiobooks,
+      'inviteRewardCount': inviteRewardCount,
     };
   }
 
