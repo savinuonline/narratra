@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
-import 'dart:math';
 
 class GoalsTab extends StatelessWidget {
   const GoalsTab({Key? key}) : super(key: key);
@@ -16,7 +13,6 @@ class GoalsTab extends StatelessWidget {
       stream: RewardService().userRewardsStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          print('Error in StreamBuilder: ${snapshot.error}');
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 
@@ -154,21 +150,7 @@ class GoalsTab extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildWeeklyProgressChart(),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildStatItem('Average', '45 min'),
-                          _buildStatItem('Best Day', 'Monday'),
-                          _buildStatItem('Total', '315 min'),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child: _buildWeeklyProgressChart(),
                 ),
               ),
 
@@ -218,29 +200,8 @@ class GoalsTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: GoogleFonts.nunito(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF3A5EF0),
-          ),
-        ),
-        Text(
-          label,
-          style: GoogleFonts.nunito(fontSize: 14, color: Colors.grey[600]),
-        ),
-      ],
-    );
-  }
-
   Widget _buildWeeklyProgressChart() {
-    // Generate sample data for now - in production, use actual user data
     final weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final weeklyData = [45, 30, 60, 25, 75, 40, 40];
 
     return SizedBox(
       height: 220,
@@ -248,7 +209,29 @@ class GoalsTab extends StatelessWidget {
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
           maxY: 100,
-          barTouchData: BarTouchData(enabled: true),
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipColor:
+                  (BarChartGroupData group) =>
+                      const Color.fromARGB(255, 54, 177, 239),
+              tooltipPadding: const EdgeInsets.all(8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                String day = weekDays[group.x.toInt()];
+                int minutes = rod.toY.toInt();
+
+                return BarTooltipItem(
+                  '$minutes mins',
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                );
+              },
+            ),
+          ),
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(
@@ -270,11 +253,18 @@ class GoalsTab extends StatelessWidget {
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                getTitlesWidget: (double value, TitleMeta meta) {
-                  if (value == 0) return Text('0');
-                  if (value == 50) return Text('50');
-                  if (value == 100) return Text('100');
-                  return Text('');
+                getTitlesWidget: (value, meta) {
+                  String text = '';
+                  if (value == 0) text = '0';
+                  if (value == 50) text = '50';
+                  if (value == 100) text = '100';
+                  return Text(
+                    text,
+                    style: GoogleFonts.nunito(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  );
                 },
                 reservedSize: 30,
               ),
@@ -282,12 +272,7 @@ class GoalsTab extends StatelessWidget {
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: FlGridData(
-            show: true,
-            horizontalInterval: 25,
-            getDrawingHorizontalLine:
-                (value) => FlLine(color: Colors.grey[300], strokeWidth: 1),
-          ),
+          gridData: FlGridData(show: false), // Remove grid lines
           borderData: FlBorderData(show: false),
           barGroups: List.generate(
             weekDays.length,
@@ -295,7 +280,7 @@ class GoalsTab extends StatelessWidget {
               x: index,
               barRods: [
                 BarChartRodData(
-                  toY: weeklyData[index].toDouble(),
+                  toY: 0, // Empty data since real data not available yet
                   color: const Color(0xFF3A5EF0),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(6),
@@ -328,84 +313,88 @@ class GoalsTab extends StatelessWidget {
                 'Set Daily Reading Goal',
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Select your daily reading time goal'),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Hours wheel
-                      SizedBox(
-                        width: 70,
-                        child: ListWheelScrollView(
-                          itemExtent: 50,
-                          diameterRatio: 1.5,
-                          useMagnifier: true,
-                          magnification: 1.2,
-                          onSelectedItemChanged: (index) {
-                            setState(() => hours = index);
-                          },
-                          controller: FixedExtentScrollController(
-                            initialItem: hours,
-                          ),
-                          physics: const FixedExtentScrollPhysics(),
-                          children: List.generate(11, (index) {
-                            return Center(
-                              child: Text(
-                                '$index',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                ),
+              content: Container(
+                width: 300,
+                height: 200,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Select your daily reading time goal'),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Hours wheel
+                          Expanded(
+                            child: ListWheelScrollView(
+                              itemExtent: 50,
+                              diameterRatio: 1.5,
+                              useMagnifier: true,
+                              magnification: 1.2,
+                              onSelectedItemChanged: (index) {
+                                setState(() => hours = index);
+                              },
+                              controller: FixedExtentScrollController(
+                                initialItem: hours,
                               ),
-                            );
-                          }),
-                        ),
-                      ),
-                      Text(' hour ', style: GoogleFonts.nunito(fontSize: 16)),
-                      // Minutes wheel
-                      SizedBox(
-                        width: 70,
-                        child: ListWheelScrollView(
-                          itemExtent: 50,
-                          diameterRatio: 1.5,
-                          useMagnifier: true,
-                          magnification: 1.2,
-                          onSelectedItemChanged: (index) {
-                            setState(() => minutes = index * 5);
-                          },
-                          controller: FixedExtentScrollController(
-                            initialItem: (minutes / 5).round(),
+                              physics: const FixedExtentScrollPhysics(),
+                              children: List.generate(11, (index) {
+                                return Center(
+                                  child: Text(
+                                    '$index',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
                           ),
-                          physics: const FixedExtentScrollPhysics(),
-                          children: List.generate(12, (index) {
-                            return Center(
-                              child: Text(
-                                '${index * 5}',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          Text(' h ', style: GoogleFonts.nunito(fontSize: 14)),
+                          // Minutes wheel with 1-minute increments
+                          Expanded(
+                            child: ListWheelScrollView(
+                              itemExtent: 50,
+                              diameterRatio: 1.5,
+                              useMagnifier: true,
+                              magnification: 1.2,
+                              onSelectedItemChanged: (index) {
+                                setState(() => minutes = index);
+                              },
+                              controller: FixedExtentScrollController(
+                                initialItem: minutes,
                               ),
-                            );
-                          }),
-                        ),
+                              physics: const FixedExtentScrollPhysics(),
+                              children: List.generate(60, (index) {
+                                return Center(
+                                  child: Text(
+                                    '$index',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                          Text(' m', style: GoogleFonts.nunito(fontSize: 14)),
+                        ],
                       ),
-                      Text(' min', style: GoogleFonts.nunito(fontSize: 16)),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3A5EF0),
+                    foregroundColor: Colors.white,
                   ),
                   onPressed: () {
                     // Calculate total minutes
@@ -427,7 +416,7 @@ class GoalsTab extends StatelessWidget {
                       );
                     }
                   },
-                  child: const Text('Set Goal'),
+                  child: Text('Set Goal'),
                 ),
               ],
             );
@@ -437,7 +426,6 @@ class GoalsTab extends StatelessWidget {
     );
   }
 
-  // Helper function to format minutes as "Xh Ym"
   String formatMinutes(int minutes) {
     if (minutes < 60) {
       return '$minutes min';

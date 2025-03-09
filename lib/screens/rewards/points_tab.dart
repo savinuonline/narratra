@@ -151,6 +151,76 @@ class PointsTab extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
+                // Weekly streak indicator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(7, (index) {
+                    // Determine if this day has been claimed
+                    final bool isClaimed = rewards.weeklyClaimedDays.contains(
+                      index,
+                    );
+                    final bool isToday = rewards.currentStreak == index;
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color:
+                                  isClaimed ? Colors.green : Colors.grey[300],
+                              border:
+                                  isToday
+                                      ? Border.all(color: Colors.blue, width: 2)
+                                      : null,
+                            ),
+                            child:
+                                isClaimed
+                                    ? const Center(
+                                      child: Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    )
+                                    : Center(
+                                      child: Text(
+                                        '${index + 1}',
+                                        style: TextStyle(
+                                          color:
+                                              isToday
+                                                  ? Colors.blue
+                                                  : Colors.grey[600],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                          ),
+                          if (isToday && !isClaimed)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+
+                const SizedBox(height: 24),
+
                 // Referral Section
                 Text(
                   'Refer & Earn',
@@ -170,7 +240,7 @@ class PointsTab extends StatelessWidget {
                             SvgPicture.asset(
                               'lib/assets/icons/gift_card.svg',
                               width: 24,
-                              height: 60,
+                              height: 48,
                               color: Color.fromARGB(255, 23, 132, 221),
                             ),
                             const SizedBox(width: 16),
@@ -245,28 +315,38 @@ class PointsTab extends StatelessWidget {
                     ),
                     title: const Text('Daily Login Bonus'),
                     subtitle: const Text('50 points'),
-                    trailing: ElevatedButton(
-                      onPressed:
-                          RewardService().isSameDay(
-                                rewards.lastLoginBonusDate,
-                                DateTime.now(),
-                              )
-                              ? null
-                              : () async {
-                                final bonus =
-                                    await RewardService()
-                                        .claimDailyLoginBonus();
-                                if (bonus > 0 && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Claimed $bonus points for daily login!',
+                    trailing: FutureBuilder<bool>(
+                      future: RewardService().canClaimDailyBonus(),
+                      builder: (context, canClaimSnapshot) {
+                        final bool canClaim = canClaimSnapshot.data ?? false;
+
+                        return ElevatedButton(
+                          onPressed:
+                              canClaim
+                                  ? () async {
+                                    final points =
+                                        await RewardService().claimLoginBonus();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'You received $points points!',
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }
-                              },
-                      child: const Text('Claim'),
+                                    );
+                                  }
+                                  : null, // Button disabled when canClaim is false
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3A5EF0),
+                          ),
+                          child: Text(
+                            'Claim Daily Bonus',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

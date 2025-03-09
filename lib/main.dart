@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'screens/auth/signup_page.dart';
 import 'screens/auth/login_page.dart';
 import 'screens/rewards/reward_dashboard.dart';
-import 'services/reward_service.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              // If document doesn't exist, create it
+            
               if (!docSnapshot.hasData || !docSnapshot.data!.exists) {
                 // Create the user document
                 FirebaseFirestore.instance
@@ -64,13 +64,11 @@ class MyApp extends StatelessWidget {
                       'usedInviteCodes': [],
                       'generatedInviteCodes': [],
                       'inviteRewardCount': 0,
+                      'currentStreak': 0,
+                      'weeklyClaimedDays': [],
                     });
-                print(
-                  'Created missing document for user: ${snapshot.data!.uid}',
-                );
               }
 
-              // Now we can show the reward dashboard
               return const RewardDashboard();
             },
           );

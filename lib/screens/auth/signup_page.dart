@@ -11,7 +11,6 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -55,7 +54,6 @@ class _SignUpPageState extends State<SignUpPage> {
               'inviteRewardCount': 0,
             });
 
-        print('User document created successfully for ${user.uid}');
 
         if (mounted) {
           ScaffoldMessenger.of(
@@ -65,7 +63,6 @@ class _SignUpPageState extends State<SignUpPage> {
         }
       }
     } catch (e) {
-      print('Error during sign up: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

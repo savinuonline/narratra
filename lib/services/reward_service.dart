@@ -1,15 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:math';
 import '../models/user_reward.dart';
+import 'dart:async';
 
 class RewardService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDynamicLinks _dynamicLinks = FirebaseDynamicLinks.instance;
+
+  final _userRewardsController = StreamController<UserReward>.broadcast();
+
+  Stream<UserReward> get userRewardsStream {
+    _refreshUserRewards();
+    return _userRewardsController.stream;
+  }
+
+  void _refreshUserRewards() async {
+    try {
+      final rewards = await getUserRewards();
+      _userRewardsController.add(rewards);
+    } catch (e) {
+      _userRewardsController.addError(e);
+    }
+  }
 
   // Create referral link
   Future<String> createReferralLink() async {
@@ -36,8 +54,6 @@ class RewardService {
           description: 'Use my referral link to get bonus points!',
         ),
       );
-
-      print('Dynamic Link Parameters: $parameters'); // Added for debugging
 
       final shortLink = await _dynamicLinks.buildShortLink(parameters);
       print(
@@ -126,7 +142,7 @@ class RewardService {
     });
   }
 
-  // Redeem points without transaction (for simpler cases, but less consistent)
+  // Redeem points without transaction
   Future<bool> redeemPoints(int amount) async {
     final rewards = await getUserRewards();
     if (rewards.points < amount) return false;
@@ -138,32 +154,6 @@ class RewardService {
 
   late DateTime lastLoginBonusDate;
 
-  Stream<UserReward> get userRewardsStream {
-    return _auth.authStateChanges().asyncMap((user) {
-      if (user == null) {
-        throw ('No authenticated user');
-      }
-
-      return _firestore
-          .collection('user_rewards')
-          .doc(user.uid)
-          .snapshots()
-          .map((doc) {
-            if (!doc.exists) {
-              print('Document does not exist for user ${user.uid}');
-              throw Exception('User document not found');
-            }
-            print('Loading rewards for user ${user.uid}');
-            return UserReward.fromMap(doc.data()!);
-          })
-          .handleError((error) {
-            print('Error loading rewards: $error');
-            throw error;
-          })
-          .first;
-    });
-  }
-
   // Get current user reward data
   Future<UserReward> getUserRewards() async {
     User? user = _auth.currentUser;
@@ -171,7 +161,6 @@ class RewardService {
     if (user == null) {
       throw Exception('No current user found.');
     }
-    final String userId = user.uid;
 
     final doc = await _firestore.collection('user_rewards').doc(user.uid).get();
 
@@ -186,7 +175,7 @@ class RewardService {
 
       await _firestore
           .collection('user_rewards')
-          .doc(user?.uid)
+          .doc(user.uid)
           .set(newReward.toMap());
       return newReward;
     }
@@ -243,22 +232,20 @@ class RewardService {
   // Update daily goal
   Future<void> updateDailyGoal(int newGoal) async {
     final user = _auth.currentUser;
-    if (user == null) {
-      print('No authenticated user found');
-      return;
-    }
+    if (user == null) return;
 
     try {
-      print('Updating daily goal to: $newGoal minutes');
-
-      await _firestore.collection('user_rewards').doc(user.uid).update({
-        'dailyGoal': newGoal,
+      await _firestore.runTransaction((transaction) async {
+        final docRef = _firestore.collection('user_rewards').doc(user.uid);
+        transaction.update(docRef, {'dailyGoal': newGoal});
       });
 
-      print('Daily goal updated successfully');
+      // Trigger a manual refresh of the userRewardsStream
+      _userRewardsController.add(await getUserRewards());
+
+      print('Daily goal updated to $newGoal');
     } catch (e) {
       print('Error updating daily goal: $e');
-      throw Exception('Failed to update daily goal: $e');
     }
   }
 
@@ -365,7 +352,6 @@ class RewardService {
       final doc = await docRef.get();
 
       if (!doc.exists) {
-        print('Creating new user document for ${user.uid}');
         await docRef.set({
           'userId': user.uid,
           'points': 0,
@@ -379,11 +365,10 @@ class RewardService {
           'usedInviteCodes': [],
           'generatedInviteCodes': [],
         });
-        print('User document created successfully');
       }
     } catch (e) {
       print('Error initializing user rewards: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -408,13 +393,6 @@ class RewardService {
         'lastLoginBonusDate': DateTime.now().toIso8601String(),
       });
     });
-  }
-
-  // Generate referral code
-  String _generateReferralCode(String userId) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return '${userId.substring(0, 4)}${timestamp.toString().substring(timestamp.toString().length - 4)}'
-        .toUpperCase();
   }
 
   // Process referral code
@@ -523,5 +501,101 @@ class RewardService {
         'inviteRewardCount': FieldValue.increment(1),
       });
     });
+  }
+
+  Future<bool> canClaimDailyBonus() async {
+    final User? user = _auth.currentUser;
+    if (user == null) return false;
+
+    final doc = await _firestore.collection('user_rewards').doc(user.uid).get();
+    if (!doc.exists) return true;
+
+    final data = doc.data()!;
+    if (!data.containsKey('lastLoginBonusDate')) {
+      return true;
+    }
+
+    final lastClaimDate = DateTime.parse(data['lastLoginBonusDate']);
+    final now = DateTime.now();
+
+    // Allow claim if not same day
+    return now.year != lastClaimDate.year ||
+        now.month != lastClaimDate.month ||
+        now.day != lastClaimDate.day;
+  }
+
+  Future<int> claimLoginBonus() async {
+    final user = _auth.currentUser;
+    if (user == null) return 0;
+
+    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+
+    return _firestore.runTransaction<int>((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data() ?? {};
+
+      // Get current streak info
+      int currentStreak = data['currentStreak'] ?? 0;
+      List<dynamic> weeklyClaimedDays = data['weeklyClaimedDays'] ?? [];
+
+      // Check if we're on a new week
+      final lastClaimDate =
+          data.containsKey('lastLoginBonusDate')
+              ? DateTime.parse(data['lastLoginBonusDate'])
+              : null;
+
+      final now = DateTime.now();
+
+      // Reset streak if it's been more than 1 day since last claim
+      if (lastClaimDate != null) {
+        final difference = now.difference(lastClaimDate).inDays;
+        if (difference > 1) {
+          currentStreak = 0;
+          weeklyClaimedDays = [];
+        }
+      }
+
+      // Increase streak and calculate points
+      currentStreak = (currentStreak + 1) % 7; // Keep within 0-6 range
+      int pointsToAdd = _getLoginBonusForDay(currentStreak);
+
+      // Update weekly claimed days
+      if (!weeklyClaimedDays.contains(currentStreak - 1)) {
+        weeklyClaimedDays.add(currentStreak - 1);
+      }
+
+      // Update document
+      transaction.update(docRef, {
+        'points': FieldValue.increment(pointsToAdd),
+        'lastLoginBonusDate': now.toIso8601String(),
+        'currentStreak': currentStreak,
+        'weeklyClaimedDays': weeklyClaimedDays,
+      });
+
+      return pointsToAdd;
+    });
+  }
+
+  int _getLoginBonusForDay(int day) {
+    // Day is 1-indexed here (after increment)
+    switch (day) {
+      case 1:
+        return 10;
+      case 2:
+        return 15;
+      case 3:
+        return 20;
+      case 4:
+        return 25;
+      case 5:
+        return 30;
+      case 6:
+        return 40;
+      case 7:
+      case 0:
+        return 50; // Day 7 or 0 (after modulo)
+      default:
+        return 10;
+    }
   }
 }

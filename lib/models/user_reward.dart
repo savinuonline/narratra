@@ -2,19 +2,21 @@ class UserReward {
   final String userId;
   int points;
   int level;
-  int dailyGoal;
+  final int dailyGoal;
   int dailyGoalProgress;
-  DateTime lastLoginBonusDate;
+  final DateTime lastLoginBonusDate;
   final String referralCode;
   final int pointsToNextLevel;
   final bool canClaimDailyBonus;
-  List<String> referrals;
+  final List<String> referrals;
   final String? inviteCode;
   final List<String> usedInviteCodes;
   final List<String> generatedInviteCodes;
   final int freeAudiobooks;
   final int premiumAudiobooks;
   final int inviteRewardCount;
+  final int currentStreak;
+  final List<int> weeklyClaimedDays;
 
   UserReward({
     required this.userId,
@@ -22,7 +24,7 @@ class UserReward {
     this.level = 1,
     this.dailyGoal = 30,
     this.dailyGoalProgress = 0,
-    DateTime? lastLoginBonusDate,
+    required this.lastLoginBonusDate,
     this.referralCode = '',
     this.referrals = const [],
     this.inviteCode,
@@ -31,8 +33,9 @@ class UserReward {
     this.freeAudiobooks = 0,
     this.premiumAudiobooks = 0,
     this.inviteRewardCount = 0,
-  }) : this.lastLoginBonusDate = lastLoginBonusDate ?? DateTime(2000),
-       this.pointsToNextLevel = 100,
+    this.currentStreak = 0,
+    this.weeklyClaimedDays = const [],
+  }) : this.pointsToNextLevel = 100,
        this.canClaimDailyBonus = true;
 
   factory UserReward.fromMap(Map<String, dynamic> map) {
@@ -43,7 +46,11 @@ class UserReward {
       dailyGoal: map['dailyGoal'] ?? 30,
       dailyGoalProgress: map['dailyGoalProgress'] ?? 0,
       lastLoginBonusDate:
-          DateTime.tryParse(map['lastLoginBonusDate'] ?? '') ?? DateTime(2000),
+          map.containsKey('lastLoginBonusDate')
+              ? DateTime.parse(map['lastLoginBonusDate'])
+              : DateTime.now().subtract(
+                const Duration(days: 1),
+              ), // Yesterday by default
       referralCode: map['referralCode'] ?? '',
       inviteCode: map['inviteCode'],
       usedInviteCodes: List<String>.from(map['usedInviteCodes'] ?? []),
@@ -53,6 +60,8 @@ class UserReward {
       freeAudiobooks: map['freeAudiobooks'] ?? 0,
       premiumAudiobooks: map['premiumAudiobooks'] ?? 0,
       inviteRewardCount: map['inviteRewardCount'] ?? 0,
+      currentStreak: map['currentStreak'] ?? 0,
+      weeklyClaimedDays: List<int>.from(map['weeklyClaimedDays'] ?? []),
     );
   }
 
@@ -71,6 +80,8 @@ class UserReward {
       'freeAudiobooks': freeAudiobooks,
       'premiumAudiobooks': premiumAudiobooks,
       'inviteRewardCount': inviteRewardCount,
+      'currentStreak': currentStreak,
+      'weeklyClaimedDays': weeklyClaimedDays,
     };
   }
 

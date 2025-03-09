@@ -43,7 +43,7 @@ dependencies:
   share_plus: ^7.2.2
   cupertino_icons: ^1.0.8
   firebase_core: ^2.32.0
-  cloud_firestore: ^4.15.7
+  cloud_firestore: ^4.17.5
   flutter_svg: ^2.0.9
   fl_chart: ^0.70.2
   intl: ^0.20.2
