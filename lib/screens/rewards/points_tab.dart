@@ -151,76 +151,6 @@ class PointsTab extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Weekly streak indicator
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(7, (index) {
-                    // Determine if this day has been claimed
-                    final bool isClaimed = rewards.weeklyClaimedDays.contains(
-                      index,
-                    );
-                    final bool isToday = rewards.currentStreak == index;
-
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color:
-                                  isClaimed ? Colors.green : Colors.grey[300],
-                              border:
-                                  isToday
-                                      ? Border.all(color: Colors.blue, width: 2)
-                                      : null,
-                            ),
-                            child:
-                                isClaimed
-                                    ? const Center(
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
-                                    )
-                                    : Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          color:
-                                              isToday
-                                                  ? Colors.blue
-                                                  : Colors.grey[600],
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                          ),
-                          if (isToday && !isClaimed)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 24),
-
                 // Referral Section
                 Text(
                   'Refer & Earn',
@@ -269,8 +199,36 @@ class PointsTab extends StatelessWidget {
                           children: [
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed:
-                                    () => _generateAndShareInviteCode(context),
+                                onPressed: () async {
+                                  try {
+                                    // First generate the link and invite code
+                                    final link =
+                                        await RewardService()
+                                            .createReferralLink();
+                                    final inviteCode =
+                                        await RewardService()
+                                            .generateInviteCode();
+                                    print(
+                                      'Generated link: $link',
+                                    ); // Debug print
+
+                                    // Then share it
+                                    await Share.share(
+                                      'Join me on Narratra and start listening to audiobooks! Use my invite code: $inviteCode\nClick to download today: $link',
+                                      subject:
+                                          'Check out Narratra - The Audiobook App',
+                                    );
+                                  } catch (e) {
+                                    print('Error sharing: $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Error sharing link: ${e.toString()}',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                                 icon: const Icon(Icons.share),
                                 label: const Text('Share Invite'),
                                 style: ElevatedButton.styleFrom(
@@ -298,56 +256,107 @@ class PointsTab extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Daily Bonus Section
+                // Combined Daily & Weekly Rewards Section
                 Text(
                   'Daily Rewards',
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                  ), // Poppins font
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Card(
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.amber,
-                    ),
-                    title: const Text('Daily Login Bonus'),
-                    subtitle: const Text('50 points'),
-                    trailing: FutureBuilder<bool>(
-                      future: RewardService().canClaimDailyBonus(),
-                      builder: (context, canClaimSnapshot) {
-                        final bool canClaim = canClaimSnapshot.data ?? false;
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Daily Login Bonus section
+                      ListTile(
+                        leading: const Icon(
+                          Icons.calendar_today,
+                          color: Colors.amber,
+                        ),
+                        title: const Text('Daily Login Bonus'),
+                        subtitle: const Text(
+                          'Points increase with daily streaks',
+                        ),
+                        trailing: FutureBuilder<bool>(
+                          future: RewardService().canClaimDailyBonus(),
+                          builder: (context, canClaimSnapshot) {
+                            final bool canClaim =
+                                canClaimSnapshot.data ?? false;
 
-                        return ElevatedButton(
-                          onPressed:
-                              canClaim
-                                  ? () async {
-                                    final points =
-                                        await RewardService().claimLoginBonus();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'You received $points points!',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  : null, // Button disabled when canClaim is false
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3A5EF0),
+                            return ElevatedButton(
+                              onPressed:
+                                  canClaim
+                                      ? () async {
+                                        final points =
+                                            await RewardService()
+                                                .claimLoginBonus();
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'You received $points points!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF3A5EF0),
+                                foregroundColor: Colors.white,
+                              ),
+                              child: Text(
+                                'Claim',
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const Divider(),
+
+                      // Weekly streak header
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                        ),
+                        child: Text(
+                          'Weekly Login Streak',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF3A5EF0),
                           ),
-                          child: Text(
-                            'Claim Daily Bonus',
-                            style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          'Log in daily to earn increasing rewards!',
+                          style: GoogleFonts.nunito(
+                            fontSize: 14,
+                            color: Colors.grey[700],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+
+                      // Weekly streak indicator
+                      _buildWeeklyStreakIndicator(rewards),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
 
@@ -476,22 +485,116 @@ class PointsTab extends StatelessWidget {
         (nextLevelPoints - currentLevelBasePoints).toDouble();
   }
 
-  Future<void> _generateAndShareInviteCode(BuildContext context) async {
-    try {
-      final inviteCode = await RewardService().generateInviteCode();
-      final message =
-          'Join me on Narratra! Use my invite code: $inviteCode\n'
-          'We both get a free audiobook when you sign up!';
+  Widget _buildWeeklyStreakIndicator(UserReward rewards) {
+    final weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-      await Share.share(message, subject: 'Get a free audiobook on Narratra!');
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to generate invite code: ${e.toString()}'),
-          ),
-        );
-      }
+    // Get today's weekday (1 = Monday, 7 = Sunday)
+    final now = DateTime.now();
+    int todayIndex = now.weekday - 1; // Convert to 0-based index
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(7, (index) {
+          // Check if this day has been claimed
+          final bool isClaimed = rewards.weeklyClaimedDays.contains(index);
+          final bool isToday = index == todayIndex;
+
+          // Calculate points for this day
+          final int dayPoints = _getPointsForDay(
+            index + 1,
+          ); // +1 because index is 0-based
+
+          return Column(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          isClaimed
+                              ? const Color(0xFF3A5EF0)
+                              : (isToday ? Colors.green : Colors.grey[200]),
+                      border:
+                          isToday
+                              ? Border.all(color: Colors.green, width: 2)
+                              : null,
+                    ),
+                    child:
+                        isClaimed
+                            ? const Center(
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            )
+                            : Center(
+                              child: Text(
+                                '+$dayPoints',
+                                style: GoogleFonts.nunito(
+                                  color:
+                                      isToday ? Colors.white : Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                  ),
+                  if (isToday && !isClaimed)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                weekDays[index],
+                style: GoogleFonts.nunito(
+                  color: isToday ? Colors.green : Colors.grey[700],
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  int _getPointsForDay(int day) {
+    switch (day) {
+      case 1:
+        return 10;
+      case 2:
+        return 15;
+      case 3:
+        return 20;
+      case 4:
+        return 25;
+      case 5:
+        return 30;
+      case 6:
+        return 40;
+      case 7:
+        return 50;
+      default:
+        return 10;
     }
   }
 

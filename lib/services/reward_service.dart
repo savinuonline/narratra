@@ -58,7 +58,7 @@ class RewardService {
       final shortLink = await _dynamicLinks.buildShortLink(parameters);
       print(
         'Short Link Generated: ${shortLink.shortUrl}',
-      ); // Added for debugging
+      );
       return shortLink.shortUrl.toString();
     } on FirebaseException catch (e) {
       print('Firebase Exception: $e');
