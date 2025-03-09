@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../rewards/points_tab.dart';
 import '../rewards/goals_tab.dart';
 
 class RewardDashboard extends StatefulWidget {
+  const RewardDashboard({Key? key}) : super(key: key);
+
   @override
   _RewardDashboardState createState() => _RewardDashboardState();
 }
@@ -12,6 +16,8 @@ class RewardDashboard extends StatefulWidget {
 class _RewardDashboardState extends State<RewardDashboard>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  User? _user;
+  DocumentSnapshot? _userDoc;
 
   @override
   void initState() {
@@ -19,9 +25,24 @@ class _RewardDashboardState extends State<RewardDashboard>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() {});
+        setState(() {}); // Rebuild to update SVG colors
       }
     });
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user != null) {
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('user_rewards')
+              .doc(_user!.uid)
+              .get();
+      setState(() {
+        _userDoc = userDoc;
+      });
+    }
   }
 
   @override
@@ -32,6 +53,10 @@ class _RewardDashboardState extends State<RewardDashboard>
 
   @override
   Widget build(BuildContext context) {
+    if (_userDoc == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -42,7 +67,7 @@ class _RewardDashboardState extends State<RewardDashboard>
               TextSpan(
                 text: 'Narratra. ',
                 style: GoogleFonts.poppins(
-                  color: Color(0xFF3A5EF0),
+                  color: const Color(0xFF3A5EF0),
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -60,13 +85,9 @@ class _RewardDashboardState extends State<RewardDashboard>
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Color(0xFF3A5EF0),
-          labelStyle: GoogleFonts.montserrat(
-            fontWeight: FontWeight.w500,
-            fontSize: 18,
-          ),
+          labelColor: const Color(0xFF3A5EF0),
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Color(0xFF3A5EF0),
+          indicatorColor: const Color(0xFF3A5EF0),
           tabs: [
             Tab(
               icon: SvgPicture.asset(
@@ -74,7 +95,9 @@ class _RewardDashboardState extends State<RewardDashboard>
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(
-                  _tabController.index == 0 ? Color(0xFF3A5EF0) : Colors.grey,
+                  _tabController.index == 0
+                      ? const Color(0xFF3A5EF0)
+                      : Colors.grey,
                   BlendMode.srcIn,
                 ),
               ),
@@ -86,7 +109,9 @@ class _RewardDashboardState extends State<RewardDashboard>
                 width: 24,
                 height: 24,
                 colorFilter: ColorFilter.mode(
-                  _tabController.index == 1 ? Color(0xFF3A5EF0) : Colors.grey,
+                  _tabController.index == 1
+                      ? const Color(0xFF3A5EF0)
+                      : Colors.grey,
                   BlendMode.srcIn,
                 ),
               ),

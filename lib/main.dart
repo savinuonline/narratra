@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'pages/signup_page.dart';
+import 'screens/auth/signup_page.dart';
+import 'screens/auth/login_page.dart';
 import 'screens/rewards/reward_dashboard.dart';
 
 void main() async {
@@ -20,9 +21,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home:
           FirebaseAuth.instance.currentUser == null
-              ? const SignUpPage()
+              ? const LoginPage()
               : RewardDashboard(),
       routes: {
+        '/login': (context) => const LoginPage(),
         '/signUp': (context) => const SignUpPage(),
         '/rewardDashboard': (context) => RewardDashboard(),
       },

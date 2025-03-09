@@ -15,12 +15,29 @@ class GoalsTab extends StatelessWidget {
     return StreamBuilder<UserReward>(
       stream: RewardService().userRewardsStream,
       builder: (context, snapshot) {
+        // Add error handling
+        if (snapshot.hasError) {
+          print('Error loading rewards: ${snapshot.error}');
+          return Center(
+            child: Text('Error loading rewards: ${snapshot.error}'),
+          );
+        }
+
         if (!snapshot.hasData) {
+          print('No data available yet');
           return const Center(child: CircularProgressIndicator());
         }
 
         final rewards = snapshot.data!;
+        // Add null check for dailyGoal
+        if (rewards.dailyGoal == 0) {
+          print('Daily goal is 0, initializing default values');
+          RewardService().initializeUserRewards();
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final double progress = rewards.dailyGoalProgress / rewards.dailyGoal;
+        print('Loading goals tab with progress: $progress');
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),

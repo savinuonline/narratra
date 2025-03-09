@@ -11,13 +11,13 @@ class RewardService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseDynamicLinks _dynamicLinks = FirebaseDynamicLinks.instance;
 
-
   // Create referral link
   Future<String> createReferralLink() async {
     final User? user = _auth.currentUser;
-    String userId = user?.uid ?? 'test_user_id_123';
-
-    print("Creating referral link for user ID: $userId");
+    if (user == null) {
+      throw Exception('No current user found');
+    }
+    final String userId = user.uid;
 
     try {
       final parameters = DynamicLinkParameters(
@@ -45,10 +45,10 @@ class RewardService {
       ); // Added for debugging
       return shortLink.shortUrl.toString();
     } on FirebaseException catch (e) {
-      print('Firebase Exception: $e'); // More specific error handling
-      return 'https://narratra.com/refer?uid=$userId'; // Fallback URL
+      print('Firebase Exception: $e');
+      return 'https://narratra.com/refer?uid=$userId';
     } on Exception catch (e) {
-      print('Generic Exception: $e'); // Catch other unexpected errors
+      print('Generic Exception: $e');
       return 'https://narratra.com/refer?uid=$userId'; // Fallback URL
     }
   }
@@ -139,52 +139,51 @@ class RewardService {
   late DateTime lastLoginBonusDate;
 
   Stream<UserReward> get userRewardsStream {
-    User? user = _auth.currentUser; // Get current user
-    String userId; // Declare userId
-
+    final user = _auth.currentUser;
     if (user == null) {
-      // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
-      userId =
-          'test_user_id_123'; // Use the SAME hardcoded ID as in getUserRewards()
-      print(
-        "WARNING (Stream): Using default test user ID: $userId. Authentication is bypassed!",
-      );
-    } else {
-      userId = user.uid;
+      print('No authenticated user found');
+      return Stream.error('No authenticated user');
     }
 
-    return _firestore
-        .collection('user_rewards')
-        .doc(userId) // Use the resolved userId (either test or actual)
-        .snapshots()
-        .map((doc) => UserReward.fromMap(doc.data() ?? {}));
+    print('Fetching rewards for user: ${user.uid}');
+    return _firestore.collection('user_rewards').doc(user.uid).snapshots().map((
+      doc,
+    ) {
+      if (!doc.exists) {
+        print('No rewards document exists for user ${user.uid}');
+        // Initialize default rewards
+        initializeUserRewards();
+        return UserReward(
+          userId: user.uid,
+          points: 0,
+          level: 1,
+          dailyGoal: 30,
+          dailyGoalProgress: 0,
+          lastLoginBonusDate: DateTime.now(),
+        );
+      }
+      print('Found rewards document for user ${user.uid}');
+      return UserReward.fromMap(doc.data() ?? {});
+    });
   }
 
   // Get current user reward data
   Future<UserReward> getUserRewards() async {
     User? user = _auth.currentUser;
-    String userId;
 
     if (user == null) {
-      // **TEMPORARY WORKAROUND - DEFAULT USER ID FOR TESTING**
-      userId =
-          'test_user_id_123'; // Use a hardcoded ID (replace with your own string)
-      print(
-        "WARNING: Using default test user ID: $userId.  Authentication is bypassed!",
-      );
-    } else {
-      userId = user.uid;
+      throw Exception('No current user found.');
     }
+    final String userId = user.uid;
 
-    final doc =
-        await _firestore.collection('user_rewards').doc(user?.uid).get();
+    final doc = await _firestore.collection('user_rewards').doc(user.uid).get();
 
     if (doc.exists) {
       return UserReward.fromMap(doc.data()!);
     } else {
       // Create new reward document for user
       final newReward = UserReward(
-        userId: user?.uid ?? userId,
+        userId: user.uid,
         lastLoginBonusDate: DateTime.now().subtract(const Duration(days: 1)),
       );
 
@@ -343,16 +342,26 @@ class RewardService {
   // Initialize rewards for new user
   Future<void> initializeUserRewards() async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('User not authenticated');
+    if (user == null) return;
 
-    final userRewardsRef = _firestore.collection('user_rewards').doc(user.uid);
-    final userRewardsDoc = await userRewardsRef.get();
+    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+    final doc = await docRef.get();
 
-    if (!userRewardsDoc.exists) {
-      final referralCode = _generateReferralCode(user.uid);
-      await userRewardsRef.set(
-        UserReward(userId: user.uid, referralCode: referralCode).toMap(),
-      );
+    if (!doc.exists) {
+      print('Initializing default rewards for user ${user.uid}');
+      await docRef.set({
+        'userId': user.uid,
+        'points': 0,
+        'level': 1,
+        'dailyGoal': 30,
+        'dailyGoalProgress': 0,
+        'lastLoginBonusDate': DateTime.now().toIso8601String(),
+        'freeAudiobooks': 0,
+        'premiumAudiobooks': 0,
+        'inviteRewardCount': 0,
+        'usedInviteCodes': [],
+        'generatedInviteCodes': [],
+      });
     }
   }
 

@@ -59,8 +59,8 @@ class _SignUpPageState extends State<SignUpPage> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Sign-up successful!')));
 
-        // Navigate to your main page or dashboard
-        // e.g., Navigator.pushNamed(context, '/rewardDashboard');
+        // Navigate to the rewards dashboard
+        Navigator.pushReplacementNamed(context, '/rewardDashboard');
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
@@ -97,6 +97,11 @@ class _SignUpPageState extends State<SignUpPage> {
               const CircularProgressIndicator()
             else
               ElevatedButton(onPressed: _signUp, child: const Text('Sign Up')),
+            TextButton(
+              onPressed:
+                  () => Navigator.pushReplacementNamed(context, '/login'),
+              child: const Text('Already have an account? Login'),
+            ),
           ],
         ),
       ),
