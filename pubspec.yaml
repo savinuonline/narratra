@@ -39,14 +39,14 @@ dependencies:
     sdk: flutter
   navigation_module:
     path: ./navigation_module
-  google_fonts: ^5.1.0
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.17
   firebase_auth: ^4.17.7
   firebase_dynamic_links: ^5.5.7
   share_plus: ^7.2.2
   cupertino_icons: ^1.0.8
   firebase_core: ^2.32.0
   cloud_firestore: ^4.17.5
-  flutter_svg: ^2.0.9
   fl_chart: ^0.70.2
   intl: ^0.20.2
 

@@ -115,12 +115,9 @@ class _RewardDashboardState extends State<RewardDashboard>
                 'lib/assets/icons/points.svg',
                 width: 24,
                 height: 24,
-                colorFilter: ColorFilter.mode(
-                  _tabController.index == 0
-                      ? const Color(0xFF3A5EF0)
-                      : Colors.grey,
-                  BlendMode.srcIn,
-                ),
+                color: _tabController.index == 0
+                    ? const Color(0xFF3A5EF0)
+                    : Colors.grey,
               ),
               child: Text(
                 'Points',
@@ -131,22 +128,26 @@ class _RewardDashboardState extends State<RewardDashboard>
                 ),
               ),
             ),
-            Tab(
-              icon: SvgPicture.asset(
-                'lib/assets/icons/goals.svg',
-                width: 24,
-                height: 24,
-                colorFilter: ColorFilter.mode(
-                  _tabController.index == 1
-                      ? const Color(0xFF3A5EF0)
-                      : Colors.grey,
-                  BlendMode.srcIn,
-                ),
-              ),
-              text: 'Goals',
+          Tab(
+            icon: SvgPicture.asset(
+              'lib/assets/icons/goals.svg',
+              width: 24,
+              height: 24,
+              color: _tabController.index == 1
+                  ? const Color(0xFF3A5EF0)
+                  : Colors.grey,
             ),
-          ],
-        ),
+            child: Text(
+              'Goals',
+              style: GoogleFonts.nunito(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
       ),
       body: TabBarView(
         controller: _tabController,
