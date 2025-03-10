@@ -37,6 +37,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  navigation_module:
+    path: ./navigation_module
   google_fonts: ^5.1.0
   firebase_auth: ^4.17.7
   firebase_dynamic_links: ^5.5.7
