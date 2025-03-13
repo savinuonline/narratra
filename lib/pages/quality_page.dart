@@ -81,7 +81,7 @@ class QualityPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8), // Rounded corners
               ),
             ),
-            icon: const Icon(Ionicons.download_outline, size: 20),
+            icon: const Icon(Ionicons.download_outline, size: 20, color: Colors.white,),
             label: Text(
               quality,
               style: const TextStyle(fontWeight: FontWeight.bold),
