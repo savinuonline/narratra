@@ -38,9 +38,9 @@ class MyApp extends StatelessWidget {
           secondary: const Color(0xFF4c3bcf),
           background: const Color(0xFF3dc2ec),
         ),
-        scaffoldBackgroundColor: const Color(0xff0c0c0c),
+        scaffoldBackgroundColor: const Color(0xffc7d9dd),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF402e7a),
+          backgroundColor: Color(0xffc7d9dd),
           foregroundColor: Colors.white,
           elevation: 4,
         ),
