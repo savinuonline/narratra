@@ -6,6 +6,7 @@ class Book {
   final String genre;
   final String imageUrl;
   final String description;
+  final String audioUrl;
 
   Book({
     required this.id,
@@ -14,6 +15,7 @@ class Book {
     required this.genre,
     required this.imageUrl,
     required this.description,
+    required this.audioUrl,
   });
 
   // Convert Book to map for DB
@@ -25,18 +27,21 @@ class Book {
       'genre': genre,
       'imageUrl': imageUrl,
       'description': description,
+      'audioUrl': audioUrl,
     };
   }
 
-  // Create Book from map (e.g. Firestore doc)
+  // Make sure this method can handle your data structure
   factory Book.fromMap(Map<String, dynamic> map) {
     return Book(
-      id: map['id'] ?? '',
+      id: map['id'] ?? '', // This might be missing if using document ID
       title: map['title'] ?? '',
       author: map['author'] ?? '',
-      genre: map['genre'] ?? '',
-      imageUrl: map['imageUrl'] ?? '',
       description: map['description'] ?? '',
+      imageUrl: map['imageUrl'] ?? '',
+      // Add other fields as needed
+      genre: map['genre'] ?? '',
+      audioUrl: map['audioUrl'] ?? '',
     );
   }
 }

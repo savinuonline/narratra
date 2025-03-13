@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
-import '../services/firebase_service.dart'; // Assume you have methods to fetch books
+import '../services/firebase_service.dart';
 import 'player_screen.dart'; // Screen for playing audiobooks
 import '../widgets/custom_bottom_nav_bar.dart'; // Custom bottom nav bar module
 
@@ -32,8 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture =
-        _firebaseService.getRecommendedBooks(widget.user.uid);
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
+      widget.user.uid,
+    );
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
@@ -123,9 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 4),
           Text(
             "Good Evening",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white70,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ),
         ],
       ),
@@ -230,7 +231,13 @@ class CategorySection extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final book = books[index];
                   return GestureDetector(
-                    onTap: () => onBookTap(book),
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/bookinfo',
+                        arguments: {'bookId': book.id}, // pass the book ID
+                      );
+                    },
                     child: BookCard(book: book),
                   );
                 },
@@ -259,11 +266,7 @@ class BookCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: ClipRRect(
@@ -306,10 +309,7 @@ class BookCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
               child: Text(
                 book.author,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 maxLines: 1,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
@@ -353,7 +353,7 @@ class BookDetailSheet extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 8),
