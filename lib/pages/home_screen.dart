@@ -232,6 +232,9 @@ class CategorySection extends StatelessWidget {
                   final book = books[index];
                   return GestureDetector(
                     onTap: () {
+                      print(
+                        'Tapped book with ID: ${book.id}',
+                      ); // Add debug print
                       Navigator.pushNamed(
                         context,
                         '/bookinfo',

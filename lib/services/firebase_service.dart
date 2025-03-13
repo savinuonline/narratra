@@ -33,8 +33,9 @@ class FirebaseService {
               .where('likeCount', isGreaterThanOrEqualTo: 3)
               .get();
 
-      final catBooks =
-          querySnapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
+      final catBooks = querySnapshot.docs.map((doc) => 
+        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
+      ).toList();
       trending.addAll(catBooks);
     }
 
@@ -65,8 +66,9 @@ class FirebaseService {
           .collection('books');
 
       final querySnapshot = await subcollectionRef.get();
-      final genreBooks =
-          querySnapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
+      final genreBooks = querySnapshot.docs.map((doc) => 
+        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': genre})
+      ).toList();
       recommended.addAll(genreBooks);
     }
 
@@ -84,8 +86,9 @@ class FirebaseService {
           .collection('books');
 
       final querySnapshot = await subcollectionRef.get();
-      final catBooks =
-          querySnapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
+      final catBooks = querySnapshot.docs.map((doc) => 
+        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
+      ).toList();
       allBooks.addAll(catBooks);
     }
 
@@ -109,15 +112,16 @@ class FirebaseService {
       final querySnapshot =
           await subcollectionRef.where('isFree', isEqualTo: true).get();
 
-      final catBooks =
-          querySnapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
+      final catBooks = querySnapshot.docs.map((doc) => 
+        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
+      ).toList();
       free.addAll(catBooks);
     }
 
     return free;
   }
 
-  /// Update user’s selected genres in Firestore
+  /// Update user's selected genres in Firestore
   Future<void> updateUserGenres(String uid, List<String> genres) async {
     try {
       await _firestore.collection('users').doc(uid).set({
@@ -130,92 +134,60 @@ class FirebaseService {
 
   Future<Book?> getBookById(String bookId) async {
     try {
+      print('======= BOOK LOOKUP DEBUG =======');
       print('Searching for book with ID: $bookId');
+      print('Using categories: $categories');
 
-      // First try: direct path if we know the genre
-      final genresSnapshot =
-          await FirebaseFirestore.instance.collection('books').get();
+      // First, try to find the book in any genre to get its original genre
+      String? originalGenre;
+      for (final genre in categories) {
+        final bookRef = _firestore
+            .collection('books')
+            .doc(genre)
+            .collection('books')
+            .doc(bookId);
 
-      for (var genre in genresSnapshot.docs) {
-        final bookDoc =
-            await FirebaseFirestore.instance
-                .collection('books')
-                .doc(genre.id)
-                .collection('books')
-                .doc(bookId)
-                .get();
-
+        final bookDoc = await bookRef.get();
         if (bookDoc.exists) {
-          print('Found book in genre: ${genre.id}');
-          return Book.fromMap(bookDoc.data()!);
+          final data = bookDoc.data()!;
+          originalGenre = data['genre'] as String?;
+          print('Found book in genre: $originalGenre');
+          break;
         }
       }
 
-      // Second try: collection group query (requires index)
-      final querySnapshot =
-          await FirebaseFirestore.instance
-              .collectionGroup('books')
-              .where('id', isEqualTo: bookId)
-              .limit(1)
-              .get();
+      // If we found the book's original genre, look it up there
+      if (originalGenre != null) {
+        final bookRef = _firestore
+            .collection('books')
+            .doc(originalGenre)
+            .collection('books')
+            .doc(bookId);
 
-      if (querySnapshot.docs.isNotEmpty) {
-        print('Found book using collection group query');
-        return Book.fromMap(querySnapshot.docs.first.data());
+        print('Looking up book in original genre: $originalGenre');
+        final bookDoc = await bookRef.get();
+
+        if (bookDoc.exists) {
+          final data = bookDoc.data()!;
+          print('Book data: $data');
+          
+          final book = Book.fromMap({
+            ...data,
+            'id': bookId,
+            'genre': originalGenre,
+          });
+          print('Created book object: ${book.title} by ${book.author}');
+          return book;
+        }
       }
 
-      print('Book not found');
+      print('\nBook $bookId not found in any genre');
+      print('======= END DEBUG =======');
       return null;
     } catch (e) {
       print('Error in getBookById: $e');
+      print('======= END DEBUG =======');
       return null;
     }
-  }
-
-  Future<void> setupTestData() async {
-    final FirebaseFirestore db = FirebaseFirestore.instance;
-
-    // Sample genres and their books
-    final Map<String, List<Map<String, dynamic>>> booksData = {
-      'Children\'s literature': [
-        {
-          'id': '001',
-          'title': 'The Little Prince',
-          'author': 'Antoine de Saint-Exupéry',
-          'description':
-              'A poetic tale about a pilot stranded in the desert...',
-          'imageUrl': 'https://example.com/little-prince.jpg',
-          'audioUrl': 'https://example.com/little-prince.mp3',
-          'genre': 'Children\'s literature',
-        },
-      ],
-      'Fiction': [
-        {
-          'id': '002',
-          'title': 'The Hobbit',
-          'author': 'J.R.R. Tolkien',
-          'description': 'Bilbo Baggins\' unexpected journey...',
-          'imageUrl': 'https://example.com/hobbit.jpg',
-          'audioUrl': 'https://example.com/hobbit.mp3',
-          'genre': 'Fiction',
-        },
-      ],
-    };
-
-    // Create the structure
-    for (var genre in booksData.entries) {
-      final genreRef = db.collection('books').doc(genre.key);
-
-      // Create books subcollection
-      final booksCollection = genreRef.collection('books');
-
-      // Add books to the subcollection
-      for (var bookData in genre.value) {
-        await booksCollection.doc(bookData['id']).set(bookData);
-        print('Added book ${bookData['id']} to ${genre.key}');
-      }
-    }
-
-    print('Test data setup complete!');
   }
 }

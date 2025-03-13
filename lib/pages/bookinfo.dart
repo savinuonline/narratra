@@ -20,42 +20,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
   @override
   void initState() {
     super.initState();
-    _debugDatabaseStructure(); // Add this line
     _bookFuture = _firebaseService.getBookById(widget.bookId);
-  }
-
-  void _debugDatabaseStructure() async {
-    try {
-      print('======= DATABASE STRUCTURE DEBUG =======');
-
-      // Check root collections and if 'books' collection exists
-      final booksCollection = FirebaseFirestore.instance.collection('books');
-      print('Root collections:');
-      print('- books');
-      final booksSnapshot = await booksCollection.get();
-      print('Books collection has ${booksSnapshot.docs.length} documents');
-
-      if (booksSnapshot.docs.isNotEmpty) {
-        // Check first genre
-        final firstGenre = booksSnapshot.docs.first;
-        print('First genre: ${firstGenre.id}');
-
-        // Check books in first genre
-        final booksInGenre =
-            await booksCollection.doc(firstGenre.id).collection('books').get();
-
-        print('Genre ${firstGenre.id} has ${booksInGenre.docs.length} books');
-
-        if (booksInGenre.docs.isNotEmpty) {
-          final firstBook = booksInGenre.docs.first;
-          print('Sample book: ID=${firstBook.id}, Data=${firstBook.data()}');
-        }
-      }
-
-      print('======= END DEBUG =======');
-    } catch (e) {
-      print('Error during structure debug: $e');
-    }
   }
 
   @override
