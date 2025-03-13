@@ -67,24 +67,30 @@ class QualityPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Downloading $quality quality...")),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red, // Red button
+              backgroundColor: const Color.fromARGB(255, 247, 99, 89), // Red button
               foregroundColor: Colors.white, // White text
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8), // Rounded corners
               ),
             ),
-            icon: const Icon(Ionicons.download_outline, size: 20, color: Colors.white,),
-            label: Text(
-              quality,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  quality,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8), // Space between text and icon
+                const Icon(Ionicons.download_outline, size: 20, color: Colors.white),
+              ],
             ),
           ),
           // File Size Text
