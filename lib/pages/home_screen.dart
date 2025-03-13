@@ -244,7 +244,7 @@ class CategorySection extends StatelessWidget {
   }
 }
 
-// A card widget to display a book's cover, title, and author.
+
 class BookCard extends StatelessWidget {
   final Book book;
 
@@ -252,75 +252,82 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+    return Column(
+      mainAxisSize: MainAxisSize.min,  // Let the column wrap content
+      children: [
+        // 1) Dark container for the image
+        Container(
+          width: 150,
+          height: 180,
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],      // Dark background
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // Display the book cover image from asset (or network if needed)
-            if (book.imageUrl.startsWith('lib/'))
-              Image.asset(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Center(
+              child: book.imageUrl.startsWith('lib/')
+                  ? Image.asset(
                 book.imageUrl,
-                height: 150,
                 width: 110,
-                fit: BoxFit.cover,
+                height: 150,
+                fit: BoxFit.contain, // Keep proportions
               )
-            else
-              Image.network(
+                  : Image.network(
                 book.imageUrl,
-                height: 150,
                 width: 110,
-                fit: BoxFit.cover,
-              ),
-            // Book title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Text(
-                book.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
+                height: 150,
+                fit: BoxFit.contain,
               ),
             ),
-            // Book author
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-              child: Text(
-                book.author,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
-                ),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        // 2) Title below the container
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            book.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.white, // Visible on dark background
+            ),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        // 3) Author below the title
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            book.author,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade300,
+            ),
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
+
 
 // A widget for showing detailed book information in a bottom sheet.
 class BookDetailSheet extends StatelessWidget {
