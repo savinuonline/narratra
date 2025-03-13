@@ -66,6 +66,7 @@ flutter:
     - lib/images/
     - assets/icons/
     - lib/images/KalaAvakashyeSirakaruwa.jpg
+
   #   - images/a_dot_ham.jpeg
 
   # An images asset can refer to one or more resolution-specific "variants", see
