@@ -60,7 +60,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
       color: Colors.deepPurple,
     ),
     GenreData(
-      name: 'Fantasy',
+      name: 'Fiction',
       icon: Icons.auto_awesome,
       color: Colors.blue,
     ),
