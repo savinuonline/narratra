@@ -32,11 +32,12 @@ class QualityPage extends StatelessWidget {
 
             Column(
               children: [
+                const SizedBox(height:10),
                 _buildHeaderRow(),
                 const Divider(),
-                _buildDataRow("360p", "600MB"),
-                _buildDataRow("480p", "1.2GB"),
-                _buildDataRow("720p", "2.4GB"),
+                _buildDataRow("360p", context, "600MB"),
+                _buildDataRow("480p", context,  "1.2GB"),
+                _buildDataRow("720p", context, "2.4GB"),
                  // Separates header from data rows
                 
               ],
@@ -60,14 +61,37 @@ class QualityPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDataRow(String quality, String size){
+  Widget _buildDataRow(String quality, BuildContext context, String size){
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildCell(quality),
-          _buildCell(size),
+          ElevatedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Downloading $quality quality...")),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red, // Red button
+              foregroundColor: Colors.white, // White text
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+              ),
+            ),
+            icon: const Icon(Ionicons.download_outline, size: 20),
+            label: Text(
+              quality,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          // File Size Text
+          Text(
+            size,
+            style: const TextStyle(fontSize: 16),
+          ),
         ],
       ) 
     );
