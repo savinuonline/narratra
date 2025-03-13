@@ -158,19 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Search audiobooks...",
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.white.withAlpha(230),
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-      ),
     );
   }
 }
@@ -234,7 +221,7 @@ class CategorySection extends StatelessWidget {
             }
             final books = snapshot.data!;
             return SizedBox(
-              height: 220,
+              height: 250,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -266,7 +253,7 @@ class BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: 250,
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -289,14 +276,14 @@ class BookCard extends StatelessWidget {
               Image.asset(
                 book.imageUrl,
                 height: 150,
-                width: 120,
+                width: 110,
                 fit: BoxFit.cover,
               )
             else
               Image.network(
                 book.imageUrl,
                 height: 150,
-                width: 120,
+                width: 110,
                 fit: BoxFit.cover,
               ),
             // Book title
