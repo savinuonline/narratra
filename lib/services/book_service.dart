@@ -8,6 +8,7 @@ class BookService {
     "Children's literature",
     "Horror",
     "Fantasy",
+    "Fiction",
     "Romance",
     "Thriller",
     "Adventure",
