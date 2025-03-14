@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
@@ -16,17 +17,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // For demonstration purposes, we'll use a FirebaseService to get books.
-  // In a real implementation, these methods should query your backend.
   final FirebaseService _firebaseService = FirebaseService();
 
   late Future<List<Book>> trendingBooksFuture;
   late Future<List<Book>> recommendedBooksFuture;
   late Future<List<Book>> todayBooksFuture;
   late Future<List<Book>> freeBooksFuture;
-
-  // Fix the undefined name '_selectedIndex'
-  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -52,26 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Define your navigation items once
-    final List<NavigationItem> navigationItems = [
-      NavigationItem(icon: 'Home.svg', label: 'Home'),
-      NavigationItem(icon: 'Search.svg', label: 'Search'),
-      NavigationItem(icon: 'Library.svg', label: 'Library'),
-      NavigationItem(icon: 'Profile.svg', label: 'Profile'),
-    ];
-
     return Scaffold(
+      // Removed bottomNavigationBar and navigation-related code
       appBar: _buildCustomAppBar(),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          // Add any additional navigation logic if needed.
-        },
-        navigationItems: navigationItems,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -87,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onBookTap: _showBookDetails,
               ),
               CategorySection(
-                title: "Recommends",
+                title: "Uniquely Yours",
                 booksFuture: recommendedBooksFuture,
                 onBookTap: _showBookDetails,
               ),
@@ -114,19 +93,22 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // User greeting
           Text(
             "Hello, ${widget.user.displayName}!",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: GoogleFonts.poppins(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: const Color(0xff000000),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "Good Evening",
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: const Color(0xff000000),
+            ),
           ),
         ],
       ),
@@ -137,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.notifications),
             onPressed: () {
               // Add your notification action here.
-              // For example, navigate to a notifications screen or show a dialog.
             },
           ),
         ),
@@ -148,7 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        // Fix "withOpacity" to "withAlpha(25)" or "withAlpha(230)"
         color: Colors.white.withAlpha(230),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
@@ -163,29 +143,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// A widget that builds a category section with a horizontally scrolling list of book cards.
 class CategorySection extends StatelessWidget {
   final String title;
   final Future<List<Book>> booksFuture;
   final ValueChanged<Book> onBookTap;
 
   const CategorySection({
-    Key? key,
+    super.key,
     required this.title,
     required this.booksFuture,
     required this.onBookTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    // If it's "Trending", make the font bigger
+    final double categoryFontSize = title == "Trending" ? 22 : 20;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+          style: GoogleFonts.poppins(
+            fontSize: categoryFontSize,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xff000000),
           ),
         ),
         const SizedBox(height: 12),
@@ -193,7 +176,7 @@ class CategorySection extends StatelessWidget {
           future: booksFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return SizedBox(
+              return const SizedBox(
                 height: 220,
                 child: Center(child: CircularProgressIndicator()),
               );
@@ -204,7 +187,10 @@ class CategorySection extends StatelessWidget {
                 child: Center(
                   child: Text(
                     'Error loading $title',
-                    style: const TextStyle(color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xff000000),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -215,7 +201,10 @@ class CategorySection extends StatelessWidget {
                 child: Center(
                   child: Text(
                     'No books available in $title',
-                    style: const TextStyle(color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xff000000),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -254,82 +243,91 @@ class CategorySection extends StatelessWidget {
   }
 }
 
-// A card widget to display a book's cover, title, and author.
 class BookCard extends StatelessWidget {
   final Book book;
 
-  const BookCard({Key? key, required this.book}) : super(key: key);
+  const BookCard({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // Display the book cover image from asset (or network if needed)
-            if (book.imageUrl.startsWith('lib/'))
-              Image.asset(
+    return Column(
+      mainAxisSize: MainAxisSize.min, // Let the column wrap content
+      children: [
+        Container(
+          width: 150,
+          height: 180,
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xffc7d9dd),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0xFF97C5ED),
+                blurRadius: 4,
+                offset: Offset(6, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Center(
+              child: book.imageUrl.startsWith('lib/')
+                  ? Image.asset(
                 book.imageUrl,
-                height: 150,
-                width: 110,
-                fit: BoxFit.cover,
+                width: 130,
+                height: 170,
+                alignment: const Alignment(5.0, -0.2),
+                fit: BoxFit.cover, // Keep proportions
               )
-            else
-              Image.network(
+                  : Image.network(
                 book.imageUrl,
-                height: 150,
                 width: 110,
-                fit: BoxFit.cover,
-              ),
-            // Book title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Text(
-                book.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
+                height: 150,
+                fit: BoxFit.contain,
               ),
             ),
-            // Book author
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-              child: Text(
-                book.author,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        // Title
+        SizedBox(
+          width: 150.0,
+          child: Text(
+            book.title,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: const Color(0xFF000000),
+            ),
+            maxLines: 1,
+            textAlign: TextAlign.left,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(height: 4),
+        // Author
+        SizedBox(
+          width: 150.0,
+          child: Text(
+            book.author,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: const Color(0xFF000000),
+            ),
+            maxLines: 2,
+            textAlign: TextAlign.left,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
 
-// A widget for showing detailed book information in a bottom sheet.
 class BookDetailSheet extends StatelessWidget {
   final Book book;
 
-  const BookDetailSheet({Key? key, required this.book}) : super(key: key);
+  const BookDetailSheet({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
@@ -341,15 +339,17 @@ class BookDetailSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Book Title
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
                   child: Text(
                     book.title,
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
                 ),
@@ -360,34 +360,46 @@ class BookDetailSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            // Author
             Text(
               "Author: ${book.author}",
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
             ),
             const SizedBox(height: 8),
+            // Genre
             Text(
               "Genre: ${book.genre}",
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
             ),
             const SizedBox(height: 12),
+            // Description
             Text(
               book.description,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.black87,
+              ),
               textAlign: TextAlign.justify,
             ),
             const SizedBox(height: 16),
-
-            // >>>>>> Like button added here <<<<<<
+            // "Like" button
             Center(
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  // Example: call a "likeBook" method from your FirebaseService
-                  // e.g.: await FirebaseService().likeBook(book.id, userId);
-                  // For demonstration, we just close the sheet:
+                  // Example "like" action
                   Navigator.pop(context);
                 },
                 icon: const Icon(Icons.thumb_up),
-                label: const Text("Like"),
+                label: Text(
+                  "Like",
+                  style: GoogleFonts.poppins(fontSize: 14),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -400,31 +412,6 @@ class BookDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PlayerScreen(book: book),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.play_arrow),
-                label: const Text("Play"),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
