@@ -15,8 +15,8 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   //sign user up method
   void signUserUp() async {
@@ -50,10 +50,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
     //try creating the user
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
+      //check if the password is the same
+      if (passwordController.text == confirmPasswordController.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+      } else {
+        //show errors to user
+        //showErrorMessge("Passwords do not match");
+      }
     } on FirebaseAuthException catch (e) {
       //Wring Email
       if (e.code == 'user-not-found') {
@@ -114,7 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 //confirm password
                 MyTextField(
-                  controller: passwordController,
+                  controller: confirmPasswordController,
                   hintText: "Confirm Password",
                   obscureText: true,
                 ),
