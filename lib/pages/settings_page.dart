@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:frontend/pages/download_page.dart';
 import 'package:frontend/pages/actions_page.dart';
+import 'package:frontend/pages/speed_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -71,15 +72,25 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                   const Spacer(),
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 227, 227, 227),
-                      borderRadius: BorderRadius.circular(15),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SpeedPage()),
+                      );
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 227, 227, 227),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(Ionicons.chevron_forward_outline),
                     ),
-                    child: Icon(Ionicons.chevron_forward_outline),
                   )
+                  
+                  
                   ],
               ),
             ),
