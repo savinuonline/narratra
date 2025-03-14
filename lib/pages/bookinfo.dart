@@ -28,7 +28,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
       backgroundColor: const Color.fromARGB(255, 247, 247, 247),
       appBar: AppBar(
         title: const Text('Book Details'),
-        backgroundColor: const Color(0xFF402e7a),
+        backgroundColor: const Color(0xFF3A5EF0),
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<Book?>(
