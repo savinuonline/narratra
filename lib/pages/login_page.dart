@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/my_button.dart';
 import 'package:frontend/components/my_textfield.dart';
 import 'package:frontend/components/squre_tile.dart';
+import 'package:frontend/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -158,14 +159,20 @@ class _LoginPageState extends State<LoginPage> {
                 //google + apple sign in buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     //Google
-                    SqureTile(imagePath: 'lib/images/GoogleLogo.png'),
+                    SqureTile(
+                      onTap: () => AuthService().signInWithGoogle(),
+                      imagePath: 'lib/images/GoogleLogo.png',
+                    ),
 
                     SizedBox(width: 10),
 
                     //Apple
-                    SqureTile(imagePath: 'lib/images/AppleLogo.png'),
+                    SqureTile(
+                      onTap: () => {},
+                      imagePath: 'lib/images/AppleLogo.png',
+                    ),
                   ],
                 ),
 
