@@ -5,7 +5,7 @@ import 'package:frontend/components/my_textfield.dart';
 import 'package:frontend/components/squre_tile.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -27,10 +27,44 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
 
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: emailController.text,
-      password: passwordController.text,
-    );
+    //wrong email message popup
+    void wrongEmailMessage() {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(title: Text("Incorrect Email"));
+        },
+      );
+    }
+
+    //wrong password message popup
+    void wrongPasswordMessage() {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(title: Text("Incorrect Password"));
+        },
+      );
+    }
+
+    //try signing in
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      //Wring Email
+      if (e.code == 'user-not-found') {
+        //show errors to user
+        wrongEmailMessage();
+      }
+      //Wrong Password
+      else if (e.code == 'wrong-password') {
+        //show errors to user
+        wrongPasswordMessage();
+      }
+    }
 
     //close loading circle
     Navigator.pop(context);
@@ -54,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 35),
                 //welcome back
                 Text(
-                  'Welcome back you\'ve been missed!',
+                  'Welcome back, you\'ve been missed!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
 
