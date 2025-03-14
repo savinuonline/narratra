@@ -134,12 +134,9 @@ class FirebaseService {
 
   Future<Book?> getBookById(String bookId) async {
     try {
-      print('======= BOOK LOOKUP DEBUG =======');
-      print('Searching for book with ID: $bookId');
-
       // Try each genre collection
-      for (final genre in categories) {
-        print('\nChecking in genre: $genre');
+      for (final genre in categories) 
+      {
         final bookRef = _firestore
             .collection('books')
             .doc(genre)
@@ -291,5 +288,160 @@ class FirebaseService {
       print('Error during migration: $e');
       rethrow;
     }
+  }
+
+  /// Get a stream of liked books for a user
+  Stream<List<Book>> getLikedBooksStream(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('liked_books')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Book> likedBooks = [];
+      
+      for (var doc in snapshot.docs) {
+        final bookId = doc.id;
+        final book = await getBookById(bookId);
+        if (book != null) {
+          likedBooks.add(book);
+        }
+      }
+      
+      return likedBooks;
+    });
+  }
+
+  /// Check if a book is liked by the user
+  Future<bool> isBookLiked(String userId, String bookId) async {
+    final doc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('liked_books')
+        .doc(bookId)
+        .get();
+    
+    return doc.exists;
+  }
+
+  /// Toggle like status for a book
+  Future<bool> toggleBookLike(String userId, String bookId) async {
+    final likedBooksRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('liked_books')
+        .doc(bookId);
+
+    final doc = await likedBooksRef.get();
+    
+    if (doc.exists) {
+      // Unlike the book
+      await likedBooksRef.delete();
+      return false;
+    } else {
+      // Like the book
+      await likedBooksRef.set({
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      return true;
+    }
+  }
+
+  // Get a stream of saved audiobooks for a user
+  Stream<List<Book>> getSavedAudiobooksStream(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('saved_audiobooks')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Book> books = [];
+      for (var doc in snapshot.docs) {
+        String bookId = doc.id;
+        Book? book = await getBookById(bookId);
+        if (book != null) {
+          books.add(book);
+        }
+      }
+      return books;
+    });
+  }
+
+  // Check if an audiobook is saved by the user
+  Future<bool> isAudiobookSaved(String userId, String bookId) async {
+    final doc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('saved_audiobooks')
+        .doc(bookId)
+        .get();
+    return doc.exists;
+  }
+
+  // Toggle save status of an audiobook
+  Future<void> toggleAudiobookSave(String userId, String bookId) async {
+    final docRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('saved_audiobooks')
+        .doc(bookId);
+
+    final doc = await docRef.get();
+    if (doc.exists) {
+      await docRef.delete();
+    } else {
+      await docRef.set({
+        'savedAt': DateTime.now(),
+      });
+    }
+  }
+
+  // Save listening progress for an audiobook
+  Future<void> saveListeningProgress(String userId, String bookId, Duration position) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('listening_progress')
+        .doc(bookId)
+        .set({
+      'position': position.inSeconds,
+      'updatedAt': DateTime.now(),
+    });
+  }
+
+  // Get listening progress for an audiobook
+  Future<Duration?> getListeningProgress(String userId, String bookId) async {
+    final doc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('listening_progress')
+        .doc(bookId)
+        .get();
+
+    if (doc.exists && doc.data()?['position'] != null) {
+      return Duration(seconds: doc.data()!['position']);
+    }
+    return null;
+  }
+
+  // Get listening history for a user
+  Stream<List<Book>> getListeningHistoryStream(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('listening_progress')
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Book> books = [];
+      for (var doc in snapshot.docs) {
+        String bookId = doc.id;
+        Book? book = await getBookById(bookId);
+        if (book != null) {
+          books.add(book);
+        }
+      }
+      return books;
+    });
   }
 }

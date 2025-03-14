@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:frontend/models/book.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../models/book.dart';
 import '../services/firebase_service.dart';
 
 class BookInfoPage extends StatefulWidget {
@@ -14,25 +14,80 @@ class BookInfoPage extends StatefulWidget {
 
 class _BookInfoPageState extends State<BookInfoPage> {
   final FirebaseService _firebaseService = FirebaseService();
-  late Future<Book?> _bookFuture;
+  bool isLiked = false;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _bookFuture = _firebaseService.getBookById(widget.bookId);
+    _checkIfLiked();
+  }
+
+  Future<void> _checkIfLiked() async {
+    final userId = 'USER_ID'; // Replace with actual user ID
+    final liked = await _firebaseService.isBookLiked(userId, widget.bookId);
+    if (mounted) {
+      setState(() {
+        isLiked = liked;
+      });
+    }
+  }
+
+  Future<void> _toggleLike() async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userId = 'USER_ID'; // Replace with actual user ID
+      final liked = await _firebaseService.toggleBookLike(userId, widget.bookId);
+      
+      if (mounted) {
+        setState(() {
+          isLiked = liked;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(liked ? 'Added to library' : 'Removed from library'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error updating library'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 247, 247, 247),
+      backgroundColor: const Color(0xFF1C1E1D),
       appBar: AppBar(
-        title: const Text('Book Details'),
-        backgroundColor: const Color(0xFF3A5EF0),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: FutureBuilder<Book?>(
-        future: _bookFuture,
+        future: _firebaseService.getBookById(widget.bookId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -41,7 +96,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error loading book: ${snapshot.error}',
+                'Error loading audiobook: ${snapshot.error}',
                 style: const TextStyle(color: Colors.white),
               ),
             );
@@ -50,7 +105,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(
               child: Text(
-                'Book not found',
+                'Audiobook not found',
                 style: TextStyle(color: Colors.white),
               ),
             );
@@ -59,164 +114,183 @@ class _BookInfoPageState extends State<BookInfoPage> {
           final book = snapshot.data!;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Book cover image
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child:
-                        book.imageUrl.startsWith('http')
-                            ? Image.network(
-                              book.imageUrl,
-                              height: 250,
-                              fit: BoxFit.cover,
-                            )
-                            : Image.asset(
-                              book.imageUrl,
-                              height: 250,
-                              fit: BoxFit.cover,
+                // Book cover and actions
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Book cover
+                      Container(
+                        width: 150,
+                        height: 220,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
                             ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Title
-                Text(
-                  book.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Author
-                Text(
-                  'By ${book.author}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: const Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Genre
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    Chip(
-                      label: Text(book.genre),
-                      backgroundColor: const Color(0xFF4c3bcf),
-                      labelStyle: const TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Description
-                Text(
-                  'Description',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  book.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color.fromARGB(255, 0, 0, 0),
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Play button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlayerScreen(book: book),
+                          ],
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF402e7a),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: book.imageUrl.startsWith('http')
+                              ? Image.network(book.imageUrl, fit: BoxFit.cover)
+                              : Image.asset(book.imageUrl, fit: BoxFit.cover),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Play Audiobook',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(width: 20),
+                      // Action buttons
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: isLoading
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        )
+                                      : Icon(
+                                          isLiked ? Icons.bookmark : Icons.bookmark_border,
+                                          color: Colors.white,
+                                        ),
+                                  onPressed: _toggleLike,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 100),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/player',
+                                  arguments: {'bookId': book.id},
+                                );
+                              },
+                              icon: const Icon(Icons.headphones),
+                              label: const Text('Listen Now'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF402e7a),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 45),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Book details
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Narrated by ${book.author}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 20),
+                          const SizedBox(width: 4),
+                          Text(
+                            '4.5',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF402e7a),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              book.genre,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Icon(
+                            Icons.timer_outlined,
+                            color: Colors.grey[400],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '8h 45m',  // You might want to add this to your Book model
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        "About this audiobook",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        book.description,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[300],
+                          height: 1.6,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class PlayerScreen extends StatelessWidget {
-  final Book book;
-
-  const PlayerScreen({Key? key, required this.book}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Now Playing: ${book.title}')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Display the book cover and title
-            book.imageUrl.startsWith('assets/')
-                ? Image.asset(book.imageUrl, height: 200)
-                : Image.network(book.imageUrl, height: 200),
-            const SizedBox(height: 16),
-            Text(
-              book.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text('by ${book.author}', style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Implement your audio playback logic here
-              },
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Play Now'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
