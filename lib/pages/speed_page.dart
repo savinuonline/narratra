@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
-class SpeedPage extends StatelessWidget {
+class SpeedPage extends StatefulWidget {
   const SpeedPage({super.key});
 
+  @override
+  State<SpeedPage> createState() => _SpeedPageState();
+}
+
+class _SpeedPageState extends State<SpeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,9 +27,6 @@ class SpeedPage extends StatelessWidget {
             ),
         ),
       ),
-    );  
-
-
-
+    );
   }
 }
