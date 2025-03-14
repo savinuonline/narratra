@@ -266,13 +266,13 @@ class BookCard extends StatelessWidget {
           height: 180,
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Colors.grey[900],
+            color: Color(0xffc7d9dd),
             borderRadius: BorderRadius.circular(15),
             boxShadow: const [
               BoxShadow(
-                color: Color(0xFF68B0AB),
+                color: Color(0xFF97C5ED),
                 blurRadius: 4,
-                offset: Offset(0, 2),
+                offset: Offset(6, 5),
               ),
             ],
           ),
@@ -282,9 +282,10 @@ class BookCard extends StatelessWidget {
               child: book.imageUrl.startsWith('lib/')
                   ? Image.asset(
                 book.imageUrl,
-                width: 110,
-                height: 150,
-                fit: BoxFit.contain, // Keep proportions
+                width: 130,
+                height: 170,
+                alignment: Alignment(5.0,-0.2),
+                fit: BoxFit.cover, // Keep proportions
               )
                   : Image.network(
                 book.imageUrl,
@@ -297,17 +298,18 @@ class BookCard extends StatelessWidget {
         ),
 
         // Title
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        SizedBox(
+          width: 150.0,
           child: Text(
             book.title,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 14,
               color: const Color(0xFF000000),
             ),
-            maxLines: 2,
-            textAlign: TextAlign.center,
+            maxLines: 1,
+            textAlign: TextAlign.left,
+            softWrap: false,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -315,16 +317,16 @@ class BookCard extends StatelessWidget {
         const SizedBox(height: 4),
 
         // Author
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        SizedBox(
+          width: 150.0,
           child: Text(
             book.author,
             style: GoogleFonts.poppins(
               fontSize: 12,
               color: const Color(0xFF000000),
             ),
-            maxLines: 1,
-            textAlign: TextAlign.center,
+            maxLines: 2,
+            textAlign: TextAlign.left,
             overflow: TextOverflow.ellipsis,
           ),
         ),
