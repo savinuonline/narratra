@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/voice_page.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:frontend/pages/download_page.dart';
 import 'package:frontend/pages/actions_page.dart';
@@ -89,9 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Icon(Ionicons.chevron_forward_outline),
                     ),
                   )
-                  
-                  
-                  ],
+                ],
               ),
             ),
 
@@ -123,16 +122,24 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                   const Spacer(),
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 227, 227, 227),
-                      borderRadius: BorderRadius.circular(15),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const VoicePage()),
+                      );
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 227, 227, 227),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(Ionicons.chevron_forward_outline),
                     ),
-                    child: Icon(Ionicons.chevron_forward_outline),
                   )
-                  ],
+                ],
               ),
             ),
             
