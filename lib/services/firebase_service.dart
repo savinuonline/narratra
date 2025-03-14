@@ -5,23 +5,25 @@ import '../models/user_model.dart';
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// You can store a static list of category doc IDs. Make sure these match exactly
-  /// the doc names in your Firestore under the top-level "books" collection.
+  /// Update this list so it matches exactly the doc names
+  /// you have under the top-level "books" collection in Firestore.
+  /// For example, if your Firestore shows doc IDs:
+  ///   "Children's literature", "Fiction", "Romance", "Thriller"
+  /// then use exactly those strings here.
   final List<String> categories = [
     "Children's literature",
-    "Horror",
-    "Fantasy",
+    "Fiction",
     "Romance",
     "Thriller",
-    "Adventure",
+    // Add or remove any others as needed
   ];
 
-  /// Example: "Trending" books are those with likeCount >= 3
-  /// We loop each category doc => subcollection("books").where('likeCount' >= 3).
+  /// "Trending" books: docs with likeCount >= 3 in each subcollection.
   Future<List<Book>> getTrendingBooks() async {
     final List<Book> trending = [];
 
     for (final cat in categories) {
+      // e.g. books -> doc("Children's literature") -> collection("books")
       final subcollectionRef = _firestore
           .collection('books')
           .doc(cat)
@@ -41,8 +43,8 @@ class FirebaseService {
     return trending;
   }
 
-  /// "Recommended" books based on user's selectedGenres
-  /// Each user genre corresponds to a doc ID in the top-level "books" collection.
+  /// "Recommended" books: based on user's selectedGenres.
+  /// Each user genre should match one of the doc IDs in `categories`.
   Future<List<Book>> getRecommendedBooks(String uid) async {
     // 1) Fetch user doc
     final userDoc = await _firestore.collection('users').doc(uid).get();
@@ -51,14 +53,13 @@ class FirebaseService {
     final userData = userDoc.data()!;
     final userGenres = List<String>.from(userData['selectedGenres'] ?? []);
 
-    // 2) If no genres are selected, return empty list
+    // 2) If no genres selected, return empty
     if (userGenres.isEmpty) return [];
 
-    // 3) For each genre, go to doc(genre).collection("books") and fetch everything
     final List<Book> recommended = [];
 
+    // 3) For each genre, load all books from that doc's subcollection
     for (final genre in userGenres) {
-      // If your doc ID literally matches the genre name, do:
       final subcollectionRef = _firestore
           .collection('books')
           .doc(genre)
@@ -74,7 +75,7 @@ class FirebaseService {
     return recommended;
   }
 
-  /// "Today For You" logic: fetch *all* categories, gather all books, shuffle, return 5.
+  /// "Today For You": gather *all* books from all categories, shuffle, pick 5.
   Future<List<Book>> getTodayForYouBooks() async {
     final List<Book> allBooks = [];
 
@@ -92,12 +93,11 @@ class FirebaseService {
     }
 
     if (allBooks.isEmpty) return [];
-
     allBooks.shuffle();
     return allBooks.take(5).toList();
   }
 
-  /// "Free" books are those with isFree = true. We fetch from each category doc => subcollection
+  /// "Free" books: docs with isFree == true in each subcollection.
   Future<List<Book>> getFreeBooks() async {
     final List<Book> free = [];
 
@@ -107,7 +107,7 @@ class FirebaseService {
           .doc(cat)
           .collection('books');
 
-      // Query isFree == true
+      // Query for isFree == true
       final querySnapshot = await subcollectionRef
           .where('isFree', isEqualTo: true)
           .get();
