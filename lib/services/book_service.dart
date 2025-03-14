@@ -11,6 +11,7 @@ class BookService {
     "Fiction",
     "Romance",
     "Thriller",
+    
     "Adventure",
   ];
 
@@ -142,6 +143,46 @@ class BookService {
       print('Book deleted successfully'); // Debug print
     } catch (e) {
       print('Error deleting book: $e');
+      rethrow;
+    }
+  }
+
+  /// Update an existing book
+  Future<void> updateBook({
+    required String id,
+    required String genre,
+    required String title,
+    required String author,
+    required String description,
+    required String imageUrl,
+    required String audioUrl,
+    bool isFree = false,
+  }) async {
+    try {
+      if (!categories.contains(genre)) {
+        throw ArgumentError('Invalid genre: $genre');
+      }
+
+      final bookData = {
+        'title': title,
+        'author': author,
+        'description': description,
+        'imageUrl': imageUrl,
+        'audioUrl': audioUrl,
+        'isFree': isFree,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await _firestore
+          .collection('books')
+          .doc(genre)
+          .collection('books')
+          .doc(id)
+          .update(bookData);
+
+      print('Book updated successfully with ID: $id');
+    } catch (e) {
+      print('Error updating book: $e');
       rethrow;
     }
   }
