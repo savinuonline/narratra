@@ -17,11 +17,90 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF3A5EF0);
+    const secondaryColor = Color(0xFF4A6EF0);
+    const backgroundColor = Color(0xFFF5F7FF);
+    const surfaceColor = Colors.white;
+
     return MaterialApp(
-      title: 'Book Manager',
+      title: 'Book Manager - Narratra.',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: backgroundColor,
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+          background: backgroundColor,
+          surface: surfaceColor,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 4,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: Colors.white,
+            elevation: 2,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: primaryColor,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.all(primaryColor),
+          trackColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) {
+              return primaryColor.withOpacity(0.5);
+            }
+            return Colors.grey[300];
+          }),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: surfaceColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: primaryColor.withOpacity(0.3)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: primaryColor.withOpacity(0.2)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: primaryColor, width: 2),
+          ),
+          labelStyle: TextStyle(color: primaryColor.withOpacity(0.7)),
+          floatingLabelStyle: const TextStyle(color: primaryColor),
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        listTileTheme: ListTileThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          tileColor: surfaceColor,
+        ),
       ),
       home: const BookManagerHome(),
     );
@@ -199,30 +278,34 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                   TextFormField(
                     initialValue: author,
                     decoration: const InputDecoration(labelText: 'Author'),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Please enter an author' : null,
+                    validator: (value) => value?.isEmpty ?? true
+                        ? 'Please enter an author'
+                        : null,
                     onSaved: (value) => author = value ?? '',
                   ),
                   TextFormField(
                     initialValue: description,
                     decoration: const InputDecoration(labelText: 'Description'),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Please enter a description' : null,
+                    validator: (value) => value?.isEmpty ?? true
+                        ? 'Please enter a description'
+                        : null,
                     onSaved: (value) => description = value ?? '',
                     maxLines: 3,
                   ),
                   TextFormField(
                     initialValue: imageUrl,
                     decoration: const InputDecoration(labelText: 'Image URL'),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Please enter an image URL' : null,
+                    validator: (value) => value?.isEmpty ?? true
+                        ? 'Please enter an image URL'
+                        : null,
                     onSaved: (value) => imageUrl = value ?? '',
                   ),
                   TextFormField(
                     initialValue: audioUrl,
                     decoration: const InputDecoration(labelText: 'Audio URL'),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Please enter an audio URL' : null,
+                    validator: (value) => value?.isEmpty ?? true
+                        ? 'Please enter an audio URL'
+                        : null,
                     onSaved: (value) => audioUrl = value ?? '',
                   ),
                   DropdownButtonFormField<String>(
@@ -269,7 +352,8 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                     if (mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Book updated successfully')),
+                        const SnackBar(
+                            content: Text('Book updated successfully')),
                       );
                     }
                   } catch (e) {
@@ -342,23 +426,49 @@ class _BookManagerHomeState extends State<BookManagerHome> {
             itemCount: books.length,
             itemBuilder: (context, index) {
               final book = books[index];
-              return ListTile(
-                title: Text(book['title']),
-                subtitle: Text(
-                    '${book['author']} - ${book['genre']}${book['isFree'] ? ' (Free)' : ''}'),
-                leading: CircleAvatar(child: Text(book['id'])),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _showEditBookDialog(book),
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: Text(
+                    book['title'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _deleteBook(book['id'], book['genre']),
+                  ),
+                  subtitle: Text(
+                    '${book['author']} - ${book['genre']}${book['isFree'] ? ' (Free)' : ''}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
                     ),
-                  ],
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        Theme.of(context).primaryColor.withOpacity(0.1),
+                    child: Text(
+                      book['id'],
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showEditBookDialog(book),
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _deleteBook(book['id'], book['genre']),
+                        color: Colors.red[400],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

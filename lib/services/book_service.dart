@@ -11,7 +11,6 @@ class BookService {
     "Fiction",
     "Romance",
     "Thriller",
-    
     "Adventure",
   ];
 
