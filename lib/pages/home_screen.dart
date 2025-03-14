@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart'; // Assume you have methods to fetch books
-import 'player_screen.dart'; // Screen for playing audiobooks
-import '../widgets/custom_bottom_nav_bar.dart'; // Custom bottom nav bar module
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
@@ -23,8 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Book>> recommendedBooksFuture;
   late Future<List<Book>> todayBooksFuture;
   late Future<List<Book>> freeBooksFuture;
-
-  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -49,25 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<NavigationItem> navigationItems = [
-      NavigationItem(icon: 'Home.svg', label: 'Home'),
-      NavigationItem(icon: 'Search.svg', label: 'Search'),
-      NavigationItem(icon: 'Library.svg', label: 'Library'),
-      NavigationItem(icon: 'Profile.svg', label: 'Profile'),
-    ];
-
     return Scaffold(
+      // Removed bottomNavigationBar and navigation-related code
       appBar: _buildCustomAppBar(),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          // Add any additional navigation logic if needed.
-        },
-        navigationItems: navigationItems,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -266,7 +246,7 @@ class BookCard extends StatelessWidget {
           height: 180,
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Color(0xffc7d9dd),
+            color: const Color(0xffc7d9dd),
             borderRadius: BorderRadius.circular(15),
             boxShadow: const [
               BoxShadow(
@@ -284,7 +264,7 @@ class BookCard extends StatelessWidget {
                 book.imageUrl,
                 width: 130,
                 height: 170,
-                alignment: Alignment(5.0,-0.2),
+                alignment: const Alignment(5.0, -0.2),
                 fit: BoxFit.cover, // Keep proportions
               )
                   : Image.network(
@@ -296,7 +276,6 @@ class BookCard extends StatelessWidget {
             ),
           ),
         ),
-
         // Title
         SizedBox(
           width: 150.0,
@@ -313,9 +292,7 @@ class BookCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-
         const SizedBox(height: 4),
-
         // Author
         SizedBox(
           width: 150.0,
@@ -371,7 +348,6 @@ class BookDetailSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-
             // Author
             Text(
               "Author: ${book.author}",
@@ -381,7 +357,6 @@ class BookDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
             // Genre
             Text(
               "Genre: ${book.genre}",
@@ -391,7 +366,6 @@ class BookDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
             // Description
             Text(
               book.description,
@@ -402,7 +376,6 @@ class BookDetailSheet extends StatelessWidget {
               textAlign: TextAlign.justify,
             ),
             const SizedBox(height: 16),
-
             // "Like" button
             Center(
               child: ElevatedButton.icon(
@@ -427,36 +400,6 @@ class BookDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // "Play" button
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Navigate to the PlayerScreen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PlayerScreen(book: book),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.play_arrow),
-                label: Text(
-                  "Play",
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
