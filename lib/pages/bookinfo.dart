@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:palette_generator/palette_generator.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
 
@@ -16,11 +17,36 @@ class _BookInfoPageState extends State<BookInfoPage> {
   final FirebaseService _firebaseService = FirebaseService();
   bool isLiked = false;
   bool isLoading = false;
+  Color? dominantColor;
+  Color? textColor;
 
   @override
   void initState() {
     super.initState();
     _checkIfLiked();
+  }
+
+  Future<void> _updatePaletteGenerator(String imageUrl) async {
+    try {
+      final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+        NetworkImage(imageUrl),
+        size: const Size(200, 300),
+      );
+      if (mounted) {
+        setState(() {
+          dominantColor = generator.dominantColor?.color ?? const Color(0xFF402e7a);
+          textColor = generator.dominantColor?.bodyTextColor ?? Colors.white;
+        });
+      }
+    } catch (e) {
+      // If there's an error, use default colors
+      if (mounted) {
+        setState(() {
+          dominantColor = const Color(0xFF402e7a);
+          textColor = Colors.white;
+        });
+      }
+    }
   }
 
   Future<void> _checkIfLiked() async {
@@ -74,10 +100,32 @@ class _BookInfoPageState extends State<BookInfoPage> {
     }
   }
 
+  Widget _buildCategoryIcon(String genre) {
+    IconData iconData;
+    switch (genre.toLowerCase()) {
+      case "children's literature":
+        iconData = Icons.child_care;
+        break;
+      case "fiction":
+        iconData = Icons.auto_stories;
+        break;
+      case "romance":
+        iconData = Icons.favorite;
+        break;
+      case "thriller":
+        iconData = Icons.psychology;
+        break;
+      default:
+        iconData = Icons.book;
+    }
+    return Icon(iconData, size: 20, color: Colors.grey[400]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1C1E1D),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -112,161 +160,191 @@ class _BookInfoPageState extends State<BookInfoPage> {
           }
 
           final book = snapshot.data!;
+          if (dominantColor == null && book.imageUrl.startsWith('http')) {
+            _updatePaletteGenerator(book.imageUrl);
+          }
 
           return SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Book cover and actions
+                // Top section with book cover and gradient
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        dominantColor?.withOpacity(0.8) ?? const Color(0xFF402e7a),
+                        const Color(0xFF1C1E1D),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 200,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: book.imageUrl.startsWith('http')
+                            ? Image.network(book.imageUrl, fit: BoxFit.cover)
+                            : Image.asset(book.imageUrl, fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Action buttons
+                Transform.translate(
+                  offset: const Offset(0, -30),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Book cover
+                      // Bookmark button
                       Container(
-                        width: 150,
-                        height: 220,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: book.imageUrl.startsWith('http')
-                              ? Image.network(book.imageUrl, fit: BoxFit.cover)
-                              : Image.asset(book.imageUrl, fit: BoxFit.cover),
+                        child: IconButton(
+                          icon: isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
+                                  ),
+                                )
+                              : Icon(
+                                  isLiked ? Icons.bookmark : Icons.bookmark_border,
+                                  color: const Color(0xFF402e7a),
+                                ),
+                          onPressed: _toggleLike,
                         ),
                       ),
-                      const SizedBox(width: 20),
-                      // Action buttons
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: isLoading
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : Icon(
-                                          isLiked ? Icons.bookmark : Icons.bookmark_border,
-                                          color: Colors.white,
-                                        ),
-                                  onPressed: _toggleLike,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 100),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/player',
-                                  arguments: {'bookId': book.id},
-                                );
-                              },
-                              icon: const Icon(Icons.headphones),
-                              label: const Text('Listen Now'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF402e7a),
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 45),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
+                      const SizedBox(width: 16),
+                      // Play button
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/player',
+                            arguments: {'bookId': book.id},
+                          );
+                        },
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Play Audiobook'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: dominantColor ?? const Color(0xFF402e7a),
+                          foregroundColor: textColor ?? Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+
                 // Book details
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        book.title,
-                        style: GoogleFonts.poppins(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Narrated by ${book.author}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      // Duration and chapters
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 20),
-                          const SizedBox(width: 4),
                           Text(
-                            '4.5',
+                            '8h 45m',
                             style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[400],
+                              fontSize: 16,
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF402e7a),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
-                              book.genre,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 12,
+                              '•',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 16,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Icon(
-                            Icons.timer_outlined,
-                            color: Colors.grey[400],
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
                           Text(
-                            '8h 45m',  // You might want to add this to your Book model
+                            '12 Chapters',
                             style: GoogleFonts.poppins(
                               color: Colors.grey[400],
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
+
+                      // Title
+                      Text(
+                        book.title,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Author
+                      Text(
+                        book.author,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Category with icon
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildCategoryIcon(book.genre),
+                          const SizedBox(width: 8),
+                          Text(
+                            book.genre,
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[400],
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // About section
                       Text(
                         "About this audiobook",
                         style: GoogleFonts.poppins(
@@ -279,11 +357,12 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       Text(
                         book.description,
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 16,
                           color: Colors.grey[300],
                           height: 1.6,
                         ),
                       ),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
@@ -295,3 +374,4 @@ class _BookInfoPageState extends State<BookInfoPage> {
     );
   }
 }
+
