@@ -74,7 +74,7 @@ class QualityPage extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 247, 99, 89), // Red button
+              backgroundColor: const Color.fromARGB(255, 96, 208, 115), // Red button
               foregroundColor: Colors.white, // White text
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
@@ -86,17 +86,17 @@ class QualityPage extends StatelessWidget {
               children: [
                 Text(
                   quality,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 const SizedBox(width: 8), // Space between text and icon
-                const Icon(Ionicons.download_outline, size: 20, color: Colors.white),
+                const Icon(Ionicons.download_outline, size: 22, color: Colors.white),
               ],
             ),
           ),
           // File Size Text
           Text(
             size,
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 18),
           ),
         ],
       ) 
@@ -107,7 +107,7 @@ class QualityPage extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
       ),
     );
