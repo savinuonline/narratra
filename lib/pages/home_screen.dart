@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
-import 'player_screen.dart'; // Screen for playing audiobooks
-import '../widgets/custom_bottom_nav_bar.dart'; // Custom bottom nav bar module
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
@@ -35,17 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
 
-  void _showBookDetails(Book book) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => BookDetailSheet(book: book),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,22 +50,19 @@ class _HomeScreenState extends State<HomeScreen> {
               CategorySection(
                 title: "Trending",
                 booksFuture: trendingBooksFuture,
-                onBookTap: _showBookDetails,
               ),
               CategorySection(
                 title: "Uniquely Yours",
                 booksFuture: recommendedBooksFuture,
-                onBookTap: _showBookDetails,
+              
               ),
               CategorySection(
                 title: "Today For You",
                 booksFuture: todayBooksFuture,
-                onBookTap: _showBookDetails,
               ),
               CategorySection(
                 title: "Free Books",
                 booksFuture: freeBooksFuture,
-                onBookTap: _showBookDetails,
               ),
             ],
           ),
@@ -146,13 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
 class CategorySection extends StatelessWidget {
   final String title;
   final Future<List<Book>> booksFuture;
-  final ValueChanged<Book> onBookTap;
 
   const CategorySection({
     super.key,
     required this.title,
     required this.booksFuture,
-    required this.onBookTap,
   });
 
   @override
@@ -221,9 +203,6 @@ class CategorySection extends StatelessWidget {
                   final book = books[index];
                   return GestureDetector(
                     onTap: () {
-                      print(
-                        'Tapped book with ID: ${book.id}',
-                      ); // Add debug print
                       Navigator.pushNamed(
                         context,
                         '/bookinfo',
@@ -320,101 +299,6 @@ class BookCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class BookDetailSheet extends StatelessWidget {
-  final Book book;
-
-  const BookDetailSheet({super.key, required this.book});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Book Title
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    book.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Author
-            Text(
-              "Author: ${book.author}",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Genre
-            Text(
-              "Genre: ${book.genre}",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Description
-            Text(
-              book.description,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.justify,
-            ),
-            const SizedBox(height: 16),
-            // "Like" button
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  // Example "like" action
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.thumb_up),
-                label: Text(
-                  "Like",
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
     );
   }
 }

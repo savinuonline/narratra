@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../services/firebase_service.dart';
-// If you have a user model, import that as well
 import '../models/user_model.dart';
 
 /// Simple data class for each genre

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/book.dart';
-import 'package:frontend/pages/player_screen.dart';
 import '../services/firebase_service.dart';
 
 class BookInfoPage extends StatefulWidget {
