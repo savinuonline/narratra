@@ -61,7 +61,7 @@ class _ActionsPageState extends State<ActionsPage> {
                       isDarkMode = value;
                     });
                   },
-                  activeColor: Colors.black,
+                  activeColor: const Color.fromARGB(255, 20, 195, 20),
                 ),
               ],
             ),

@@ -13,6 +13,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  double selectedSpeed = 1.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,50 +50,69 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 10,),
             SizedBox(
               width: double.infinity,
-              child: Row(
-                children: [
-                  Container(
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color.fromARGB(255, 218, 245, 204),
-                    ),
-                    child: Icon(Ionicons.play_circle_outline, size: 26,
-                    color: const Color.fromARGB(255, 3, 116, 16),),
-                  
-                  ),
-                  SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Playback Speed", 
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      )),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SpeedPage()),
-                      );
-                    },
-                    child: Container(
-                      width: 60,
-                      height: 60,
+              child: GestureDetector(
+                onTap: () async {
+                  final newSpeed = await Navigator.push(
+                    context,
+                     MaterialPageRoute(builder: (context) => SpeedPage(initialSpeed: selectedSpeed,)),
+                    );
+                    if (newSpeed != null && newSpeed is double){
+                      setState(() {
+                        selectedSpeed = newSpeed;
+                      });
+                    }
+                },
+              
+
+                child: Row(
+                  children: [
+                    Container(
+                      height: 50,
+                      width: 50,
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 227, 227, 227),
-                        borderRadius: BorderRadius.circular(15),
+                        shape: BoxShape.circle,
+                        color: const Color.fromARGB(255, 218, 245, 204),
                       ),
-                      child: Icon(Ionicons.chevron_forward_outline),
+                      child: Icon(Ionicons.play_circle_outline, size: 26,
+                      color: const Color.fromARGB(255, 3, 116, 16),
+                      ),
                     ),
-                  )
-                ],
-              ),
+                  
+                    SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Playback Speed", 
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Text(
+                        selectedSpeed == 1.0 ? "Normal" : "${selectedSpeed}x",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey,
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),                     
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 227, 227, 227),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(Ionicons.chevron_forward_outline),
+                      ),
+                  ],
+                ),
+              ),  
             ),
 
             const SizedBox(height: 10,),
