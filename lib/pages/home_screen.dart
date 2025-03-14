@@ -7,7 +7,6 @@ import '../services/firebase_service.dart';
 class HomeScreen extends StatefulWidget {
   final UserModel user;
 
-  // Fix the "key could be a super parameter" lint
   const HomeScreen({super.key, required this.user});
 
   @override
@@ -54,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
               CategorySection(
                 title: "Uniquely Yours",
                 booksFuture: recommendedBooksFuture,
-              
               ),
               CategorySection(
                 title: "Today For You",
@@ -250,20 +248,21 @@ class BookCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Center(
-              child: book.imageUrl.startsWith('lib/')
-                  ? Image.asset(
-                book.imageUrl,
-                width: 130,
-                height: 170,
-                alignment: const Alignment(5.0, -0.2),
-                fit: BoxFit.cover, // Keep proportions
-              )
-                  : Image.network(
-                book.imageUrl,
-                width: 110,
-                height: 150,
-                fit: BoxFit.contain,
-              ),
+              child:
+                  book.imageUrl.startsWith('lib/')
+                      ? Image.asset(
+                        book.imageUrl,
+                        width: 130,
+                        height: 170,
+                        alignment: const Alignment(5.0, -0.2),
+                        fit: BoxFit.cover, // Keep proportions
+                      )
+                      : Image.network(
+                        book.imageUrl,
+                        width: 110,
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ),
             ),
           ),
         ),

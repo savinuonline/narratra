@@ -25,7 +25,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff0c0c0c),
+      backgroundColor: const Color.fromARGB(255, 247, 247, 247),
       appBar: AppBar(
         title: const Text('Book Details'),
         backgroundColor: const Color(0xFF402e7a),
@@ -88,7 +88,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   book.title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 0, 0, 0),
                   ),
                 ),
 
@@ -97,9 +97,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 // Author
                 Text(
                   'By ${book.author}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -111,7 +111,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
                     Chip(
                       label: Text(book.genre),
                       backgroundColor: const Color(0xFF4c3bcf),
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: const TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                      ),
                     ),
                   ],
                 ),
@@ -123,14 +125,14 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   'Description',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 0, 0, 0),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   book.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
+                    color: const Color.fromARGB(255, 0, 0, 0),
                     height: 1.5,
                   ),
                 ),
