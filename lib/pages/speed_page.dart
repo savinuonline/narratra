@@ -71,7 +71,7 @@ class _SpeedPageState extends State<SpeedPage> {
                           : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: selectedSpeed == speed ? Colors.blue : Colors.transparent,
+                        color: selectedSpeed == speed ? const Color.fromRGBO(33, 150, 243, 1) : Colors.transparent,
                         width: 2,
                       ),
                     ),

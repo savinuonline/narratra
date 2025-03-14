@@ -71,10 +71,10 @@ class QualityPage extends StatelessWidget {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Downloading $quality quality...")),
-              );
+              );    
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 96, 208, 115), // Red button
+              backgroundColor: const Color.fromARGB(255, 69, 163, 239), // Red button
               foregroundColor: Colors.white, // White text
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
