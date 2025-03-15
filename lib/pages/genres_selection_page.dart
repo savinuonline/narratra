@@ -9,21 +9,14 @@ class GenreData {
   final IconData icon;
   final MaterialColor color;
 
-  GenreData({
-    required this.name,
-    required this.icon,
-    required this.color,
-  });
+  GenreData({required this.name, required this.icon, required this.color});
 }
 
 // If you only have a user ID:
 class GenresSelectionPage extends StatefulWidget {
   final String uid;
 
-  const GenresSelectionPage({
-    super.key,
-    required this.uid,
-  });
+  const GenresSelectionPage({super.key, required this.uid});
 
   @override
   _GenresSelectionPageState createState() => _GenresSelectionPageState();
@@ -57,22 +50,14 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
       icon: Icons.local_police,
       color: Colors.deepPurple,
     ),
-    GenreData(
-      name: 'Fiction',
-      icon: Icons.auto_awesome,
-      color: Colors.blue,
-    ),
+    GenreData(name: 'Fiction', icon: Icons.auto_awesome, color: Colors.blue),
     // Updated horror icon to use a ghost icon from FontAwesome
     GenreData(
       name: 'Horror',
       icon: FontAwesomeIcons.ghost,
       color: Colors.deepOrange,
     ),
-    GenreData(
-      name: 'Romance',
-      icon: Icons.favorite,
-      color: Colors.red,
-    ),
+    GenreData(name: 'Romance', icon: Icons.favorite, color: Colors.red),
     GenreData(
       name: 'Adventure',
       icon: Icons.flight_takeoff,
@@ -105,12 +90,9 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
             const SizedBox(height: 16),
             const Text(
               "What Are You Into?",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
@@ -128,22 +110,25 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                 child: Wrap(
                   spacing: 16,
                   runSpacing: 16,
-                  children: allGenres.map((genre) {
-                    final bool isSelected = selectedGenres.contains(genre.name);
-                    return GenreButton(
-                      genre: genre,
-                      selected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedGenres.remove(genre.name);
-                          } else {
-                            selectedGenres.add(genre.name);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
+                  children:
+                      allGenres.map((genre) {
+                        final bool isSelected = selectedGenres.contains(
+                          genre.name,
+                        );
+                        return GenreButton(
+                          genre: genre,
+                          selected: isSelected,
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                selectedGenres.remove(genre.name);
+                              } else {
+                                selectedGenres.add(genre.name);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                 ),
               ),
             ),
