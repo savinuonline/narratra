@@ -28,13 +28,15 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
   Future<void> _updatePaletteGenerator(String imageUrl) async {
     try {
-      final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-        NetworkImage(imageUrl),
-        size: const Size(200, 300),
-      );
+      final PaletteGenerator generator =
+          await PaletteGenerator.fromImageProvider(
+            NetworkImage(imageUrl),
+            size: const Size(200, 300),
+          );
       if (mounted) {
         setState(() {
-          dominantColor = generator.dominantColor?.color ?? const Color(0xFF402e7a);
+          dominantColor =
+              generator.dominantColor?.color ?? const Color(0xFF402e7a);
           textColor = generator.dominantColor?.bodyTextColor ?? Colors.white;
         });
       }
@@ -68,13 +70,16 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
     try {
       final userId = 'USER_ID'; // Replace with actual user ID
-      final liked = await _firebaseService.toggleBookLike(userId, widget.bookId);
-      
+      final liked = await _firebaseService.toggleBookLike(
+        userId,
+        widget.bookId,
+      );
+
       if (mounted) {
         setState(() {
           isLiked = liked;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(liked ? 'Added to library' : 'Removed from library'),
@@ -118,19 +123,19 @@ class _BookInfoPageState extends State<BookInfoPage> {
       default:
         iconData = Icons.book;
     }
-    return Icon(iconData, size: 20, color: Colors.grey[400]);
+    return Icon(iconData, size: 20, color: Colors.grey[600]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1E1D),
+      backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -138,23 +143,66 @@ class _BookInfoPageState extends State<BookInfoPage> {
         future: _firebaseService.getBookById(widget.bookId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
+              ),
+            );
           }
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Error loading audiobook: ${snapshot.error}',
-                style: const TextStyle(color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Color(0xFF402e7a),
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading audiobook',
+                    style: GoogleFonts.poppins(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    snapshot.error.toString(),
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             );
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(
-              child: Text(
-                'Audiobook not found',
-                style: TextStyle(color: Colors.white),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.library_music,
+                    color: Color(0xFF402e7a),
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Audiobook not found',
+                    style: GoogleFonts.poppins(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -175,8 +223,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        dominantColor?.withOpacity(0.8) ?? const Color(0xFF402e7a),
-                        const Color(0xFF1C1E1D),
+                        dominantColor?.withOpacity(0.8) ??
+                            const Color(0xFF402e7a),
+                        const Color.fromARGB(255, 238, 115, 115),
                       ],
                     ),
                   ),
@@ -196,9 +245,13 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: book.imageUrl.startsWith('http')
-                            ? Image.network(book.imageUrl, fit: BoxFit.cover)
-                            : Image.asset(book.imageUrl, fit: BoxFit.cover),
+                        child:
+                            book.imageUrl.startsWith('http')
+                                ? Image.network(
+                                  book.imageUrl,
+                                  fit: BoxFit.cover,
+                                )
+                                : Image.asset(book.imageUrl, fit: BoxFit.cover),
                       ),
                     ),
                   ),
@@ -224,19 +277,24 @@ class _BookInfoPageState extends State<BookInfoPage> {
                           ],
                         ),
                         child: IconButton(
-                          icon: isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
+                          icon:
+                              isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF402e7a),
+                                      ),
+                                    ),
+                                  )
+                                  : Icon(
+                                    isLiked
+                                        ? Icons.bookmark
+                                        : Icons.bookmark_border,
+                                    color: const Color(0xFF402e7a),
                                   ),
-                                )
-                              : Icon(
-                                  isLiked ? Icons.bookmark : Icons.bookmark_border,
-                                  color: const Color(0xFF402e7a),
-                                ),
                           onPressed: _toggleLike,
                         ),
                       ),
@@ -253,9 +311,15 @@ class _BookInfoPageState extends State<BookInfoPage> {
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Play Audiobook'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: dominantColor ?? const Color(0xFF402e7a),
-                          foregroundColor: textColor ?? Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          backgroundColor:
+                              dominantColor ?? const Color(0xFF402e7a),
+                          foregroundColor:
+                              textColor ??
+                              const Color.fromARGB(255, 214, 156, 156),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -310,7 +374,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -322,7 +386,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[300],
+                          color: Colors.grey[800],
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -336,7 +400,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                           Text(
                             book.genre,
                             style: GoogleFonts.poppins(
-                              color: Colors.grey[400],
+                              color: Colors.grey[600],
                               fontSize: 16,
                             ),
                           ),
@@ -350,7 +414,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -358,11 +422,58 @@ class _BookInfoPageState extends State<BookInfoPage> {
                         book.description,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: Colors.grey[300],
+                          color: Colors.grey[800],
                           height: 1.6,
                         ),
                       ),
                       const SizedBox(height: 32),
+
+                      // About Author section
+                      Text(
+                        "About the Author",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (book.authorImageUrl.isNotEmpty)
+                            Container(
+                              width: 80,
+                              height: 80,
+                              margin: const EdgeInsets.only(right: 16),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                image: DecorationImage(
+                                  image: NetworkImage(book.authorImageUrl),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              book.authorDescription,
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                color: Colors.grey[800],
+                                height: 1.6,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -374,4 +485,3 @@ class _BookInfoPageState extends State<BookInfoPage> {
     );
   }
 }
-

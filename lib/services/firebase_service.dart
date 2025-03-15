@@ -23,21 +23,20 @@ class FirebaseService {
     final List<Book> trending = [];
 
     for (final cat in categories) {
-      // e.g. books -> doc("Children's literature") -> collection("books")
       final subcollectionRef = _firestore
           .collection('books')
           .doc(cat)
           .collection('books');
 
-      // Query docs where likeCount >= 3
       final querySnapshot =
           await subcollectionRef
               .where('likeCount', isGreaterThanOrEqualTo: 3)
               .get();
 
-      final catBooks = querySnapshot.docs.map((doc) => 
-        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
-      ).toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       trending.addAll(catBooks);
     }
 
@@ -67,9 +66,12 @@ class FirebaseService {
           .collection('books');
 
       final querySnapshot = await subcollectionRef.get();
-      final genreBooks = querySnapshot.docs.map((doc) => 
-        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': genre})
-      ).toList();
+      final genreBooks =
+          querySnapshot.docs
+              .map(
+                (doc) => Book.fromMap({...doc.data(), 'genre': genre}, doc.id),
+              )
+              .toList();
       recommended.addAll(genreBooks);
     }
 
@@ -87,9 +89,10 @@ class FirebaseService {
           .collection('books');
 
       final querySnapshot = await subcollectionRef.get();
-      final catBooks = querySnapshot.docs.map((doc) => 
-        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
-      ).toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       allBooks.addAll(catBooks);
     }
 
@@ -112,9 +115,10 @@ class FirebaseService {
       final querySnapshot =
           await subcollectionRef.where('isFree', isEqualTo: true).get();
 
-      final catBooks = querySnapshot.docs.map((doc) => 
-        Book.fromMap({...doc.data(), 'id': doc.id, 'genre': cat})
-      ).toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       free.addAll(catBooks);
     }
 
@@ -132,41 +136,46 @@ class FirebaseService {
     }
   }
 
+  /// Get book by ID with author details
   Future<Book?> getBookById(String bookId) async {
     try {
-      // Try each genre collection
-      for (final genre in categories) 
-      {
-        final bookRef = _firestore
-            .collection('books')
-            .doc(genre)
-            .collection('books')
-            .doc(bookId);
+      print('Fetching book with ID: $bookId');
 
-        final bookDoc = await bookRef.get();
-        print('Book exists in $genre: ${bookDoc.exists}');
-        
+      // Search through all genre collections
+      for (final genre in categories) {
+        print('Checking genre: $genre');
+
+        final bookDoc =
+            await _firestore
+                .collection('books')
+                .doc(genre)
+                .collection('books')
+                .doc(bookId)
+                .get();
+
         if (bookDoc.exists) {
-          final data = bookDoc.data()!;
-          print('Found book data: $data');
-          
-          // Create book with the correct genre
-          final book = Book.fromMap({
-            ...data,
-            'id': bookId,
-            'genre': genre, // Use the current genre
-          });
-          print('Successfully created book object: ${book.title} by ${book.author} in genre: ${book.genre}');
-          return book;
+          print('Found book in genre: $genre');
+          final bookData = bookDoc.data()!;
+
+          // Get author details
+          final authorDetails = await getAuthorByName(bookData['author'] ?? '');
+
+          // Merge book data with genre and author details
+          final mergedData = {
+            ...bookData,
+            'genre': genre,
+            'authorDescription':
+                authorDetails?['description'] ??
+                'No author description available.',
+            'authorImageUrl': authorDetails?['imageUrl'] ?? '',
+          };
+
+          return Book.fromMap(mergedData, bookId);
         }
       }
 
-      print('\nBook $bookId not found in any genre');
-      print('======= END DEBUG =======');
       return null;
     } catch (e) {
-      print('Error in getBookById: $e');
-      print('======= END DEBUG =======');
       return null;
     }
   }
@@ -177,11 +186,12 @@ class FirebaseService {
 
     // Check all categories for the highest ID
     for (final genre in categories) {
-      final snapshot = await _firestore
-          .collection('books')
-          .doc(genre)
-          .collection('books')
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('books')
+              .doc(genre)
+              .collection('books')
+              .get();
 
       for (final doc in snapshot.docs) {
         // Parse the numeric ID
@@ -210,7 +220,9 @@ class FirebaseService {
     try {
       // Validate that the genre exists
       if (!categories.contains(genre)) {
-        throw ArgumentError('Invalid genre: $genre. Must be one of: $categories');
+        throw ArgumentError(
+          'Invalid genre: $genre. Must be one of: $categories',
+        );
       }
 
       // Get the next available ID
@@ -251,13 +263,13 @@ class FirebaseService {
 
       for (final genre in categories) {
         print('\nMigrating books in genre: $genre');
-        
+
         // Get all books in this genre
         final booksRef = _firestore
             .collection('books')
             .doc(genre)
             .collection('books');
-            
+
         final snapshot = await booksRef.get();
 
         // Process each book
@@ -298,29 +310,30 @@ class FirebaseService {
         .collection('liked_books')
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> likedBooks = [];
-      
-      for (var doc in snapshot.docs) {
-        final bookId = doc.id;
-        final book = await getBookById(bookId);
-        if (book != null) {
-          likedBooks.add(book);
-        }
-      }
-      
-      return likedBooks;
-    });
+          List<Book> likedBooks = [];
+
+          for (var doc in snapshot.docs) {
+            final bookId = doc.id;
+            final book = await getBookById(bookId);
+            if (book != null) {
+              likedBooks.add(book);
+            }
+          }
+
+          return likedBooks;
+        });
   }
 
   /// Check if a book is liked by the user
   Future<bool> isBookLiked(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('liked_books')
-        .doc(bookId)
-        .get();
-    
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('liked_books')
+            .doc(bookId)
+            .get();
+
     return doc.exists;
   }
 
@@ -333,16 +346,14 @@ class FirebaseService {
         .doc(bookId);
 
     final doc = await likedBooksRef.get();
-    
+
     if (doc.exists) {
       // Unlike the book
       await likedBooksRef.delete();
       return false;
     } else {
       // Like the book
-      await likedBooksRef.set({
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+      await likedBooksRef.set({'timestamp': FieldValue.serverTimestamp()});
       return true;
     }
   }
@@ -355,26 +366,27 @@ class FirebaseService {
         .collection('saved_audiobooks')
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> books = [];
-      for (var doc in snapshot.docs) {
-        String bookId = doc.id;
-        Book? book = await getBookById(bookId);
-        if (book != null) {
-          books.add(book);
-        }
-      }
-      return books;
-    });
+          List<Book> books = [];
+          for (var doc in snapshot.docs) {
+            String bookId = doc.id;
+            Book? book = await getBookById(bookId);
+            if (book != null) {
+              books.add(book);
+            }
+          }
+          return books;
+        });
   }
 
   // Check if an audiobook is saved by the user
   Future<bool> isAudiobookSaved(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('saved_audiobooks')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('saved_audiobooks')
+            .doc(bookId)
+            .get();
     return doc.exists;
   }
 
@@ -390,33 +402,33 @@ class FirebaseService {
     if (doc.exists) {
       await docRef.delete();
     } else {
-      await docRef.set({
-        'savedAt': DateTime.now(),
-      });
+      await docRef.set({'savedAt': DateTime.now()});
     }
   }
 
   // Save listening progress for an audiobook
-  Future<void> saveListeningProgress(String userId, String bookId, Duration position) async {
+  Future<void> saveListeningProgress(
+    String userId,
+    String bookId,
+    Duration position,
+  ) async {
     await _firestore
         .collection('users')
         .doc(userId)
         .collection('listening_progress')
         .doc(bookId)
-        .set({
-      'position': position.inSeconds,
-      'updatedAt': DateTime.now(),
-    });
+        .set({'position': position.inSeconds, 'updatedAt': DateTime.now()});
   }
 
   // Get listening progress for an audiobook
   Future<Duration?> getListeningProgress(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('listening_progress')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('listening_progress')
+            .doc(bookId)
+            .get();
 
     if (doc.exists && doc.data()?['position'] != null) {
       return Duration(seconds: doc.data()!['position']);
@@ -433,15 +445,40 @@ class FirebaseService {
         .orderBy('updatedAt', descending: true)
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> books = [];
-      for (var doc in snapshot.docs) {
-        String bookId = doc.id;
-        Book? book = await getBookById(bookId);
-        if (book != null) {
-          books.add(book);
-        }
-      }
-      return books;
-    });
+          List<Book> books = [];
+          for (var doc in snapshot.docs) {
+            String bookId = doc.id;
+            Book? book = await getBookById(bookId);
+            if (book != null) {
+              books.add(book);
+            }
+          }
+          return books;
+        });
+  }
+
+  /// Get author details by name - needed for book details
+  Future<Map<String, dynamic>?> getAuthorByName(String name) async {
+    try {
+      final doc = await _firestore.collection('authors').doc(name).get();
+      return doc.exists ? doc.data() : null;
+    } catch (e) {
+      print('Error getting author: $e');
+      return null;
+    }
+  }
+
+  /// Get a stream of all authors
+  Stream<List<Map<String, dynamic>>> getAuthorsStream() {
+    return _firestore
+        .collection('authors')
+        .orderBy('name')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => {'id': doc.id, ...doc.data()})
+                  .toList(),
+        );
   }
 }

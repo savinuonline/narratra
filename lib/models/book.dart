@@ -3,19 +3,25 @@ class Book {
   final String id;
   final String title;
   final String author;
-  final String genre;
-  final String imageUrl;
+  final String authorDescription;
+  final String authorImageUrl;
   final String description;
+  final String imageUrl;
   final String audioUrl;
+  final String genre;
+  final bool isFree;
 
   Book({
     required this.id,
     required this.title,
     required this.author,
-    required this.genre,
-    required this.imageUrl,
+    required this.authorDescription,
+    required this.authorImageUrl,
     required this.description,
+    required this.imageUrl,
     required this.audioUrl,
+    required this.genre,
+    required this.isFree,
   });
 
   // Convert Book to map for DB
@@ -24,24 +30,29 @@ class Book {
       'id': id,
       'title': title,
       'author': author,
-      'genre': genre,
-      'imageUrl': imageUrl,
+      'authorDescription': authorDescription,
+      'authorImageUrl': authorImageUrl,
       'description': description,
+      'imageUrl': imageUrl,
       'audioUrl': audioUrl,
+      'genre': genre,
+      'isFree': isFree,
     };
   }
 
   // Make sure this method can handle your data structure
-  factory Book.fromMap(Map<String, dynamic> map) {
+  factory Book.fromMap(Map<String, dynamic> map, String id) {
     return Book(
-      id: map['id'] ?? '', // This might be missing if using document ID
+      id: id,
       title: map['title'] ?? '',
       author: map['author'] ?? '',
+      authorDescription: map['authorDescription'] ?? 'No author description available.',
+      authorImageUrl: map['authorImageUrl'] ?? '',
       description: map['description'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
-      // Add other fields as needed
-      genre: map['genre'] ?? '',
       audioUrl: map['audioUrl'] ?? '',
+      genre: map['genre'] ?? '',
+      isFree: map['isFree'] ?? false,
     );
   }
 }
