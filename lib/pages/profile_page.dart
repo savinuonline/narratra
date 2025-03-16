@@ -35,43 +35,53 @@ class ProfilePage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Picture
-            Stack(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage("assets/profile.jpg"),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.blueAccent,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white, size: 12),
-                      onPressed: (){
-
-                      },
+                // Profile Picture (Left Side)
+                Stack(
+                  children: [
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage("assets/profile.jpg"),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.blueAccent,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          onPressed: () {
+                            // Edit profile picture functionality
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(width: 20),
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Mashinee Maleesha"
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
-                ),
-                const SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ElevatedButton(
+                const SizedBox(width: 20), // Space between profile and text
+                // Name & Edit Profile (Right Side)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Mashinee Maleesha",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    ElevatedButton(
                       onPressed: () {
                         // Edit profile functionality
                       },
@@ -87,9 +97,17 @@ class ProfilePage extends StatelessWidget {
                         style: TextStyle(color: Colors.blueAccent),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            FeatureTile(
+              title: "Favorites",
+              icon: Icons.favorite_border,
+              onTap: () {
+                // Navigate to Favorites Page
+              },
             ),
           ],
         ),
@@ -98,5 +116,40 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-                   
+class FeatureTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
 
+  const FeatureTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blueAccent),
+            const SizedBox(width: 20),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          ],
+        ),
+      ),
+    );
+  }
+}
