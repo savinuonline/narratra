@@ -79,15 +79,13 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
   Future<void> _updatePaletteGenerator(String imageUrl) async {
     try {
-      final PaletteGenerator generator =
-          await PaletteGenerator.fromImageProvider(
-            NetworkImage(imageUrl),
-            size: const Size(200, 300),
-          );
+      final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+        NetworkImage(imageUrl),
+        size: const Size(200, 300),
+      );
       if (mounted) {
         setState(() {
-          dominantColor =
-              generator.dominantColor?.color ??
+          dominantColor = generator.dominantColor?.color ??
               generator.vibrantColor?.color ??
               generator.mutedColor?.color ??
               const Color(0xFF402e7a);
@@ -291,7 +289,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
     // Calculate progress for the fixed action buttons
     final boxProgress = ((_scrollOffset - (threshold * 1.1)) /
-            (threshold * 0.5))
+        (threshold * 0.5))
         .clamp(0.0, 1.0);
 
     if (_isLoadingBook) {
@@ -355,23 +353,22 @@ class _BookInfoPageState extends State<BookInfoPage> {
             ],
           ),
           child: IconButton(
-            icon:
-                isBookmarkLoading
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                    )
-                    : Icon(
-                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      size: 28,
-                    ),
+            icon: isBookmarkLoading
+                ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 0, 0, 0),
+                ),
+              ),
+            )
+                : Icon(
+              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: const Color.fromARGB(255, 0, 0, 0),
+              size: 28,
+            ),
             onPressed: _showCreatePlaylistDialog,
           ),
         ),
@@ -394,26 +391,22 @@ class _BookInfoPageState extends State<BookInfoPage> {
             ],
           ),
           child: IconButton(
-            icon:
-                isLoading
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                    )
-                    : Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border_outlined,
-                      color:
-                          isLiked
-                              ? Colors.red
-                              : const Color.fromARGB(255, 0, 0, 0),
-                      size: 28,
-                    ),
+            icon: isLoading
+                ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 0, 0, 0),
+                ),
+              ),
+            )
+                : Icon(
+              isLiked ? Icons.favorite : Icons.favorite_border_outlined,
+              color: isLiked ? Colors.red : const Color.fromARGB(255, 0, 0, 0),
+              size: 28,
+            ),
             onPressed: _toggleLike,
           ),
         ),
@@ -441,8 +434,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  dominantColor ?? const Color.fromARGB(255, 249, 249, 249),
-              foregroundColor: textColor ?? const Color.fromARGB(255, 0, 0, 0),
+              dominantColor ?? const Color.fromARGB(255, 249, 249, 249),
+              foregroundColor:
+              textColor ?? const Color.fromARGB(255, 0, 0, 0),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -469,7 +463,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 floating: false,
                 snap: false,
                 backgroundColor:
-                    dominantColor ?? const Color.fromARGB(255, 124, 114, 241),
+                dominantColor ?? const Color.fromARGB(255, 124, 114, 241),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
@@ -477,41 +471,40 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 title: AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
                   opacity: showTitle ? 1.0 : 0.0,
-                  child:
-                      showTitle
-                          ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                book.title,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                book.author,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 12,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          )
-                          : null,
+                  child: showTitle
+                      ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        book.author,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  )
+                      : null,
                 ),
                 flexibleSpace: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                     final scrollExtent =
                         MediaQuery.of(context).size.height * 0.5 -
-                        kToolbarHeight;
+                            kToolbarHeight;
                     final scrollPosition =
                         (constraints.maxHeight - kToolbarHeight) / scrollExtent;
                     final adjustedPosition = scrollPosition.clamp(0.0, 1.0);
@@ -529,15 +522,11 @@ class _BookInfoPageState extends State<BookInfoPage> {
                                   dominantColor?.withOpacity(0.9) ??
                                       const Color.fromARGB(255, 97, 83, 255),
                                   (dominantColor != null
-                                          ? HSLColor.fromColor(
-                                            dominantColor!,
-                                          ).withLightness(0.8).toColor()
-                                          : const Color.fromARGB(
-                                            255,
-                                            231,
-                                            111,
-                                            5,
-                                          ))
+                                      ? HSLColor.fromColor(dominantColor!)
+                                      .withLightness(0.8)
+                                      .toColor()
+                                      : const Color.fromARGB(
+                                      255, 231, 111, 5))
                                       .withOpacity(0.7),
                                 ],
                               ),
@@ -564,16 +553,15 @@ class _BookInfoPageState extends State<BookInfoPage> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child:
-                                        book.imageUrl.startsWith('http')
-                                            ? Image.network(
-                                              book.imageUrl,
-                                              fit: BoxFit.cover,
-                                            )
-                                            : Image.asset(
-                                              book.imageUrl,
-                                              fit: BoxFit.cover,
-                                            ),
+                                    child: book.imageUrl.startsWith('http')
+                                        ? Image.network(
+                                      book.imageUrl,
+                                      fit: BoxFit.cover,
+                                    )
+                                        : Image.asset(
+                                      book.imageUrl,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -585,13 +573,10 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   },
                 ),
               ),
-
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    // Add consistent spacing regardless of button position
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                    // Duration and chapters
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
@@ -629,12 +614,10 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   ],
                 ),
               ),
-
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Title
                     Text(
                       book.title,
                       style: GoogleFonts.poppins(
@@ -644,7 +627,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    // Author
                     Text(
                       book.author,
                       style: GoogleFonts.poppins(
@@ -654,7 +636,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Category with icon
                     Row(
                       children: [
                         SvgPicture.asset(
@@ -674,7 +655,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ],
                     ),
                     const SizedBox(height: 32),
-                    // About section
                     Text(
                       "About",
                       style: GoogleFonts.poppins(
@@ -696,9 +676,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                           ),
                           maxLines: _showAboutDescription ? null : 4,
                           overflow:
-                              _showAboutDescription
-                                  ? null
-                                  : TextOverflow.ellipsis,
+                          _showAboutDescription ? null : TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
                         GestureDetector(
@@ -719,7 +697,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ],
                     ),
                     const SizedBox(height: 32),
-                    // About Author section
                     Text(
                       "About the Author",
                       style: GoogleFonts.poppins(
@@ -764,28 +741,23 @@ class _BookInfoPageState extends State<BookInfoPage> {
                                   height: 1.6,
                                 ),
                                 maxLines: _showAuthorDescription ? null : 4,
-                                overflow:
-                                    _showAuthorDescription
-                                        ? null
-                                        : TextOverflow.ellipsis,
+                                overflow: _showAuthorDescription
+                                    ? null
+                                    : TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
                                     _showAuthorDescription =
-                                        !_showAuthorDescription;
+                                    !_showAuthorDescription;
                                   });
                                 },
                                 child: Text(
-                                  _showAuthorDescription
-                                      ? 'See less'
-                                      : 'See more',
+                                  _showAuthorDescription ? 'See less' : 'See more',
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
-                                    color:
-                                        dominantColor ??
-                                        const Color(0xFF402e7a),
+                                    color: dominantColor ?? const Color(0xFF402e7a),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -801,47 +773,41 @@ class _BookInfoPageState extends State<BookInfoPage> {
               ),
             ],
           ),
-
-          // Fixed action buttons
           Positioned(
             top: _calculateButtonPosition(context),
             left: 0,
             right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 10 * boxProgress,
-                  sigmaY: 10 * boxProgress,
-                ),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 15,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        dominantColor?.withOpacity(0.95 * boxProgress) ??
-                        const Color.fromARGB(
-                          255,
-                          252,
-                          252,
-                          252,
-                        ).withOpacity(0.95 * boxProgress),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1 * boxProgress),
-                        blurRadius: 4 * boxProgress,
-                        offset: Offset(0, 2 * boxProgress),
-                      ),
-                    ],
-                  ),
-                  child: actionButtons,
-                ),
-              ),
-            ),
+            child: _buildActionButtonsContainer(actionButtons, boxProgress),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtonsContainer(Widget actionButtons, double boxProgress) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: 10 * boxProgress,
+          sigmaY: 10 * boxProgress,
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          decoration: BoxDecoration(
+            color: dominantColor?.withOpacity(0.95 * boxProgress) ??
+                const Color.fromARGB(255, 252, 252, 252)
+                    .withOpacity(0.95 * boxProgress),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1 * boxProgress),
+                blurRadius: 4 * boxProgress,
+                offset: Offset(0, 2 * boxProgress),
+              ),
+            ],
+          ),
+          child: actionButtons,
+        ),
       ),
     );
   }
@@ -850,7 +816,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
     final expandedHeight = MediaQuery.of(context).size.height * 0.5;
     final threshold =
         (expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top) *
-        0.85;
+            0.85;
     final minPosition =
         MediaQuery.of(context).padding.top + kToolbarHeight + 15;
     final maxPosition = expandedHeight - 20;
