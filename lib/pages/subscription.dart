@@ -4,14 +4,19 @@ class SubscriptionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+  
       appBar: AppBar(),
       body: SingleChildScrollView(
+      
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+              Icon(Icons.arrow_back, color: Colors.black,),
+              Center(
                 child: Text(
                   'Become a Premium',
                   style: TextStyle(
@@ -22,7 +27,7 @@ class SubscriptionPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              const Center(
+              Center(
                 child: Text(
                   'Get access to the Premium Features of Narratra and feel the Book',
                   textAlign: TextAlign.center,
