@@ -126,15 +126,6 @@ class ProfilePage extends StatelessWidget {
               },
             ),
             const SizedBox(height: 10), // Consistent gap
-            FeatureTile(
-              title: "History", // Added History
-              icon: Icons.history,
-              onTap: () {
-                // Show history in a dialog or directly on the page.
-                _showHistoryDialog(context);
-              },
-            ),
-            const SizedBox(height: 10), // Consistent gap
             LanguageSelectionTile(
               title: "Language Selection",
               icon: Icons.language,
@@ -150,6 +141,14 @@ class ProfilePage extends StatelessWidget {
               onTap: () {
                 // Navigate to Subscription page
                 _navigateToSubscriptionPage(context);
+              },
+            ),
+            const SizedBox(height: 10), // Consistent gap
+            FeatureTile(
+              title: "History",
+              icon: Icons.history,
+              onTap: () {
+                _navigateToHistoryPage(context);
               },
             ),
           ],
@@ -190,24 +189,11 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // Method to show history in a dialog (or any other place)
-  void _showHistoryDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Your History"),
-          content: const Text("Here is the user's history."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
+  // Method to navigate to the History page
+  void _navigateToHistoryPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HistoryPage()),
     );
   }
 
@@ -361,6 +347,21 @@ class SubscriptionTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class HistoryPage extends StatelessWidget {
+  const HistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("History"),
+        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
+      ),
+      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
   }
 }
