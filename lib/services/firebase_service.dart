@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/book.dart';
 import '../models/user_model.dart';
+import 'package:rxdart/rxdart.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -491,24 +492,144 @@ class FirebaseService {
     return doc.exists;
   }
 
-  Future<bool> createPlaylist(
-      String userId,
-      String playlistName,
-      String bookId,
-      ) async {
+  /// Get a stream of the user's library including liked books and playlists
+  Stream<Map<String, dynamic>> getUserLibraryStream(String userId) {
+    return Rx.combineLatest2(
+      getLikedBooksStream(userId),
+      _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .snapshots(),
+      (List<Book> likedBooks, QuerySnapshot playlistsSnapshot) async {
+        final playlists = await Future.wait(
+          playlistsSnapshot.docs.map((doc) async {
+            final playlistData = doc.data() as Map<String, dynamic>;
+            final bookIds = List<String>.from(playlistData['books'] ?? []);
+            
+            // Fetch all books in the playlist
+            final books = await Future.wait(
+              bookIds.map((bookId) async {
+                final book = await getBookById(bookId);
+                return book;
+              }),
+            );
+
+            // Filter out null books and create playlist map
+            final validBooks = books.where((book) => book != null).cast<Book>().toList();
+
+            return {
+              'id': doc.id,
+              'name': playlistData['name'],
+              'books': validBooks,
+              'createdAt': playlistData['createdAt'],
+            };
+          }),
+        );
+
+        return {
+          'likedBooks': likedBooks,
+          'playlists': playlists,
+        };
+      },
+    ).asyncMap((future) => future);
+  }
+
+  /// Create a new playlist
+  Future<String> createPlaylist(
+    String userId,
+    String playlistName,
+    String bookId,
+  ) async {
+    try {
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .add({
+            'name': playlistName,
+            'books': [bookId],
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+      return docRef.id;
+    } catch (e) {
+      print('Error creating playlist: $e');
+      rethrow;
+    }
+  }
+
+  /// Rename a playlist
+  Future<void> renamePlaylist(
+    String userId,
+    String playlistId,
+    String newName,
+  ) async {
     try {
       await _firestore
           .collection('users')
           .doc(userId)
           .collection('playlists')
-          .add({
-        'name': playlistName,
-        'books': [bookId],
-        'createdAt': DateTime.now(),
-      });
-      return true;
+          .doc(playlistId)
+          .update({'name': newName});
     } catch (e) {
-      return false;
+      print('Error renaming playlist: $e');
+      rethrow;
+    }
+  }
+
+  /// Add a book to an existing playlist
+  Future<void> addBookToPlaylist(
+    String userId,
+    String playlistId,
+    String bookId,
+  ) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .doc(playlistId)
+          .update({
+            'books': FieldValue.arrayUnion([bookId]),
+          });
+    } catch (e) {
+      print('Error adding book to playlist: $e');
+      rethrow;
+    }
+  }
+
+  /// Remove a book from a playlist
+  Future<void> removeBookFromPlaylist(
+    String userId,
+    String playlistId,
+    String bookId,
+  ) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .doc(playlistId)
+          .update({
+            'books': FieldValue.arrayRemove([bookId]),
+          });
+    } catch (e) {
+      print('Error removing book from playlist: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete a playlist
+  Future<void> deletePlaylist(String userId, String playlistId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .doc(playlistId)
+          .delete();
+    } catch (e) {
+      rethrow;
     }
   }
 }

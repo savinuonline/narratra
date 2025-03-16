@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen>
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        height: 75,
+        height: 80, // Changed from 75 to 80
         margin: const EdgeInsets.only(bottom: 0),
         child: Container(
           decoration: BoxDecoration(
@@ -105,17 +105,17 @@ class _MainScreenState extends State<MainScreen>
                 selectedLabelStyle: GoogleFonts.poppins(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  height: 0.9,
+                  height: 1.0,
                 ),
                 unselectedLabelStyle: GoogleFonts.poppins(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  height: 0.9,
+                  height: 1.0,
                 ),
                 type: BottomNavigationBarType.fixed,
                 backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
                 elevation: 10,
-                iconSize: 28,
+                iconSize: 26, // Changed from 28 to 26
                 items:
                     _navigationItems.map((item) {
                       final int index = _navigationItems.indexOf(item);
@@ -138,8 +138,12 @@ class _MainScreenState extends State<MainScreen>
                                 return Transform.scale(
                                   scale: scale,
                                   child: Container(
-                                    margin: const EdgeInsets.only(bottom: 1),
-                                    padding: const EdgeInsets.all(7),
+                                    margin: const EdgeInsets.only(
+                                      bottom: 0,
+                                    ), // Changed from 1 to 0
+                                    padding: const EdgeInsets.all(
+                                      6,
+                                    ), // Changed from 7 to 6
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:

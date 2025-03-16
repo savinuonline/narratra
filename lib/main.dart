@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
-import 'pages/home_screen.dart';
 import 'models/user_model.dart';
 import 'pages/main_screen.dart';
 

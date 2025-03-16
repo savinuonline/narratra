@@ -174,9 +174,118 @@ class _BookInfoPageState extends State<BookInfoPage> {
     return showDialog(
       context: context,
       builder: (context) {
+        return StreamBuilder<Map<String, dynamic>>(
+          stream: _firebaseService.getUserLibraryStream('USER_ID'),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final playlists = List<Map<String, dynamic>>.from(
+              snapshot.data?['playlists'] ?? [],
+            );
+
+            return AlertDialog(
+              title: Text(
+                'Add to Playlist',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Create New Playlist Button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showNewPlaylistDialog();
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text(
+                        'Create New Playlist',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: dominantColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                    if (playlists.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Your Playlists',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...playlists.map(
+                        (playlist) => ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color:
+                                  dominantColor?.withOpacity(0.1) ??
+                                  Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.playlist_play,
+                              color: dominantColor ?? Colors.grey,
+                            ),
+                          ),
+                          title: Text(
+                            playlist['name'],
+                            style: GoogleFonts.poppins(),
+                          ),
+                          onTap: () async {
+                            await _firebaseService.addBookToPlaylist(
+                              'USER_ID',
+                              playlist['id'],
+                              widget.bookId,
+                            );
+                            if (mounted) {
+                              setState(() => isBookmarked = true);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Added to ${playlist['name']}'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel', style: GoogleFonts.poppins()),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showNewPlaylistDialog() async {
+    _playlistNameController.clear();
+    return showDialog(
+      context: context,
+      builder: (context) {
         return AlertDialog(
           title: Text(
-            'Create Playlist',
+            'Create New Playlist',
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
           content: TextField(
@@ -188,6 +297,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
+            autofocus: true,
           ),
           actions: [
             TextButton(
@@ -199,9 +309,18 @@ class _BookInfoPageState extends State<BookInfoPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                _createPlaylist(_playlistNameController.text);
+                final name = _playlistNameController.text.trim();
+                if (name.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a playlist name'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                _createPlaylist(name);
                 Navigator.pop(context);
-                _playlistNameController.clear();
               },
               style: ElevatedButton.styleFrom(backgroundColor: dominantColor),
               child: Text(
@@ -224,13 +343,13 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
     try {
       final userId = 'USER_ID'; // Replace with actual user ID
-      final success = await _firebaseService.createPlaylist(
+      final playlistId = await _firebaseService.createPlaylist(
         userId,
         playlistName,
         widget.bookId,
       );
 
-      if (mounted && success) {
+      if (mounted && playlistId.isNotEmpty) {
         setState(() {
           isBookmarked = true;
         });
@@ -817,8 +936,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
     final threshold =
         (expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top) *
             0.85;
+        0.9;
     final minPosition =
-        MediaQuery.of(context).padding.top + kToolbarHeight + 15;
+        MediaQuery.of(context).padding.top + kToolbarHeight + 20;
     final maxPosition = expandedHeight - 20;
 
     if (_scrollOffset <= 0) {
