@@ -91,9 +91,9 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 const SizedBox(height: 15),
                 //logo
-                const Icon(Icons.lock, size: 100),
+                Image.asset('lib/images/BlackLogo.png', height: 100),
 
-                const SizedBox(height: 35),
+                const SizedBox(height: 20),
                 //welcome back
                 Text(
                   'Let\'s create an account for you!',
