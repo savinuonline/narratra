@@ -119,10 +119,10 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 10), // Consistent gap
             FeatureTile(
-              title: "Rewards", // Rewards option added
+              title: "Rewards",
               icon: Icons.star_border,
               onTap: () {
-                _navigateToRewardsPage(context); // Navigation to Rewards page
+                _navigateToRewardsPage(context);
               },
             ),
             const SizedBox(height: 10), // Consistent gap
@@ -131,6 +131,15 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.language,
               onTap: () {
                 _showLanguageDialog(context);
+              },
+            ),
+            const SizedBox(height: 10), // Consistent gap
+            SubscriptionTile(
+              // Subscription feature added
+              title: "Subscription",
+              icon: Icons.subscriptions,
+              onTap: () {
+                // Subscription option functionality (without navigation)
               },
             ),
           ],
@@ -246,6 +255,45 @@ class LanguageSelectionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const LanguageSelectionTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blueAccent),
+            const SizedBox(width: 20),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SubscriptionTile extends StatelessWidget {
+  // Subscription Tile
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const SubscriptionTile({
     required this.title,
     required this.icon,
     required this.onTap,
