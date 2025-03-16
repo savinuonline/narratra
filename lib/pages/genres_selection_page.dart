@@ -71,7 +71,6 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Container(
         // A simple gradient background
         decoration: BoxDecoration(
@@ -131,7 +130,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
 
             // Continue button
             Padding(
-              padding: const EdgeInsets.only(bottom: 100),
+              padding: const EdgeInsets.only(bottom: 70),
               child: ElevatedButton(
                 onPressed: () async {
                   // 1) Convert selectedGenres to a List

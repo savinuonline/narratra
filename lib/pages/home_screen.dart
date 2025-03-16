@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
             elevation: 0,
             // Removed the leading property
             title: Text(
-              'narratra',
+              'narratra.',
               style: TextStyle(
                 fontFamily: 'NarratraFont', // Your custom font family name
                 fontSize: 24,
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
               minHeight: 280,
               maxHeight: 280,
               child: Container(
-                color: const Color(0xffc7d9dd),
+                color: const Color(0xFFC7D9DD),
                 child: _TrendingSection(booksFuture: trendingBooksFuture),
               ),
             ),
