@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/components/book_card.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -103,7 +104,34 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          //for you
+          SizedBox(height: 50),
+
+          //for you book cards
+          Padding(
+            padding: const EdgeInsets.only(left: 25.0),
+            child: Text(
+              "For You",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+            ),
+          ),
+
+          SizedBox(height: 25),
+
+          Container(
+            height: 200,
+            child: ListView.builder(
+              itemCount: 3,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return BookCard(
+                  bookName: "Madol Doowa",
+                  authorName: "Martin Wickramasinghe",
+                  bookImagePath: 'lib/images/madoldoowa.jpg',
+                  rating: 4.5,
+                );
+              },
+            ),
+          ),
 
           //recently added
         ],
