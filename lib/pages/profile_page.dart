@@ -122,12 +122,37 @@ class ProfilePage extends StatelessWidget {
               title: "Language Selection",
               icon: Icons.language,
               onTap: () {
-                // You can implement language change here
+                _showLanguageDialog(context);
               },
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // Method to show language selection dialog
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select Language"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text("English"),
+                onTap: () {
+                  // Logic to change language to English
+                  Navigator.pop(context);
+                },
+              ),
+              // You can add more languages here
+            ],
+          ),
+        );
+      },
     );
   }
 }
