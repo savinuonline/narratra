@@ -1,23 +1,19 @@
-import 'package:navigation_module/navigation_module.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/firebase_options.dart';
-import 'package:frontend/pages/intro_page.dart';
+import 'splashscreen.dart'; // Import the splash screen file
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: IntroPage(),
+      title: 'Narratra App',
+      home: const SplashScreen(), // Only the splash screen is shown
     );
   }
 }
