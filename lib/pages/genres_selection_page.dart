@@ -71,11 +71,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // If you want no title text, just shrink it:
-        title: const SizedBox.shrink(),
-        elevation: 0,
-      ),
+
       body: Container(
         // A simple gradient background
         decoration: BoxDecoration(
@@ -87,7 +83,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 100),
             const Text(
               "What Are You Into?",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -135,7 +131,7 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
 
             // Continue button
             Padding(
-              padding: const EdgeInsets.only(bottom: 50),
+              padding: const EdgeInsets.only(bottom: 100),
               child: ElevatedButton(
                 onPressed: () async {
                   // 1) Convert selectedGenres to a List
