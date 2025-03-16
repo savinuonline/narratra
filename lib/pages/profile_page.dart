@@ -343,11 +343,9 @@ class DownloadsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Downloads"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
       ),
-      body: const Center(
-        child: Text("No downloads available.", style: TextStyle(fontSize: 18)),
-      ),
+      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
   }
 }
@@ -360,11 +358,9 @@ class FavoritesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Favorites"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
       ),
-      body: const Center(
-        child: Text("No favorites yet.", style: TextStyle(fontSize: 18)),
-      ),
+      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
   }
 }
