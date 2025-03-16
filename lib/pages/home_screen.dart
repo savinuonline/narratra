@@ -101,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverPersistentHeader(
             pinned: false, // Changed pinned to false
             delegate: TrendingHeaderDelegate(
-              minHeight: 280,
-              maxHeight: 280,
+              minHeight: 320,
+              maxHeight: 320,
               child: Container(
                 color: const Color(0xFFC7D9DD),
                 child: _TrendingSection(booksFuture: trendingBooksFuture),
