@@ -142,8 +142,8 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                     genresList,
                   );
 
-                  // 3) Then navigate to home
-                  Navigator.pushReplacementNamed(context, '/home');
+                  // Navigate to main screen instead of home
+                  Navigator.pushReplacementNamed(context, '/main');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,

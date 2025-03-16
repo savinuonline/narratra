@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:navigation_module/home_page.dart';
-import 'package:navigation_module/library_page.dart';
-import 'package:navigation_module/profile_page.dart';
-import 'package:navigation_module/search_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'home_screen.dart';
+import 'library_page.dart';
+import '../models/user_model.dart';
 
-class NavigationModule extends StatefulWidget {
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
-  _NavigationModuleState createState() => _NavigationModuleState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _NavigationModuleState extends State<NavigationModule>
+class _MainScreenState extends State<MainScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   int _selectedIndex = 0;
   int _previousIndex = 0;
+
   final List<Widget> _pages = [
-    HomePage(),
-    SearchPage(),
-    LibraryPage(),
-    ProfilePage(),
+    HomeScreen(
+      user: UserModel(
+        uid: 'GEhVv1eBKM4VugcxFlVN',
+        displayName: 'Test User',
+        selectedGenres: ['Personal Growth', 'Fiction'],
+      ),
+    ),
+    const Center(child: Text('Search')),
+    const LibraryPage(),
+    const Center(child: Text('Profile')),
   ];
+
   final List<NavigationItem> _navigationItems = [
     NavigationItem(icon: 'Home.svg', label: 'Home'),
     NavigationItem(icon: 'Search.svg', label: 'Search'),
@@ -66,13 +75,13 @@ class _NavigationModuleState extends State<NavigationModule>
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        height: 80,
+        height: 75,
         margin: const EdgeInsets.only(bottom: 0),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
             ),
             boxShadow: [
               BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
@@ -104,7 +113,7 @@ class _NavigationModuleState extends State<NavigationModule>
                   height: 0.9,
                 ),
                 type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
                 elevation: 10,
                 iconSize: 28,
                 items:
@@ -130,9 +139,7 @@ class _NavigationModuleState extends State<NavigationModule>
                                   scale: scale,
                                   child: Container(
                                     margin: const EdgeInsets.only(bottom: 1),
-                                    padding: const EdgeInsets.all(
-                                      7,
-                                    ), // Reduced from 8
+                                    padding: const EdgeInsets.all(7),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:
@@ -141,8 +148,8 @@ class _NavigationModuleState extends State<NavigationModule>
                                               : Colors.transparent,
                                     ),
                                     child: SizedBox(
-                                      width: 22, // Reduced from 24
-                                      height: 22, // Reduced from 24
+                                      width: 22,
+                                      height: 22,
                                       child: SvgPicture.asset(
                                         'assets/icons/${item.icon}',
                                         color:
