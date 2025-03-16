@@ -139,7 +139,8 @@ class ProfilePage extends StatelessWidget {
               title: "Subscription",
               icon: Icons.subscriptions,
               onTap: () {
-                // Subscription option functionality (without navigation)
+                // Navigate to Subscription page
+                _navigateToSubscriptionPage(context);
               },
             ),
           ],
@@ -169,6 +170,14 @@ class ProfilePage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const RewardsPage()),
+    );
+  }
+
+  // Method to navigate to the Subscription page
+  void _navigateToSubscriptionPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SubscriptionPage()),
     );
   }
 
@@ -368,6 +377,22 @@ class RewardsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Rewards"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
+    );
+  }
+}
+
+class SubscriptionPage extends StatelessWidget {
+  // Subscription page added
+  const SubscriptionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Subscription"),
         backgroundColor: Colors.blueAccent,
       ),
       body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
