@@ -16,7 +16,7 @@ class FirebaseService {
   ];
 
   /// "Trending" books: docs with likeCount >= 1 in each subcollection,
-  /// ordered descending by likeCount. Returns the overall top 10 trending books.
+
   Future<List<Book>> getTrendingBooks() async {
     final List<Book> trending = [];
 
