@@ -65,33 +65,70 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Removed bottomNavigationBar and navigation-related code
-      appBar: _buildCustomAppBar(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              CategorySection(
-                title: "Trending",
-                booksFuture: trendingBooksFuture,
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar without a leading icon and with a notification button on the right.
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            // Removed the leading property
+            title: Text(
+              'narratra',
+              style: TextStyle(
+                fontFamily: 'NarratraFont', // Your custom font family name
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
               ),
-              CategorySection(
-                title: "Uniquely Yours",
-                booksFuture: recommendedBooksFuture,
-              ),
-              CategorySection(
-                title: "Today For You",
-                booksFuture: todayBooksFuture,
-              ),
-              CategorySection(
-                title: "Free Books",
-                booksFuture: freeBooksFuture,
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.black),
+                onPressed: () {
+                  // Add your notification action here.
+                },
               ),
             ],
+          ),
+
+
+
+          // Trending Section (Not pinned now)
+          SliverPersistentHeader(
+            pinned: false, // Changed pinned to false
+            delegate: TrendingHeaderDelegate(
+              minHeight: 280,
+              maxHeight: 280,
+              child: Container(
+                color: const Color(0xffc7d9dd),
+                child: _TrendingSection(
+                  booksFuture: trendingBooksFuture,
+                ),
+              ),
+            ),
+          ),
+
+          // Other categories
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Uniquely Yours",
+              booksFuture: recommendedBooksFuture,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Today For You",
+              booksFuture: todayBooksFuture,
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Free Books",
+              booksFuture: freeBooksFuture,
+            ),
           ),
         ),
       ),
