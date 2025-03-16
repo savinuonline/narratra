@@ -107,7 +107,6 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.favorite_border,
               onTap: () {
                 // Navigate to Favorites Page
-                _navigateToFavoritesPage(context);
               },
             ),
             FeatureTile(
@@ -115,28 +114,20 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.download,
               onTap: () {
                 // Navigate to Downloads Page
-                _navigateToDownloadsPage(context);
+              },
+            ),
+            const SizedBox(height: 20),
+            // Language Selection Feature
+            LanguageSelectionTile(
+              title: "Language Selection",
+              icon: Icons.language,
+              onTap: () {
+                // You can implement language change here
               },
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _navigateToFavoritesPage(BuildContext context) {
-    // Code to navigate to the Favorites page
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FavoritesPage()),
-    );
-  }
-
-  void _navigateToDownloadsPage(BuildContext context) {
-    // Code to navigate to the Downloads page
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const DownloadsPage()),
     );
   }
 }
@@ -147,6 +138,44 @@ class FeatureTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const FeatureTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blueAccent),
+            const SizedBox(width: 20),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LanguageSelectionTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const LanguageSelectionTile({
     required this.title,
     required this.icon,
     required this.onTap,
