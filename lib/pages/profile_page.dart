@@ -107,6 +107,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.favorite_border,
               onTap: () {
                 // Navigate to Favorites Page
+                _navigateToFavoritesPage(context);
               },
             ),
             FeatureTile(
@@ -123,9 +124,16 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  void _navigateToFavoritesPage(BuildContext context) {
+    // Code to navigate to the Favorites page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FavoritesPage()),
+    );
+  }
+
   void _navigateToDownloadsPage(BuildContext context) {
     // Code to navigate to the Downloads page
-    // For now, this is just a placeholder
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const DownloadsPage()),
@@ -183,6 +191,23 @@ class DownloadsPage extends StatelessWidget {
       ),
       body: const Center(
         child: Text("No downloads available.", style: TextStyle(fontSize: 18)),
+      ),
+    );
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  const FavoritesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Favorites"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: const Center(
+        child: Text("No favorites yet.", style: TextStyle(fontSize: 18)),
       ),
     );
   }
