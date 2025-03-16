@@ -96,47 +96,54 @@ class SubscriptionOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4, // Adds shadow to the card
-      margin: EdgeInsets.symmetric(vertical: 10), // Adds margin around the card
-      child: Padding(
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: Container(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        height: 180, // Set a fixed height for the card
+        child: Stack(
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Adjust color if needed
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  price,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 35),
-            Text(
-              price,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Adjust color if needed
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey, // Adjust color if needed
-              ),
-            ),
-            SizedBox(height: 10),
-            Center(
+            // Position the button in the center-right with an offset
+            Positioned(
+              right: -50, // Align to the right
+              top: 80, // Adjust this value to move the button up or down
               child: ElevatedButton(
                 onPressed: () {
                   // Add subscribe logic here
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Button background color
-                  foregroundColor: Colors.white, // Button text color
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
