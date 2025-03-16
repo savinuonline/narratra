@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
+import 'dart:ui';
 
 class BookInfoPage extends StatefulWidget {
   final String bookId;
@@ -81,7 +82,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
           );
       if (mounted) {
         setState(() {
-          // Get the dominant color or use a vibrant/muted color if available
           dominantColor =
               generator.dominantColor?.color ??
               generator.vibrantColor?.color ??
@@ -181,11 +181,18 @@ class _BookInfoPageState extends State<BookInfoPage> {
         MediaQuery.of(context).size.height * 0.35 - kToolbarHeight;
     final showTitle = _scrollOffset > threshold;
 
+    // Calculate progress for the fixed action buttons
+    final boxProgress = ((_scrollOffset - (threshold * 1.1)) /
+            (threshold * 0.5))
+        .clamp(0.0, 1.0);
+
     if (_isLoadingBook) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Color.fromARGB(255, 0, 0, 0),
+            ),
           ),
         ),
       );
@@ -303,11 +310,13 @@ class _BookInfoPageState extends State<BookInfoPage> {
             slivers: [
               SliverAppBar(
                 expandedHeight: MediaQuery.of(context).size.height * 0.5,
+                collapsedHeight: kToolbarHeight,
                 pinned: true,
                 stretch: true,
                 floating: false,
                 snap: false,
-                backgroundColor: dominantColor ?? const Color(0xFF402e7a),
+                backgroundColor:
+                    dominantColor ?? const Color.fromARGB(255, 124, 114, 241),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
@@ -317,15 +326,31 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   opacity: showTitle ? 1.0 : 0.0,
                   child:
                       showTitle
-                          ? Text(
-                            book.title,
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                book.title,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                book.author,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           )
                           : null,
                 ),
@@ -349,16 +374,16 @@ class _BookInfoPageState extends State<BookInfoPage> {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   dominantColor?.withOpacity(0.9) ??
-                                      const Color(0xFF402e7a),
+                                      const Color.fromARGB(255, 97, 83, 255),
                                   (dominantColor != null
                                           ? HSLColor.fromColor(
                                             dominantColor!,
                                           ).withLightness(0.8).toColor()
                                           : const Color.fromARGB(
                                             255,
-                                            31,
-                                            43,
-                                            45,
+                                            231,
+                                            111,
+                                            5,
                                           ))
                                       .withOpacity(0.7),
                                 ],
@@ -408,16 +433,11 @@ class _BookInfoPageState extends State<BookInfoPage> {
                 ),
               ),
 
-              // Add space for fixed action buttons when they become "fixed"
-              showTitle
-                  ? SliverToBoxAdapter(child: SizedBox(height: 120))
-                  : SliverToBoxAdapter(child: Container()),
-
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 20),
+                    // Add consistent spacing regardless of button position
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     // Duration and chapters
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -629,31 +649,43 @@ class _BookInfoPageState extends State<BookInfoPage> {
             ],
           ),
 
-          // The buttons will now be properly positioned and scroll with content
+          // Fixed action buttons
           Positioned(
             top: _calculateButtonPosition(context),
             left: 0,
             right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color:
-                    showTitle
-                        ? (dominantColor?.withOpacity(0.95) ??
-                            const Color(0xFF402e7a).withOpacity(0.95))
-                        : Colors.transparent,
-                boxShadow:
-                    showTitle
-                        ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                        : null,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 10 * boxProgress,
+                  sigmaY: 10 * boxProgress,
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 15,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        dominantColor?.withOpacity(0.95 * boxProgress) ??
+                        const Color.fromARGB(
+                          255,
+                          252,
+                          252,
+                          252,
+                        ).withOpacity(0.95 * boxProgress),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1 * boxProgress),
+                        blurRadius: 4 * boxProgress,
+                        offset: Offset(0, 2 * boxProgress),
+                      ),
+                    ],
+                  ),
+                  child: actionButtons,
+                ),
               ),
-              child: actionButtons,
             ),
           ),
         ],
@@ -664,19 +696,17 @@ class _BookInfoPageState extends State<BookInfoPage> {
   double _calculateButtonPosition(BuildContext context) {
     final expandedHeight = MediaQuery.of(context).size.height * 0.5;
     final threshold =
-        expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top;
+        (expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top) *
+        0.85;
     final minPosition = MediaQuery.of(context).padding.top + kToolbarHeight;
-    final maxPosition =
-        expandedHeight - 32; // Adjusted to position buttons slightly higher
+    final maxPosition = expandedHeight - 32; // 32 is the padding of the buttons
 
     if (_scrollOffset <= 0) {
       // At the top of the page
       return maxPosition;
     } else if (_scrollOffset >= threshold) {
-      // Scrolled enough to fix to top
       return minPosition;
     } else {
-      // In between - buttons should move with scroll
       return maxPosition - _scrollOffset;
     }
   }
