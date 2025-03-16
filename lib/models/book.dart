@@ -10,6 +10,7 @@ class Book {
   final String audioUrl;
   final String genre;
   final bool isFree;
+  final int likeCount; // New field for the number of likes
 
   Book({
     required this.id,
