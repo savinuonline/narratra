@@ -46,12 +46,12 @@ class SubscriptionPage extends StatelessWidget {
               Divider(height: 20, thickness: 1),
               SubscriptionOption(
                 title: 'Premium',
-                price: 'Rs.499/month',
+                price: 'Rs.699/month',
                 description: 'Most Popular Choice',
               ),
               Divider(height: 20, thickness: 1),
               SubscriptionOption(
-                title: 'Premium',
+                title: 'Premium (Family)',
                 price: 'Rs.1299/month',
                 description: 'Best Values for Families',
               ),
@@ -142,7 +142,7 @@ class SubscriptionOption extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Subscribe'),
+                child: Text('Features'),
               ),
             ),
           ],
