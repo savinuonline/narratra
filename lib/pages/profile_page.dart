@@ -109,6 +109,7 @@ class ProfilePage extends StatelessWidget {
                 // Navigate to Favorites Page
               },
             ),
+            const SizedBox(height: 10), // Consistent gap
             FeatureTile(
               title: "Downloads",
               icon: Icons.download,
@@ -116,8 +117,7 @@ class ProfilePage extends StatelessWidget {
                 // Navigate to Downloads Page
               },
             ),
-            const SizedBox(height: 20),
-            // Language Selection Feature
+            const SizedBox(height: 10), // Consistent gap
             LanguageSelectionTile(
               title: "Language Selection",
               icon: Icons.language,
