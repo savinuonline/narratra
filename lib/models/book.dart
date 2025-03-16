@@ -10,6 +10,7 @@ class Book {
   final String audioUrl;
   final String genre;
   final bool isFree;
+  final int likeCount; // New field for the number of likes
 
   Book({
     required this.id,
@@ -22,9 +23,10 @@ class Book {
     required this.audioUrl,
     required this.genre,
     required this.isFree,
+    required this.likeCount,
   });
 
-  // Convert Book to map for DB
+  // Convert Book to map for saving to Firestore
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -37,10 +39,11 @@ class Book {
       'audioUrl': audioUrl,
       'genre': genre,
       'isFree': isFree,
+      'likeCount': likeCount,
     };
   }
 
-  // Make sure this method can handle your data structure
+  // Factory constructor for creating a Book from a map
   factory Book.fromMap(Map<String, dynamic> map, String id) {
     return Book(
       id: id,
@@ -53,6 +56,7 @@ class Book {
       audioUrl: map['audioUrl'] ?? '',
       genre: map['genre'] ?? '',
       isFree: map['isFree'] ?? false,
+      likeCount: map['likeCount'] != null ? map['likeCount'] as int : 0,
     );
   }
 }
