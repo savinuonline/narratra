@@ -11,35 +11,37 @@ class LibraryPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1C1E1D),
+        backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text(
-            'My Library',
+            'My Narratra.',
             style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 0, 0, 0),
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
             ),
           ),
           bottom: TabBar(
             indicatorColor: const Color(0xFF402e7a),
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.grey,
-            labelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-            ),
+            labelColor: const Color.fromARGB(255, 0, 0, 0),
+            unselectedLabelColor: const Color.fromARGB(255, 58, 65, 65),
+            labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             tabs: const [
-              Tab(text: 'Saved Audiobooks'),
-              Tab(text: 'Listening History'),
+              Tab(text: 'My Playlists'),
+              Tab(text: 'narratra. History'),
             ],
           ),
         ),
-        body: TabBarView(
+        body: Column(
           children: [
-            _SavedAudiobooksTab(),
-            _ListeningHistoryTab(),
+            Expanded(
+              child: TabBarView(
+                children: [_SavedAudiobooksTab(), _ListeningHistoryTab()],
+              ),
+            ),
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -53,7 +55,9 @@ class _SavedAudiobooksTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Book>>(
-      stream: _firebaseService.getLikedBooksStream('USER_ID'), // Replace with actual user ID
+      stream: _firebaseService.getLikedBooksStream(
+        'USER_ID',
+      ), // Replace with actual user ID
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -74,22 +78,22 @@ class _SavedAudiobooksTab extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.headphones_outlined,
-                  color: Colors.grey,
-                  size: 64,
+                Image.asset(
+                  'lib/images/empty_playlist.png',
+                  width: 200,
+                  height: 200,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Text(
-                  'No saved audiobooks yet',
+                  'It seems pretty empty here...',
                   style: GoogleFonts.poppins(
-                    color: Colors.grey,
+                    color: const Color.fromARGB(255, 0, 0, 0),
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Save audiobooks to listen offline',
+                  'Add some audiobooks to make them your own!!',
                   style: GoogleFonts.poppins(
                     color: Colors.grey[600],
                     fontSize: 14,
@@ -139,17 +143,18 @@ class _SavedAudiobooksTab extends StatelessWidget {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: book.imageUrl.startsWith('http')
-                                ? Image.network(
-                                    book.imageUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  )
-                                : Image.asset(
-                                    book.imageUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  ),
+                            child:
+                                book.imageUrl.startsWith('http')
+                                    ? Image.network(
+                                      book.imageUrl,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    )
+                                    : Image.asset(
+                                      book.imageUrl,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    ),
                           ),
                         ),
                         // Play icon overlay
@@ -183,7 +188,7 @@ class _SavedAudiobooksTab extends StatelessWidget {
                   Text(
                     book.title,
                     style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -192,9 +197,9 @@ class _SavedAudiobooksTab extends StatelessWidget {
                   ),
                   // Narrator
                   Text(
-                    'Narrated by ${book.author}',
+                    '${book.author}',
                     style: GoogleFonts.poppins(
-                      color: Colors.grey[400],
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       fontSize: 12,
                     ),
                     maxLines: 1,
@@ -217,21 +222,14 @@ class _ListeningHistoryTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.history,
-            color: Colors.grey,
-            size: 64,
-          ),
+          const Icon(Icons.history, color: Colors.grey, size: 64),
           const SizedBox(height: 16),
           Text(
             'Listening history coming soon',
-            style: GoogleFonts.poppins(
-              color: Colors.grey,
-              fontSize: 16,
-            ),
+            style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
           ),
         ],
       ),
     );
   }
-} 
+}

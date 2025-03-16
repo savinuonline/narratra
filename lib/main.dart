@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
 import 'pages/home_screen.dart';
 import 'models/user_model.dart';
+import 'pages/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,19 +45,15 @@ class MyApp extends StatelessWidget {
           elevation: 4,
         ),
       ),
-      // Start on the Preferences page; user picks genres, then goes to Home
       initialRoute: '/preferences',
       routes: {
         '/preferences':
             (context) => const GenresSelectionPage(uid: 'GEhVv1eBKM4VugcxFlVN'),
-        // Once the user finishes selecting genres, your code can do:
-        // Navigator.pushReplacementNamed(context, '/home');
-        '/home': (context) => HomeScreen(user: dummyUser),
+        '/main': (context) => const MainScreen(),
         '/bookinfo': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
-          print('Navigation to BookInfo with ID: ${args['bookId']}');
           return BookInfoPage(bookId: args['bookId']);
         },
       },

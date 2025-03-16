@@ -67,70 +67,72 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // SliverAppBar without a leading icon and with a notification button on the right.
-          SliverAppBar(
-            pinned: true,
-            floating: false,
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            // Removed the leading property
-            title: Text(
-              'narratra.',
-              style: TextStyle(
-                fontFamily: 'NarratraFont', // Your custom font family name
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
+    return CustomScrollView(
+      slivers: [
+        // SliverAppBar without a leading icon and with a notification button on the right.
+        SliverAppBar(
+          pinned: true,
+          floating: false,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          // Removed the leading property
+          title: Text(
+            'narratra.',
+            style: TextStyle(
+              fontFamily: 'NarratraFont', // Your custom font family name
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications, color: Colors.black),
-                onPressed: () {
-                  // Add your notification action here.
-                },
-              ),
-            ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications, color: Colors.black),
+              onPressed: () {
+                // Add your notification action here.
+              },
+            ),
+          ],
+        ),
 
-          // Trending Section (Not pinned now)
-          SliverPersistentHeader(
-            pinned: false, // Changed pinned to false
-            delegate: TrendingHeaderDelegate(
-              minHeight: 280,
-              maxHeight: 280,
-              child: Container(
-                color: const Color(0xFFC7D9DD),
-                child: _TrendingSection(booksFuture: trendingBooksFuture),
-              ),
+        // Trending Section (Not pinned now)
+        SliverPersistentHeader(
+          pinned: false,
+          delegate: TrendingHeaderDelegate(
+            minHeight: 280,
+            maxHeight: 280,
+            child: Container(
+              color: const Color.fromRGBO(199, 217, 221, 1),
+              child: _TrendingSection(booksFuture: trendingBooksFuture),
             ),
           ),
+        ),
 
-          // Other categories
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Uniquely Yours",
-              booksFuture: recommendedBooksFuture,
-            ),
+        // Other categories
+        SliverToBoxAdapter(
+          child: CategorySection(
+            title: "Uniquely Yours",
+            booksFuture: recommendedBooksFuture,
           ),
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Today For You",
-              booksFuture: todayBooksFuture,
-            ),
+        ),
+        SliverToBoxAdapter(
+          child: CategorySection(
+            title: "Today For You",
+            booksFuture: todayBooksFuture,
           ),
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Free Books",
-              booksFuture: freeBooksFuture,
-            ),
+        ),
+        SliverToBoxAdapter(
+          child: CategorySection(
+            title: "Free Books",
+            booksFuture: freeBooksFuture,
           ),
-        ],
-      ),
+        ),
+        // Add bottom padding to account for navigation bar
+        SliverToBoxAdapter(
+          child: SizedBox(height: 80), // Height of the navigation bar
+        ),
+      ],
     );
   }
 }
@@ -311,70 +313,116 @@ class BookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 150,
+          width: 140,
           height: 180,
-          margin: const EdgeInsets.only(bottom: 10),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: const Color(0xffc7d9dd),
+            color: const Color(0xFFF5F7F9),
             borderRadius: BorderRadius.circular(15),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0xFF97C5ED),
-                blurRadius: 4,
-                offset: Offset(6, 5),
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Center(
-              child:
-                  book.imageUrl.startsWith('lib/')
-                      ? Image.asset(
-                        book.imageUrl,
-                        width: 130,
-                        height: 170,
-                        alignment: const Alignment(5.0, -0.2),
-                        fit: BoxFit.cover,
-                      )
-                      : Image.network(
-                        book.imageUrl,
-                        width: 110,
-                        height: 150,
-                        fit: BoxFit.contain,
+          child: Stack(
+            children: [
+              // Background container with rounded corners
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: const Color.fromARGB(255, 31, 38, 45),
+                ),
+              ),
+              // Book cover container
+              Align(
+                alignment: const Alignment(0, -0.2),
+                child: Container(
+                  width: 125,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
                       ),
-            ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child:
+                        book.imageUrl.startsWith('lib/')
+                            ? Image.asset(
+                              book.imageUrl,
+                              width: 100,
+                              height: 160,
+                              fit: BoxFit.cover,
+                            )
+                            : Image.network(
+                              book.imageUrl,
+                              width: 100,
+                              height: 160,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.book,
+                                      size: 30,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        SizedBox(
-          width: 150.0,
-          child: Text(
-            book.title,
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: const Color(0xFF000000),
-            ),
-            maxLines: 1,
-            textAlign: TextAlign.left,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: 150.0,
-          child: Text(
-            book.author,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: const Color(0xFF000000),
-            ),
-            maxLines: 2,
-            textAlign: TextAlign.left,
-            overflow: TextOverflow.ellipsis,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 132,
+                child: Text(
+                  book.title,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: const Color(0xFF000000),
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 2),
+              SizedBox(
+                width: 132,
+                child: Text(
+                  book.author,
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: Colors.grey[700],
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ),
       ],
