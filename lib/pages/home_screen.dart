@@ -22,7 +22,11 @@ class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => maxHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return child;
   }
 
@@ -54,7 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
+      widget.user.uid,
+    );
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
@@ -91,8 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
 
-
-
           // Trending Section (Not pinned now)
           SliverPersistentHeader(
             pinned: false, // Changed pinned to false
@@ -101,9 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
               maxHeight: 280,
               child: Container(
                 color: const Color(0xffc7d9dd),
-                child: _TrendingSection(
-                  booksFuture: trendingBooksFuture,
-                ),
+                child: _TrendingSection(booksFuture: trendingBooksFuture),
               ),
             ),
           ),
@@ -187,7 +189,8 @@ class _TrendingSection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 16),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -274,8 +277,8 @@ class CategorySection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder: (context, index) =>
-                  const SizedBox(width: 16),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -327,20 +330,21 @@ class BookCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Center(
-              child: book.imageUrl.startsWith('lib/')
-                  ? Image.asset(
-                book.imageUrl,
-                width: 130,
-                height: 170,
-                alignment: const Alignment(5.0, -0.2),
-                fit: BoxFit.cover,
-              )
-                  : Image.network(
-                book.imageUrl,
-                width: 110,
-                height: 150,
-                fit: BoxFit.contain,
-              ),
+              child:
+                  book.imageUrl.startsWith('lib/')
+                      ? Image.asset(
+                        book.imageUrl,
+                        width: 130,
+                        height: 170,
+                        alignment: const Alignment(5.0, -0.2),
+                        fit: BoxFit.cover,
+                      )
+                      : Image.network(
+                        book.imageUrl,
+                        width: 110,
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ),
             ),
           ),
         ),

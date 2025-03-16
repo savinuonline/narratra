@@ -20,15 +20,41 @@ class _BookInfoPageState extends State<BookInfoPage> {
   bool isLoading = false;
   Color? dominantColor;
   Color? textColor;
-  bool _isAppBarExpanded = true;
+  double _scrollOffset = 0.0;
   bool _showAboutDescription = false;
   bool _showAuthorDescription = false;
+  Book? _book;
+  bool _isLoadingBook = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _checkIfLiked();
+    _loadBook();
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _loadBook() async {
+    try {
+      final book = await _firebaseService.getBookById(widget.bookId);
+      if (mounted) {
+        setState(() {
+          _book = book;
+          _isLoadingBook = false;
+          if (book != null && book.imageUrl.startsWith('http')) {
+            _updatePaletteGenerator(book.imageUrl);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error loading audiobook';
+          _isLoadingBook = false;
+        });
+      }
+    }
+    await _checkIfLiked();
   }
 
   @override
@@ -39,14 +65,10 @@ class _BookInfoPageState extends State<BookInfoPage> {
   }
 
   void _onScroll() {
-    final isAppBarExpanded =
-        _scrollController.hasClients &&
-        _scrollController.offset < (MediaQuery.of(context).size.height * 0.35);
-    if (isAppBarExpanded != _isAppBarExpanded) {
-      setState(() {
-        _isAppBarExpanded = isAppBarExpanded;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
   }
 
   Future<void> _updatePaletteGenerator(String imageUrl) async {
@@ -64,7 +86,6 @@ class _BookInfoPageState extends State<BookInfoPage> {
         });
       }
     } catch (e) {
-      // If there's an error, use default colors
       if (mounted) {
         setState(() {
           dominantColor = const Color(0xFF402e7a);
@@ -151,104 +172,146 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final threshold =
+        MediaQuery.of(context).size.height * 0.35 - kToolbarHeight;
+    final showTitle = _scrollOffset > threshold;
+
+    if (_isLoadingBook) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
+          ),
+        ),
+      );
+    }
+
+    if (_errorMessage != null || _book == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Color(0xFF402e7a),
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage ?? 'Audiobook not found',
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Book is loaded and available
+    final book = _book!;
+
+    // Store action buttons in a variable to reuse them
+    final actionButtons = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Bookmark button
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon:
+                  isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF402e7a),
+                          ),
+                        ),
+                      )
+                      : Icon(
+                        isLiked ? Icons.bookmark : Icons.bookmark_border,
+                        color: const Color(0xFF402e7a),
+                      ),
+              onPressed: _toggleLike,
+            ),
+          ),
+          // Listen Now button
+          SizedBox(
+            width:
+                MediaQuery.of(context).size.width -
+                120, // Adjust width to leave space for bookmark button
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/player',
+                  arguments: {'bookId': book.id},
+                );
+              },
+              icon: const Icon(Icons.play_circle_fill),
+              label: const Text('Listen Now'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dominantColor ?? const Color(0xFF402e7a),
+                foregroundColor: textColor ?? Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FutureBuilder<Book?>(
-        future: _firebaseService.getBookById(widget.bookId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF402e7a)),
-              ),
-            );
-          }
-
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: Color(0xFF402e7a),
-                    size: 48,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    snapshot.hasError
-                        ? 'Error loading audiobook'
-                        : 'Audiobook not found',
-                    style: GoogleFonts.poppins(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final book = snapshot.data!;
-          if (dominantColor == null && book.imageUrl.startsWith('http')) {
-            _updatePaletteGenerator(book.imageUrl);
-          }
-
-          return CustomScrollView(
+      body: Stack(
+        children: [
+          CustomScrollView(
             controller: _scrollController,
+            physics: const ClampingScrollPhysics(),
             slivers: [
-              // Expandable app bar with book cover
               SliverAppBar(
                 expandedHeight: MediaQuery.of(context).size.height * 0.5,
                 pinned: true,
                 stretch: true,
+                floating: false,
+                snap: false,
                 backgroundColor: dominantColor ?? const Color(0xFF402e7a),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          dominantColor?.withOpacity(0.8) ??
-                              const Color(0xFF402e7a),
-                          const Color.fromARGB(255, 238, 115, 115),
-                        ],
-                      ),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 200,
-                        height: 300,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child:
-                              book.imageUrl.startsWith('http')
-                                  ? Image.network(
-                                    book.imageUrl,
-                                    fit: BoxFit.cover,
-                                  )
-                                  : Image.asset(
-                                    book.imageUrl,
-                                    fit: BoxFit.cover,
-                                  ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  title:
-                      !_isAppBarExpanded
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                title: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: showTitle ? 1.0 : 0.0,
+                  child:
+                      showTitle
                           ? Text(
                             book.title,
                             style: GoogleFonts.poppins(
@@ -256,53 +319,106 @@ class _BookInfoPageState extends State<BookInfoPage> {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           )
                           : null,
                 ),
-                actions:
-                    !_isAppBarExpanded
-                        ? [
-                          IconButton(
-                            icon: Icon(
-                              isLiked ? Icons.bookmark : Icons.bookmark_border,
-                              color: Colors.white,
+                flexibleSpace: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    final scrollExtent =
+                        MediaQuery.of(context).size.height * 0.5 -
+                        kToolbarHeight;
+                    final scrollPosition =
+                        (constraints.maxHeight - kToolbarHeight) / scrollExtent;
+                    final adjustedPosition = scrollPosition.clamp(0.0, 1.0);
+
+                    return FlexibleSpaceBar(
+                      background: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  dominantColor?.withOpacity(0.8) ??
+                                      const Color(0xFF402e7a),
+                                  const Color.fromARGB(255, 238, 115, 115),
+                                ],
+                              ),
                             ),
-                            onPressed: _toggleLike,
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white,
+                          Center(
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 300),
+                              opacity: adjustedPosition,
+                              child: Transform.scale(
+                                scale: 0.8 + (0.2 * adjustedPosition),
+                                child: Container(
+                                  width: 200,
+                                  height: 300,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child:
+                                        book.imageUrl.startsWith('http')
+                                            ? Image.network(
+                                              book.imageUrl,
+                                              fit: BoxFit.cover,
+                                            )
+                                            : Image.asset(
+                                              book.imageUrl,
+                                              fit: BoxFit.cover,
+                                            ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/player',
-                                arguments: {'bookId': book.id},
-                              );
-                            },
                           ),
-                        ]
-                        : null,
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
+
+              // Add space for fixed action buttons when they become "fixed"
+              showTitle
+                  ? SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 120, // Height of action buttons + padding
+                    ),
+                  )
+                  : SliverToBoxAdapter(child: Container()),
 
               SliverToBoxAdapter(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Duration section - moved up and left-aligned
+                    const SizedBox(height: 24),
+                    // Action buttons - only visible when not fixed
+                    if (!showTitle) actionButtons,
+                    const SizedBox(height: 16),
+                    // Duration and chapters
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 24,
-                        top: 8,
-                        bottom: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             '8h 45m',
                             style: GoogleFonts.poppins(
-                              color: Colors.grey[400],
+                              color: Colors.grey[600],
                               fontSize: 16,
                             ),
                           ),
@@ -311,7 +427,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                             child: Text(
                               '•',
                               style: TextStyle(
-                                color: Colors.grey[400],
+                                color: Colors.grey[600],
                                 fontSize: 16,
                               ),
                             ),
@@ -319,195 +435,155 @@ class _BookInfoPageState extends State<BookInfoPage> {
                           Text(
                             '12 Chapters',
                             style: GoogleFonts.poppins(
-                              color: Colors.grey[400],
+                              color: Colors.grey[600],
                               fontSize: 16,
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
 
-                    // Action buttons - repositioned
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Title
+                    Text(
+                      book.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Bookmark button - moved left
+                    ),
+                    const SizedBox(height: 8),
+                    // Author
+                    Text(
+                      book.author,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Category with icon
+                    Row(
+                      children: [
+                        _buildCategoryIcon(book.genre),
+                        const SizedBox(width: 8),
+                        Text(
+                          book.genre,
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    // About section
+                    Text(
+                      "About this audiobook",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.description,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.grey[800],
+                            height: 1.6,
+                          ),
+                          maxLines: _showAboutDescription ? null : 4,
+                          overflow:
+                              _showAboutDescription
+                                  ? null
+                                  : TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showAboutDescription = !_showAboutDescription;
+                            });
+                          },
+                          child: Text(
+                            _showAboutDescription ? 'See less' : 'See more',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: dominantColor ?? const Color(0xFF402e7a),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    // About Author section
+                    Text(
+                      "About the Author",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (book.authorImageUrl.isNotEmpty)
                           Container(
+                            width: 80,
+                            height: 80,
+                            margin: const EdgeInsets.only(right: 16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withOpacity(0.1),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
-                            ),
-                            child: IconButton(
-                              icon:
-                                  isLoading
-                                      ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Color(0xFF402e7a),
-                                              ),
-                                        ),
-                                      )
-                                      : Icon(
-                                        isLiked
-                                            ? Icons.bookmark
-                                            : Icons.bookmark_border,
-                                        color: const Color(0xFF402e7a),
-                                      ),
-                              onPressed: _toggleLike,
-                            ),
-                          ),
-
-                          // Play button - moved right
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/player',
-                                arguments: {'bookId': book.id},
-                              );
-                            },
-                            icon: const Icon(Icons.play_circle_fill),
-                            label: const Text('Listen Now'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  dominantColor ?? const Color(0xFF402e7a),
-                              foregroundColor: textColor ?? Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                              image: DecorationImage(
+                                image: NetworkImage(book.authorImageUrl),
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Book details
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 16),
-
-                          // Title
-                          Text(
-                            book.title,
-                            style: GoogleFonts.poppins(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Author
-                          Text(
-                            book.author,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Category with icon
-                          Row(
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildCategoryIcon(book.genre),
-                              const SizedBox(width: 8),
                               Text(
-                                book.genre,
+                                book.authorDescription,
                                 style: GoogleFonts.poppins(
-                                  color: Colors.grey[600],
                                   fontSize: 16,
+                                  color: Colors.grey[800],
+                                  height: 1.6,
                                 ),
+                                maxLines: _showAuthorDescription ? null : 4,
+                                overflow:
+                                    _showAuthorDescription
+                                        ? null
+                                        : TextOverflow.ellipsis,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-
-                          // About section with See More button
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "About this audiobook",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _showAboutDescription =
-                                        !_showAboutDescription;
-                                  });
-                                },
-                                child: Text(
-                                  _showAboutDescription
-                                      ? "See Less"
-                                      : "See More",
-                                  style: GoogleFonts.poppins(
-                                    color: const Color(0xFF402e7a),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            book.description,
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: Colors.grey[800],
-                              height: 1.6,
-                            ),
-                            maxLines: _showAboutDescription ? null : 4,
-                            overflow:
-                                _showAboutDescription
-                                    ? null
-                                    : TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 32),
-
-                          // About Author section with See More button
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "About the Author",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () {
                                   setState(() {
                                     _showAuthorDescription =
                                         !_showAuthorDescription;
@@ -515,67 +591,47 @@ class _BookInfoPageState extends State<BookInfoPage> {
                                 },
                                 child: Text(
                                   _showAuthorDescription
-                                      ? "See Less"
-                                      : "See More",
-                                  style: GoogleFonts.poppins(
-                                    color: const Color(0xFF402e7a),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (book.authorImageUrl.isNotEmpty)
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  margin: const EdgeInsets.only(right: 16),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                    image: DecorationImage(
-                                      image: NetworkImage(book.authorImageUrl),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              Expanded(
-                                child: Text(
-                                  book.authorDescription,
+                                      ? 'See less'
+                                      : 'See more',
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
-                                    color: Colors.grey[800],
-                                    height: 1.6,
+                                    color:
+                                        dominantColor ??
+                                        const Color(0xFF402e7a),
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  maxLines: _showAuthorDescription ? null : 4,
-                                  overflow:
-                                      _showAuthorDescription
-                                          ? null
-                                          : TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                    const SizedBox(height: 40),
+                  ]),
                 ),
               ),
             ],
-          );
-        },
+          ),
+
+          // Fixed action buttons when scrolled
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            top:
+                showTitle
+                    ? kToolbarHeight + MediaQuery.of(context).padding.top
+                    : -100, // Move off screen when not showing
+            left: 0,
+            right: 0,
+            child: Container(
+              color:
+                  dominantColor?.withOpacity(0.95) ??
+                  const Color(0xFF402e7a).withOpacity(0.95),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: actionButtons,
+            ),
+          ),
+        ],
       ),
     );
   }
