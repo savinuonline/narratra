@@ -100,8 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverPersistentHeader(
           pinned: false,
           delegate: TrendingHeaderDelegate(
-            minHeight: 280,
-            maxHeight: 280,
+            minHeight: 320,
+            maxHeight: 320,
             child: Container(
               color: const Color.fromRGBO(199, 217, 221, 1),
               child: _TrendingSection(booksFuture: trendingBooksFuture),
