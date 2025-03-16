@@ -377,7 +377,7 @@ class RewardsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Rewards"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
       ),
       body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
@@ -393,7 +393,7 @@ class SubscriptionPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Subscription"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
       ),
       body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
