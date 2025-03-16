@@ -481,4 +481,53 @@ class FirebaseService {
                   .toList(),
         );
   }
+
+  Future<bool> isBookBookmarked(String userId, String bookId) async {
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('bookmarks')
+            .doc(bookId)
+            .get();
+    return doc.exists;
+  }
+
+  Future<bool> createPlaylist(
+    String userId,
+    String playlistName,
+    String bookId,
+  ) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('playlists')
+          .add({
+            'name': playlistName,
+            'books': [bookId],
+            'createdAt': DateTime.now(),
+          });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> incrementBookLikeCount(String bookId) async {
+    final doc = await _firestore.collection('books').doc(bookId).get();
+    if (doc.exists) {
+      final data = doc.data()!;
+      final likeCount = data['likeCount'] ?? 0;
+      // Increment the book's like count by 1
+    }
+  }
+
+  Future<void> decrementBookLikeCount(String bookId) async {
+    final doc = await _firestore.collection('books').doc(bookId).get();
+    if (doc.exists) {
+      final data = doc.data()!;
+      final likeCount = data['likeCount'] ?? 0;
+    }
+  }
 }

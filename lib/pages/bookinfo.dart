@@ -19,7 +19,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
   final FirebaseService _firebaseService = FirebaseService();
   final ScrollController _scrollController = ScrollController();
   bool isLiked = false;
+  bool isBookmarked = false;
   bool isLoading = false;
+  bool isBookmarkLoading = false;
   Color? dominantColor;
   Color? textColor;
   double _scrollOffset = 0.0;
@@ -28,6 +30,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
   Book? _book;
   bool _isLoadingBook = true;
   String? _errorMessage;
+  final TextEditingController _playlistNameController = TextEditingController();
 
   @override
   void initState() {
@@ -63,6 +66,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _playlistNameController.dispose();
     super.dispose();
   }
 
@@ -103,9 +107,14 @@ class _BookInfoPageState extends State<BookInfoPage> {
   Future<void> _checkIfLiked() async {
     final userId = 'USER_ID'; // Replace with actual user ID
     final liked = await _firebaseService.isBookLiked(userId, widget.bookId);
+    final bookmarked = await _firebaseService.isBookBookmarked(
+      userId,
+      widget.bookId,
+    );
     if (mounted) {
       setState(() {
         isLiked = liked;
+        isBookmarked = bookmarked;
       });
     }
   }
@@ -129,9 +138,18 @@ class _BookInfoPageState extends State<BookInfoPage> {
           isLiked = liked;
         });
 
+        // Update like count in Firebase
+        if (liked) {
+          await _firebaseService.incrementBookLikeCount(widget.bookId);
+        } else {
+          await _firebaseService.decrementBookLikeCount(widget.bookId);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(liked ? 'Added to library' : 'Removed from library'),
+            content: Text(
+              liked ? 'Added to favorites' : 'Removed from favorites',
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -140,7 +158,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Error updating library'),
+            content: Text('Error updating favorites'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -149,6 +167,96 @@ class _BookInfoPageState extends State<BookInfoPage> {
       if (mounted) {
         setState(() {
           isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _showCreatePlaylistDialog() async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Create Playlist',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: _playlistNameController,
+            decoration: InputDecoration(
+              hintText: 'Enter playlist name',
+              hintStyle: GoogleFonts.poppins(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _playlistNameController.clear();
+              },
+              child: Text('Cancel', style: GoogleFonts.poppins()),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _createPlaylist(_playlistNameController.text);
+                Navigator.pop(context);
+                _playlistNameController.clear();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: dominantColor),
+              child: Text(
+                'Create',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _createPlaylist(String playlistName) async {
+    if (isBookmarkLoading) return;
+
+    setState(() {
+      isBookmarkLoading = true;
+    });
+
+    try {
+      final userId = 'USER_ID'; // Replace with actual user ID
+      final success = await _firebaseService.createPlaylist(
+        userId,
+        playlistName,
+        widget.bookId,
+      );
+
+      if (mounted && success) {
+        setState(() {
+          isBookmarked = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added to playlist: $playlistName'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error creating playlist'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isBookmarkLoading = false;
         });
       }
     }
@@ -229,11 +337,51 @@ class _BookInfoPageState extends State<BookInfoPage> {
 
     // Store action buttons in a variable to reuse them
     final actionButtons = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        // Bookmark (Playlist) button
         Container(
-          width: 56,
-          height: 80,
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon:
+                isBookmarkLoading
+                    ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ),
+                    )
+                    : Icon(
+                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                      size: 28,
+                    ),
+            onPressed: _showCreatePlaylistDialog,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // Like (Heart) button
+        Container(
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
@@ -249,8 +397,8 @@ class _BookInfoPageState extends State<BookInfoPage> {
             icon:
                 isLoading
                     ? const SizedBox(
-                      width: 22,
-                      height: 22,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 1,
                         valueColor: AlwaysStoppedAnimation<Color>(
@@ -259,17 +407,22 @@ class _BookInfoPageState extends State<BookInfoPage> {
                       ),
                     )
                     : Icon(
-                      isLiked
-                          ? Icons.bookmark
-                          : Icons.bookmark_outline_outlined,
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      size: 35,
+                      isLiked ? Icons.favorite : Icons.favorite_border_outlined,
+                      color:
+                          isLiked
+                              ? Colors.red
+                              : const Color.fromARGB(255, 0, 0, 0),
+                      size: 28,
                     ),
             onPressed: _toggleLike,
           ),
         ),
-        const SizedBox(width: 120),
-        Expanded(
+
+        const SizedBox(width: 75),
+
+        // Listen Now button
+        SizedBox(
+          width: 160,
           child: ElevatedButton.icon(
             onPressed: () {
               Navigator.pushNamed(
@@ -290,7 +443,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
               backgroundColor:
                   dominantColor ?? const Color.fromARGB(255, 249, 249, 249),
               foregroundColor: textColor ?? const Color.fromARGB(255, 0, 0, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -698,8 +851,9 @@ class _BookInfoPageState extends State<BookInfoPage> {
     final threshold =
         (expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top) *
         0.85;
-    final minPosition = MediaQuery.of(context).padding.top + kToolbarHeight;
-    final maxPosition = expandedHeight - 32; // 32 is the padding of the buttons
+    final minPosition =
+        MediaQuery.of(context).padding.top + kToolbarHeight + 15;
+    final maxPosition = expandedHeight - 20;
 
     if (_scrollOffset <= 0) {
       // At the top of the page
