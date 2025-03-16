@@ -106,7 +106,7 @@ class ProfilePage extends StatelessWidget {
               title: "Favorites",
               icon: Icons.favorite_border,
               onTap: () {
-                // Action for Favorites
+                _navigateToFavoritesPage(context);
               },
             ),
             const SizedBox(height: 10), // Consistent gap
@@ -114,7 +114,7 @@ class ProfilePage extends StatelessWidget {
               title: "Downloads",
               icon: Icons.download,
               onTap: () {
-                // Action for Downloads
+                _navigateToDownloadsPage(context);
               },
             ),
             const SizedBox(height: 10), // Consistent gap
@@ -122,7 +122,7 @@ class ProfilePage extends StatelessWidget {
               title: "Rewards", // Rewards option added
               icon: Icons.star_border,
               onTap: () {
-                // Action for Rewards (no navigation)
+                _navigateToRewardsPage(context); // Navigation to Rewards page
               },
             ),
             const SizedBox(height: 10), // Consistent gap
@@ -136,6 +136,30 @@ class ProfilePage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Method to navigate to the Favorites page
+  void _navigateToFavoritesPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FavoritesPage()),
+    );
+  }
+
+  // Method to navigate to the Downloads page
+  void _navigateToDownloadsPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DownloadsPage()),
+    );
+  }
+
+  // Method to navigate to the Rewards page
+  void _navigateToRewardsPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RewardsPage()),
     );
   }
 
@@ -250,6 +274,55 @@ class LanguageSelectionTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class DownloadsPage extends StatelessWidget {
+  const DownloadsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Downloads"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: const Center(
+        child: Text("No downloads available.", style: TextStyle(fontSize: 18)),
+      ),
+    );
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  const FavoritesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Favorites"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: const Center(
+        child: Text("No favorites yet.", style: TextStyle(fontSize: 18)),
+      ),
+    );
+  }
+}
+
+class RewardsPage extends StatelessWidget {
+  const RewardsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Rewards"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
   }
 }
