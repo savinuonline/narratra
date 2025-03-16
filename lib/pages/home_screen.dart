@@ -4,6 +4,36 @@ import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
 
+// A custom delegate to control the Trending section header
+class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  TrendingHeaderDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  @override
+  double get minExtent => minHeight;
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant TrendingHeaderDelegate oldDelegate) {
+    return oldDelegate.minHeight != minHeight ||
+        oldDelegate.maxHeight != maxHeight ||
+        oldDelegate.child != child;
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   final UserModel user;
 
