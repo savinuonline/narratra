@@ -148,7 +148,13 @@ class ProfilePage extends StatelessWidget {
                   Navigator.pop(context);
                 },
               ),
-              // You can add more languages here
+              ListTile(
+                title: const Text("Sinhala"),
+                onTap: () {
+                  // Logic to change language to Sinhala
+                  Navigator.pop(context);
+                },
+              ),
             ],
           ),
         );
