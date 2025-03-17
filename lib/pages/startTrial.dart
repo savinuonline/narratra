@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -28,8 +24,10 @@ class _TrialPageState extends State<TrialPage> {
 
   void _startTrial() {
     setState(() {
+      
+    });(() {
       _trialStarted = true;
-      _trialEndDate = DateTime.now().add(Duration(days: 7)); // 7-day trial
+      _trialEndDate = DateTime.now().add(Duration(days: 4));
     });
   }
 
@@ -46,7 +44,7 @@ class _TrialPageState extends State<TrialPage> {
             if (_trialStarted)
               Text(
                 'Trial ends on: ${_trialEndDate!.toLocal()}',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 20),
               )
             else
               Text(
