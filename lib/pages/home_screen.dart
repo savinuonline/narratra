@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: Text(
             'narratra.',
             style: TextStyle(
-              fontFamily: 'NarratraFont', // Your custom font family name
+              fontFamily: 'NarratraFont',
               fontSize: 24,
               fontWeight: FontWeight.w600,
               color: Colors.black,

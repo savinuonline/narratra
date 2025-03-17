@@ -632,4 +632,17 @@ class FirebaseService {
       rethrow;
     }
   }
+
+  Stream<List<Book>> getBooksByGenre(String genre) {
+    return _firestore
+        .collection('books')
+        .doc(genre)
+        .collection('books')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Book.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    });
+  }
 }
