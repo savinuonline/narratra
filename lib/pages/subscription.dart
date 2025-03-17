@@ -14,6 +14,15 @@ class SubscriptionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+            onPressed: () {
+            // Handle the back button press
+            Navigator.pop(context); // Navigate back to the previous screen
+          },
+        )
+      ),
       body: Column(
         children: [
           // Add "Become a Premium" text at the top
@@ -59,6 +68,7 @@ Expanded(
                 SubscriptionPlanCard(
                   title: 'Premium',
                   price: 'Rs.699/month',
+
                   features: [
                     'Unlimited access to all audiobooks',
                     'High Quality audio (330kps)',
@@ -106,7 +116,7 @@ class SubscriptionPlanCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.all(10),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
