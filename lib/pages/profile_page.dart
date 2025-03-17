@@ -105,133 +105,47 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Favorites",
               icon: Icons.favorite_border,
-              onTap: () {
-                _navigateToFavoritesPage(context);
-              },
+              onTap: () {},
             ),
-            const SizedBox(height: 10), // Consistent gap
-            FeatureTile(
-              title: "Downloads",
-              icon: Icons.download,
-              onTap: () {
-                _navigateToDownloadsPage(context);
-              },
-            ),
-            const SizedBox(height: 10), // Consistent gap
+            const SizedBox(height: 10),
+            FeatureTile(title: "Downloads", icon: Icons.download, onTap: () {}),
+            const SizedBox(height: 10),
             FeatureTile(
               title: "Rewards",
               icon: Icons.star_border,
-              onTap: () {
-                _navigateToRewardsPage(context);
-              },
+              onTap: () {},
             ),
-            const SizedBox(height: 10), // Consistent gap
-            LanguageSelectionTile(
+            const SizedBox(height: 10),
+            FeatureTile(
               title: "Language Selection",
               icon: Icons.language,
-              onTap: () {
-                _showLanguageDialog(context);
-              },
+              onTap: () {},
             ),
-            const SizedBox(height: 10), // Consistent gap
-            SubscriptionTile(
-              // Subscription feature added
+            const SizedBox(height: 10),
+            FeatureTile(
               title: "Subscription",
               icon: Icons.subscriptions,
-              onTap: () {
-                // Navigate to Subscription page
-                _navigateToSubscriptionPage(context);
-              },
+              onTap: () {},
             ),
-            const SizedBox(height: 10), // Consistent gap
-            FeatureTile(
-              title: "History",
-              icon: Icons.history,
-              onTap: () {
-                _navigateToHistoryPage(context);
-              },
+            const SizedBox(height: 10),
+            FeatureTile(title: "History", icon: Icons.history, onTap: () {}),
+            const SizedBox(height: 30), // Space before About section
+            const Text(
+              "About",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              " ",
+              style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  // Method to navigate to the Favorites page
-  void _navigateToFavoritesPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FavoritesPage()),
-    );
-  }
-
-  // Method to navigate to the Downloads page
-  void _navigateToDownloadsPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const DownloadsPage()),
-    );
-  }
-
-  // Method to navigate to the Rewards page
-  void _navigateToRewardsPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RewardsPage()),
-    );
-  }
-
-  // Method to navigate to the Subscription page
-  void _navigateToSubscriptionPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SubscriptionPage()),
-    );
-  }
-
-  // Method to navigate to the History page
-  void _navigateToHistoryPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HistoryPage()),
-    );
-  }
-
-  // Method to show language selection dialog
-  void _showLanguageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Select Language"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text("English"),
-                onTap: () {
-                  // Logic to change language to English
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text("Sinhala"),
-                onTap: () {
-                  // Logic to change language to Sinhala
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text("Tamil"),
-                onTap: () {
-                  // Logic to change language to Tamil
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
@@ -259,7 +173,7 @@ class FeatureTile extends StatelessWidget {
             const SizedBox(width: 20),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,
@@ -270,159 +184,6 @@ class FeatureTile extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class LanguageSelectionTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const LanguageSelectionTile({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.blueAccent),
-            const SizedBox(width: 20),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            const Spacer(),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SubscriptionTile extends StatelessWidget {
-  // Subscription Tile
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const SubscriptionTile({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.blueAccent),
-            const SizedBox(width: 20),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            const Spacer(),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class HistoryPage extends StatelessWidget {
-  const HistoryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("History"),
-        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
-      ),
-      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
-    );
-  }
-}
-
-class DownloadsPage extends StatelessWidget {
-  const DownloadsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Downloads"),
-        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
-      ),
-      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
-    );
-  }
-}
-
-class FavoritesPage extends StatelessWidget {
-  const FavoritesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Favorites"),
-        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
-      ),
-      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
-    );
-  }
-}
-
-class RewardsPage extends StatelessWidget {
-  const RewardsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Rewards"),
-        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
-      ),
-      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
-    );
-  }
-}
-
-class SubscriptionPage extends StatelessWidget {
-  // Subscription page added
-  const SubscriptionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Subscription"),
-        backgroundColor: const Color.fromARGB(255, 159, 173, 197),
-      ),
-      body: const Center(child: Text(" ", style: TextStyle(fontSize: 18))),
     );
   }
 }
