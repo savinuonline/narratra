@@ -28,7 +28,6 @@ class ProfilePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              // Navigate to settings page
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsPage()),
@@ -45,7 +44,6 @@ class ProfilePage extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Profile Picture (Left Side)
                 Stack(
                   children: [
                     const CircleAvatar(
@@ -72,8 +70,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(width: 20), // Space between profile and text
-                // Name & Edit Profile (Right Side)
+                const SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -113,7 +110,8 @@ class ProfilePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FavoritesPage(),
+                    builder:
+                        (context) => const PlaceholderPage(title: "Favorites"),
                   ),
                 );
               },
@@ -126,7 +124,8 @@ class ProfilePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const DownloadsPage(),
+                    builder:
+                        (context) => const PlaceholderPage(title: "Downloads"),
                   ),
                 );
               },
@@ -138,7 +137,10 @@ class ProfilePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RewardsPage()),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => const PlaceholderPage(title: "Rewards"),
+                  ),
                 );
               },
             ),
@@ -150,7 +152,9 @@ class ProfilePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LanguageSelectionPage(),
+                    builder:
+                        (context) =>
+                            const PlaceholderPage(title: "Language Selection"),
                   ),
                 );
               },
@@ -163,7 +167,9 @@ class ProfilePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SubscriptionPage(),
+                    builder:
+                        (context) =>
+                            const PlaceholderPage(title: "Subscription"),
                   ),
                 );
               },
@@ -175,11 +181,14 @@ class ProfilePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => const PlaceholderPage(title: "History"),
+                  ),
                 );
               },
             ),
-            const SizedBox(height: 30), // Space before About section
+            const SizedBox(height: 30),
             const Text(
               "About",
               style: TextStyle(
@@ -189,10 +198,17 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              "Narratra is an audiobook platform designed to provide high-quality listening experiences for users. "
-              "We aim to make books more accessible and enjoyable through our innovative features and user-friendly interface.",
-              style: TextStyle(fontSize: 14, color: Colors.black54),
+            FeatureTile(
+              title: "Privacy Policy",
+              icon: Icons.privacy_tip,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivacyPolicyPage(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -210,6 +226,7 @@ class FeatureTile extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.onTap,
+    super.key,
   });
 
   @override
@@ -240,74 +257,27 @@ class FeatureTile extends StatelessWidget {
 }
 
 // Placeholder pages
-class FavoritesPage extends StatelessWidget {
-  const FavoritesPage({super.key});
+class PlaceholderPage extends StatelessWidget {
+  final String title;
+  const PlaceholderPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Favorites")),
-      body: const Center(child: Text("Favorites Page")),
+      appBar: AppBar(title: Text(title)),
+      body: Center(child: Text("$title Page Content Here")),
     );
   }
 }
 
-class DownloadsPage extends StatelessWidget {
-  const DownloadsPage({super.key});
+class PrivacyPolicyPage extends StatelessWidget {
+  const PrivacyPolicyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Downloads")),
-      body: const Center(child: Text("Downloads Page")),
-    );
-  }
-}
-
-class RewardsPage extends StatelessWidget {
-  const RewardsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Rewards")),
-      body: const Center(child: Text("Rewards Page")),
-    );
-  }
-}
-
-class LanguageSelectionPage extends StatelessWidget {
-  const LanguageSelectionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Language Selection")),
-      body: const Center(child: Text("Language Selection Page")),
-    );
-  }
-}
-
-class SubscriptionPage extends StatelessWidget {
-  const SubscriptionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Subscription")),
-      body: const Center(child: Text("Subscription Page")),
-    );
-  }
-}
-
-class HistoryPage extends StatelessWidget {
-  const HistoryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("History")),
-      body: const Center(child: Text("History Page")),
+      appBar: AppBar(title: const Text("Privacy Policy")),
+      body: const Center(child: Text("Privacy Policy Content Here")),
     );
   }
 }
