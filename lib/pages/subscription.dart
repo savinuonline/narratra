@@ -114,12 +114,12 @@ class SubscriptionPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(10),
+            margin: EdgeInsets.all(10),
       color: title == 'Premium' ? Colors.blue : Colors.white, // Set background color for Premium card
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, // Center content for all cards
           children: [
             Text(
               title,
@@ -130,11 +130,27 @@ class SubscriptionPlanCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            Text(
-              price,
-              style: TextStyle(
-                fontSize: 18,
-                color: title == 'Premium' ? Colors.white : Colors.grey, // Set text color for Premium card
+            // Use RichText to make the numeric part of the price bold for all cards
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: price.split('/')[0], // Extract the numeric part (e.g., "Rs.699")
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold, // Make the numeric part bold
+                      color: title == 'Premium' ? Colors.white : const Color.fromARGB(255, 0, 0, 0), // Set text color for Premium card
+                    ),
+                  ),
+                  TextSpan(
+                    text: '/${price.split('/')[1]}', // Add the "/month" part
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal, // Keep "/month" normal
+                      color: title == 'Premium' ? Colors.white : Colors.grey, // Set text color for Premium card
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 16),
