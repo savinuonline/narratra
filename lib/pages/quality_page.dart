@@ -35,9 +35,9 @@ class QualityPage extends StatelessWidget {
                 const SizedBox(height:10),
                 _buildHeaderRow(),
                 const Divider(),
-                _buildDataRow("360p", context, "600MB"),
-                _buildDataRow("480p", context,  "1.2GB"),
-                _buildDataRow("720p", context, "2.4GB"),
+                _buildDataRow("360kbps", context, "600MB"),
+                _buildDataRow("480kbps", context,  "1.2GB"),
+                _buildDataRow("720kbps", context, "2.4GB"),
                  // Separates header from data rows
                 
               ],
