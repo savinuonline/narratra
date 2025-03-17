@@ -28,14 +28,16 @@ class FirebaseService {
           .collection('books');
 
       // Query docs where likeCount >= 1, ordered descending by likeCount
-      final querySnapshot = await subcollectionRef
-          .where('likeCount', isGreaterThanOrEqualTo: 1)
-          .orderBy('likeCount', descending: true)
-          .get();
+      final querySnapshot =
+          await subcollectionRef
+              .where('likeCount', isGreaterThanOrEqualTo: 1)
+              .orderBy('likeCount', descending: true)
+              .get();
 
-      final catBooks = querySnapshot.docs
-          .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
-          .toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       trending.addAll(catBooks);
     }
 
@@ -61,9 +63,12 @@ class FirebaseService {
           .doc(genre)
           .collection('books');
       final querySnapshot = await subcollectionRef.get();
-      final genreBooks = querySnapshot.docs
-          .map((doc) => Book.fromMap({...doc.data(), 'genre': genre}, doc.id))
-          .toList();
+      final genreBooks =
+          querySnapshot.docs
+              .map(
+                (doc) => Book.fromMap({...doc.data(), 'genre': genre}, doc.id),
+              )
+              .toList();
       recommended.addAll(genreBooks);
     }
 
@@ -81,9 +86,10 @@ class FirebaseService {
           .doc(cat)
           .collection('books');
       final querySnapshot = await subcollectionRef.get();
-      final catBooks = querySnapshot.docs
-          .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
-          .toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       allBooks.addAll(catBooks);
     }
 
@@ -103,11 +109,12 @@ class FirebaseService {
           .collection('books');
 
       final querySnapshot =
-      await subcollectionRef.where('isFree', isEqualTo: true).get();
+          await subcollectionRef.where('isFree', isEqualTo: true).get();
 
-      final catBooks = querySnapshot.docs
-          .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
-          .toList();
+      final catBooks =
+          querySnapshot.docs
+              .map((doc) => Book.fromMap({...doc.data(), 'genre': cat}, doc.id))
+              .toList();
       free.addAll(catBooks);
     }
 
@@ -133,12 +140,13 @@ class FirebaseService {
       // Search through all genre collections
       for (final genre in categories) {
         print('Checking genre: $genre');
-        final bookDoc = await _firestore
-            .collection('books')
-            .doc(genre)
-            .collection('books')
-            .doc(bookId)
-            .get();
+        final bookDoc =
+            await _firestore
+                .collection('books')
+                .doc(genre)
+                .collection('books')
+                .doc(bookId)
+                .get();
 
         if (bookDoc.exists) {
           print('Found book in genre: $genre');
@@ -151,7 +159,9 @@ class FirebaseService {
           final mergedData = {
             ...bookData,
             'genre': genre,
-            'authorDescription': authorDetails?['description'] ?? 'No author description available.',
+            'authorDescription':
+                authorDetails?['description'] ??
+                'No author description available.',
             'authorImageUrl': authorDetails?['imageUrl'] ?? '',
           };
 
@@ -170,11 +180,12 @@ class FirebaseService {
     int highestId = 0;
 
     for (final genre in categories) {
-      final snapshot = await _firestore
-          .collection('books')
-          .doc(genre)
-          .collection('books')
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('books')
+              .doc(genre)
+              .collection('books')
+              .get();
 
       for (final doc in snapshot.docs) {
         final currentId = int.tryParse(doc.id) ?? 0;
@@ -279,26 +290,27 @@ class FirebaseService {
         .collection('liked_books')
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> likedBooks = [];
-      for (var doc in snapshot.docs) {
-        final bookId = doc.id;
-        final book = await getBookById(bookId);
-        if (book != null) {
-          likedBooks.add(book);
-        }
-      }
-      return likedBooks;
-    });
+          List<Book> likedBooks = [];
+          for (var doc in snapshot.docs) {
+            final bookId = doc.id;
+            final book = await getBookById(bookId);
+            if (book != null) {
+              likedBooks.add(book);
+            }
+          }
+          return likedBooks;
+        });
   }
 
   /// Check if a book is liked by the user.
   Future<bool> isBookLiked(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('liked_books')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('liked_books')
+            .doc(bookId)
+            .get();
 
     return doc.exists;
   }
@@ -335,9 +347,7 @@ class FirebaseService {
 
       final docSnap = await docRef.get();
       if (docSnap.exists) {
-        await docRef.update({
-          'likeCount': FieldValue.increment(1),
-        });
+        await docRef.update({'likeCount': FieldValue.increment(1)});
         break;
       }
     }
@@ -354,9 +364,7 @@ class FirebaseService {
 
       final docSnap = await docRef.get();
       if (docSnap.exists) {
-        await docRef.update({
-          'likeCount': FieldValue.increment(-1),
-        });
+        await docRef.update({'likeCount': FieldValue.increment(-1)});
         break;
       }
     }
@@ -370,26 +378,27 @@ class FirebaseService {
         .collection('saved_audiobooks')
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> books = [];
-      for (var doc in snapshot.docs) {
-        String bookId = doc.id;
-        Book? book = await getBookById(bookId);
-        if (book != null) {
-          books.add(book);
-        }
-      }
-      return books;
-    });
+          List<Book> books = [];
+          for (var doc in snapshot.docs) {
+            String bookId = doc.id;
+            Book? book = await getBookById(bookId);
+            if (book != null) {
+              books.add(book);
+            }
+          }
+          return books;
+        });
   }
 
   /// Check if an audiobook is saved by the user.
   Future<bool> isAudiobookSaved(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('saved_audiobooks')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('saved_audiobooks')
+            .doc(bookId)
+            .get();
     return doc.exists;
   }
 
@@ -411,10 +420,10 @@ class FirebaseService {
 
   /// Save listening progress for an audiobook.
   Future<void> saveListeningProgress(
-      String userId,
-      String bookId,
-      Duration position,
-      ) async {
+    String userId,
+    String bookId,
+    Duration position,
+  ) async {
     await _firestore
         .collection('users')
         .doc(userId)
@@ -425,12 +434,13 @@ class FirebaseService {
 
   /// Get listening progress for an audiobook.
   Future<Duration?> getListeningProgress(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('listening_progress')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('listening_progress')
+            .doc(bookId)
+            .get();
 
     if (doc.exists && doc.data()?['position'] != null) {
       return Duration(seconds: doc.data()!['position']);
@@ -447,16 +457,16 @@ class FirebaseService {
         .orderBy('updatedAt', descending: true)
         .snapshots()
         .asyncMap((snapshot) async {
-      List<Book> books = [];
-      for (var doc in snapshot.docs) {
-        String bookId = doc.id;
-        Book? book = await getBookById(bookId);
-        if (book != null) {
-          books.add(book);
-        }
-      }
-      return books;
-    });
+          List<Book> books = [];
+          for (var doc in snapshot.docs) {
+            String bookId = doc.id;
+            Book? book = await getBookById(bookId);
+            if (book != null) {
+              books.add(book);
+            }
+          }
+          return books;
+        });
   }
 
   /// Get author details by name - needed for book details.
@@ -478,17 +488,20 @@ class FirebaseService {
         .snapshots()
         .map(
           (snapshot) =>
-          snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList(),
-    );
+              snapshot.docs
+                  .map((doc) => {'id': doc.id, ...doc.data()})
+                  .toList(),
+        );
   }
 
   Future<bool> isBookBookmarked(String userId, String bookId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('bookmarks')
-        .doc(bookId)
-        .get();
+    final doc =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('bookmarks')
+            .doc(bookId)
+            .get();
     return doc.exists;
   }
 
@@ -506,7 +519,7 @@ class FirebaseService {
           playlistsSnapshot.docs.map((doc) async {
             final playlistData = doc.data() as Map<String, dynamic>;
             final bookIds = List<String>.from(playlistData['books'] ?? []);
-            
+
             // Fetch all books in the playlist
             final books = await Future.wait(
               bookIds.map((bookId) async {
@@ -516,7 +529,8 @@ class FirebaseService {
             );
 
             // Filter out null books and create playlist map
-            final validBooks = books.where((book) => book != null).cast<Book>().toList();
+            final validBooks =
+                books.where((book) => book != null).cast<Book>().toList();
 
             return {
               'id': doc.id,
@@ -527,10 +541,7 @@ class FirebaseService {
           }),
         );
 
-        return {
-          'likedBooks': likedBooks,
-          'playlists': playlists,
-        };
+        return {'likedBooks': likedBooks, 'playlists': playlists};
       },
     ).asyncMap((future) => future);
   }
@@ -640,9 +651,12 @@ class FirebaseService {
         .collection('books')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Book.fromMap(doc.data() as Map<String, dynamic>, doc.id))
-          .toList();
-    });
+          return snapshot.docs
+              .map(
+                (doc) =>
+                    Book.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+              )
+              .toList();
+        });
   }
 }

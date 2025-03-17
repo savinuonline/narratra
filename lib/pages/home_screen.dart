@@ -79,8 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Removed the leading property
           title: Text(
             'narratra.',
-            style: TextStyle(
-              fontFamily: 'NarratraFont',
+            style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.w600,
               color: Colors.black,
