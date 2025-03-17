@@ -1,18 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: PricingPage(),
-    );
-  }
-}
-
 class PricingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -28,7 +15,7 @@ class PricingPage extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  'Basic',
+                  'Free',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -37,7 +24,7 @@ class PricingPage extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  '\$19',
+                  '\Rs.0',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
@@ -48,7 +35,7 @@ class PricingPage extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Text(
-                  'For solo entrepreneurs',
+                  'Perfect for Casual Listeners',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.grey,
@@ -56,11 +43,11 @@ class PricingPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 40),
-              FeatureItem(text: '2% 3rd-party payment providers'),
-              FeatureItem(text: '10 inventory locations'),
-              FeatureItem(text: '24/7 chat support'),
-              FeatureItem(text: 'Localized global selling (3 markets)'),
-              FeatureItem(text: 'POS Lite'),
+              FeatureItem(text: 'Access to selected audiobooks'),
+              FeatureItem(text: 'Basic audio quality'),
+              FeatureItem(text: 'Ad-supported listening'),
+              FeatureItem(text: 'Mobile app access'),
+              FeatureItem(text: 'Basic recommendations'),
               SizedBox(height: 40),
               Center(
                 child: ElevatedButton(
@@ -75,7 +62,7 @@ class PricingPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text('Start 7-day free trial'),
+                  child: Text('Subscribe'),
                 ),
               ),
             ],
