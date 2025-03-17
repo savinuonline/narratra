@@ -142,7 +142,7 @@ class SubscriptionPlanCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  Icon(Icons.check, color: title == 'Premium' ? Colors.white : Colors.green), // Set icon color for Premium card
+                  Icon(Icons.check, color: title == 'Premium' ? Colors.white : const Color.fromARGB(255, 0, 0, 0)), // Set icon color for Premium card
                   SizedBox(width: 8),
                   Text(
                     feature,
