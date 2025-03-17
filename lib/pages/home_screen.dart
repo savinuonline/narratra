@@ -23,10 +23,10 @@ class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
+      BuildContext context,
+      double shrinkOffset,
+      bool overlapsContent,
+      ) {
     return child;
   }
 
@@ -58,9 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
-      widget.user.uid,
-    );
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
@@ -129,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         // Add bottom padding to account for navigation bar
         SliverToBoxAdapter(
-          child: SizedBox(height: 80), // Height of the navigation bar
+          child: SizedBox(height: 80),
         ),
       ],
     );
@@ -190,8 +188,7 @@ class _TrendingSection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder:
-                      (context, index) => const SizedBox(width: 16),
+                  separatorBuilder: (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -278,8 +275,7 @@ class CategorySection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder:
-                      (context, index) => const SizedBox(width: 16),
+                  separatorBuilder: (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -310,6 +306,18 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If the imageUrl does not start with "http" and is not an asset path (e.g., "lib/"),
+    // we assume it is a filename in your Firebase Storage "Book covers" folder.
+    String displayImageUrl;
+    if (book.imageUrl.startsWith('lib/')) {
+      displayImageUrl = book.imageUrl;
+    } else if (!book.imageUrl.startsWith('http')) {
+      displayImageUrl =
+      "https://firebasestorage.googleapis.com/v0/b/narratradb.firebasestorage.app/o/Book%20covers%2F${Uri.encodeComponent(book.imageUrl)}?alt=media";
+    } else {
+      displayImageUrl = book.imageUrl;
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,32 +364,24 @@ class BookCard extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child:
-                        book.imageUrl.startsWith('lib/')
-                            ? Image.asset(
-                              book.imageUrl,
-                              width: 100,
-                              height: 160,
-                              fit: BoxFit.cover,
-                            )
-                            : Image.network(
-                              book.imageUrl,
-                              width: 100,
-                              height: 160,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey[200],
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.book,
-                                      size: 30,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                );
-                              },
+                    child: Image.network(
+                      displayImageUrl,
+                      width: 100,
+                      height: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(
+                              Icons.book,
+                              size: 30,
+                              color: Colors.grey,
                             ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
