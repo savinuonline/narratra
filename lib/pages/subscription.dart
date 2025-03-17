@@ -1,170 +1,96 @@
 import 'package:flutter/material.dart';
 
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: SubscriptionPage(),
+    );
+  }
+}
+
 class SubscriptionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-  
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-      
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.arrow_back, color: Colors.black,),
-              Center(
-                child: Text(
-                  'Become a Premium',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black, // Adjust color if needed
-                  ),
-                ),
-              ),
-              SizedBox(height: 10,),
-              Center(
-                child: Text(
-                  'Get access to the Premium Features of Narratra and feel the Book',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
-              SizedBox(height: 40),
-              SubscriptionOption(
-                title: 'Free',
-                price: 'Rs.0/month',
-                description: 'Perfect for Casual Listeners',
-              ),
-              Divider(height: 20, thickness: 1),
-              SubscriptionOption(
-                title: 'Premium',
-                price: 'Rs.699/month',
-                description: 'Most Popular Choice',
-              ),
-              Divider(height: 20, thickness: 1),
-              SubscriptionOption(
-                title: 'Premium (Family)',
-                price: 'Rs.1299/month',
-                description: 'Best Values for Families',
-              ),
-              Divider(height: 20, thickness: 1),
-              const Center(
-                child: Text(
-                  'Cancel Anytime ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  'Restore Purchases ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
+      appBar: AppBar(
+        title: Text('Choose Your Plan'),
+      ),
+      body: ListView(
+        children: [
+          SubscriptionPlanCard(
+            title: 'Free',
+            price: 'Rs.0/month',
+            features: [
+              'Access to Selected Audiobooks',
+              'Basic Audio Quality',
+              'Ad-Supported Listening',
+              'Mobile App Access',
+              'Basic Recommendations',
             ],
           ),
-        ),
+          SubscriptionPlanCard(
+            title: 'Premium',
+            price: 'Rs.699/month',
+            features: [
+              'Unlimited access to all audiobooks',
+              'High Quality audio (330kps)',
+              'Ad-free Experience',
+              'Offline Listening',
+              'Adaptive recommendations',
+              'Multiple voice options',
+              'Priority access to new features',
+            ],
+          ),
+          // if there are more packages can be added here
+        ],
       ),
     );
   }
 }
 
-class BoxWithFeatureButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 500, // Adjust the width as needed
-      padding: EdgeInsets.all(40), // Adjust padding as needed
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-    );
-  }
-}
-
-class SubscriptionOption extends StatelessWidget {
+class SubscriptionPlanCard extends StatelessWidget {
   final String title;
   final String price;
-  final String description;
+  final List<String> features;
 
-  SubscriptionOption({
+  SubscriptionPlanCard({
     required this.title,
     required this.price,
-    required this.description,
+    required this.features,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        height: 180, // Set a fixed height for the card
-        child: Stack(
+      margin: EdgeInsets.all(10),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  price,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+            Text(
+              title,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            // Position the button in the center-right with an offset
-            Positioned(
-              right: -50, // Align to the right
-              top: 80, // Adjust this value to move the button up or down
+            SizedBox(height: 8),
+            Text(
+              price,
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            SizedBox(height: 16),
+            ...features.map((feature) => Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Text('• $feature'),
+            )).toList(),
+            SizedBox(height: 16),
+            Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Add subscribe logic here
+                  // Handle the get started button press
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text('Features'),
+                child: Text('Get Started'),
               ),
             ),
           ],
