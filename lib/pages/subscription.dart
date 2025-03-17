@@ -10,7 +10,7 @@ class SubscriptionPage extends StatelessWidget {
       body: SingleChildScrollView(
       
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +26,7 @@ class SubscriptionPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 10,),
               Center(
                 child: Text(
                   'Get access to the Premium Features of Narratra and feel the Book',
@@ -77,6 +77,21 @@ class SubscriptionPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class BoxWithFeatureButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 500, // Adjust the width as needed
+      padding: EdgeInsets.all(40), // Adjust padding as needed
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
       ),
     );
   }
