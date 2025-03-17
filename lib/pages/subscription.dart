@@ -88,12 +88,18 @@ class SubscriptionPlanCard extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               price,
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(fontSize: 18, color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             SizedBox(height: 16),
             ...features.map((feature) => Padding(
               padding: EdgeInsets.symmetric(vertical: 4),
-              child: Text('• $feature'),
+              child: Row(
+                children: [
+                  Icon(Icons.check, color: const Color.fromARGB(255, 0, 0, 0)),
+                  SizedBox(width: 8),
+                  Text(feature),
+                ],
+              ),
             )).toList(),
             SizedBox(height: 16),
             Center(
@@ -101,6 +107,9 @@ class SubscriptionPlanCard extends StatelessWidget {
                 onPressed: () {
                   // Handle the get started button press
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                ),
                 child: Text('Get Started'),
               ),
             ),
