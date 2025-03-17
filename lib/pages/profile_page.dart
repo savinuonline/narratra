@@ -29,6 +29,10 @@ class ProfilePage extends StatelessWidget {
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
               // Navigate to settings page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
             },
           ),
         ],
@@ -105,30 +109,76 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Favorites",
               icon: Icons.favorite_border,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FavoritesPage(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 10),
-            FeatureTile(title: "Downloads", icon: Icons.download, onTap: () {}),
+            FeatureTile(
+              title: "Downloads",
+              icon: Icons.download,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DownloadsPage(),
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 10),
             FeatureTile(
               title: "Rewards",
               icon: Icons.star_border,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RewardsPage()),
+                );
+              },
             ),
             const SizedBox(height: 10),
             FeatureTile(
               title: "Language Selection",
               icon: Icons.language,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LanguageSelectionPage(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 10),
             FeatureTile(
               title: "Subscription",
               icon: Icons.subscriptions,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SubscriptionPage(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 10),
-            FeatureTile(title: "History", icon: Icons.history, onTap: () {}),
+            FeatureTile(
+              title: "History",
+              icon: Icons.history,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                );
+              },
+            ),
             const SizedBox(height: 30), // Space before About section
             const Text(
               "About",
@@ -140,7 +190,8 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              " ",
+              "Narratra is an audiobook platform designed to provide high-quality listening experiences for users. "
+              "We aim to make books more accessible and enjoyable through our innovative features and user-friendly interface.",
               style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
           ],
@@ -184,6 +235,91 @@ class FeatureTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Placeholder pages
+class FavoritesPage extends StatelessWidget {
+  const FavoritesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Favorites")),
+      body: const Center(child: Text("Favorites Page")),
+    );
+  }
+}
+
+class DownloadsPage extends StatelessWidget {
+  const DownloadsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Downloads")),
+      body: const Center(child: Text("Downloads Page")),
+    );
+  }
+}
+
+class RewardsPage extends StatelessWidget {
+  const RewardsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Rewards")),
+      body: const Center(child: Text("Rewards Page")),
+    );
+  }
+}
+
+class LanguageSelectionPage extends StatelessWidget {
+  const LanguageSelectionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Language Selection")),
+      body: const Center(child: Text("Language Selection Page")),
+    );
+  }
+}
+
+class SubscriptionPage extends StatelessWidget {
+  const SubscriptionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Subscription")),
+      body: const Center(child: Text("Subscription Page")),
+    );
+  }
+}
+
+class HistoryPage extends StatelessWidget {
+  const HistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("History")),
+      body: const Center(child: Text("History Page")),
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Settings")),
+      body: const Center(child: Text("Settings Page")),
     );
   }
 }
