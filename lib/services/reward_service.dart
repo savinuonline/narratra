@@ -56,9 +56,7 @@ class RewardService {
       );
 
       final shortLink = await _dynamicLinks.buildShortLink(parameters);
-      print(
-        'Short Link Generated: ${shortLink.shortUrl}',
-      );
+      print('Short Link Generated: ${shortLink.shortUrl}');
       return shortLink.shortUrl.toString();
     } on FirebaseException catch (e) {
       print('Firebase Exception: $e');
@@ -171,6 +169,7 @@ class RewardService {
       final newReward = UserReward(
         userId: user.uid,
         lastLoginBonusDate: DateTime.now().subtract(const Duration(days: 1)),
+        registrationDate: DateTime.now(),
       );
 
       await _firestore
@@ -207,17 +206,58 @@ class RewardService {
       final userData = UserReward.fromMap(docSnapshot.data()!);
       final now = DateTime.now();
 
-      if (isSameDay(userData.lastLoginBonusDate, now)) {
-        dailyBonus = 0; // Already claimed today
-        return; // Stop transaction here, no bonus awarded
+      // Debug prints
+      print('Checking daily bonus eligibility:');
+      print('Current time: ${now.toString()}');
+      print('Last claim time: ${userData.lastLoginBonusDate.toString()}');
+      print(
+        'Hours since last claim: ${now.difference(userData.lastLoginBonusDate).inHours}',
+      );
+      print('Can claim bonus: ${userData.canClaimDailyBonus}');
+      print('Current streak: ${userData.currentStreak}');
+
+      // Check if user can claim today's bonus
+      if (!userData.canClaimDailyBonus) {
+        print('Cannot claim bonus yet - waiting period not over');
+        dailyBonus = 0;
+        return;
       }
 
-      dailyBonus = 50; // Award daily bonus (50 points)
+      // Calculate streak
+      final lastClaim = userData.lastLoginBonusDate;
+      final hoursDifference = now.difference(lastClaim).inHours;
+
+      // Reset streak if more than 24 hours has passed
+      if (hoursDifference > 24) {
+        print('Streak reset - more than 24 hours passed');
+        userData.currentStreak = 0;
+        userData.weeklyClaimedDays.clear();
+      }
+
+      // Increment streak (1-7)
+      userData.currentStreak = (userData.currentStreak + 1) % 7;
+      if (userData.currentStreak == 0) userData.currentStreak = 7;
+
+      // Get points for current streak day
+      dailyBonus = userData.getPointsForStreakDay();
+
+      // Update weekly claimed days
+      final currentDayIndex = now.weekday - 1; // 0-6 for Monday-Sunday
+      if (!userData.weeklyClaimedDays.contains(currentDayIndex)) {
+        userData.weeklyClaimedDays.add(currentDayIndex);
+      }
+
+      print('Awarding daily bonus:');
+      print('Points awarded: $dailyBonus');
+      print('New streak: ${userData.currentStreak}');
+      print('Weekly claimed days: ${userData.weeklyClaimedDays}');
 
       // Update points and lastLoginBonusDate in a single transaction
       transaction.update(userDoc, {
         'points': userData.points + dailyBonus,
-        'lastLoginBonusDate': now, // Use DateTime object directly for Firestore
+        'lastLoginBonusDate': now.toIso8601String(),
+        'currentStreak': userData.currentStreak,
+        'weeklyClaimedDays': userData.weeklyClaimedDays,
       });
     });
 
@@ -226,7 +266,34 @@ class RewardService {
       final updatedRewards = await getUserRewards();
       checkAndUpdateLevel(updatedRewards);
     }
-    return dailyBonus; // Return the bonus awarded (0 if already claimed)
+    return dailyBonus;
+  }
+
+  // Test method to verify login bonus functionality
+  Future<void> testLoginBonus() async {
+    try {
+      final rewards = await getUserRewards();
+      print('\n=== Login Bonus Test ===');
+      print('Current user rewards:');
+      print('Points: ${rewards.points}');
+      print('Last login bonus: ${rewards.lastLoginBonusDate}');
+      print('Current streak: ${rewards.currentStreak}');
+      print('Can claim bonus: ${rewards.canClaimDailyBonus}');
+      print('Weekly claimed days: ${rewards.weeklyClaimedDays}');
+
+      final bonus = await claimDailyLoginBonus();
+      print('\nClaim attempt result:');
+      print('Bonus points awarded: $bonus');
+
+      final updatedRewards = await getUserRewards();
+      print('\nUpdated rewards:');
+      print('Points: ${updatedRewards.points}');
+      print('Last login bonus: ${updatedRewards.lastLoginBonusDate}');
+      print('Current streak: ${updatedRewards.currentStreak}');
+      print('Weekly claimed days: ${updatedRewards.weeklyClaimedDays}');
+    } catch (e) {
+      print('Error testing login bonus: $e');
+    }
   }
 
   // Update daily goal
@@ -278,7 +345,30 @@ class RewardService {
 
   // Check and update level if needed
   void checkAndUpdateLevel(UserReward rewards) {
-    final newLevel = (rewards.points / 1000).floor() + 1;
+    // Define level XP thresholds
+    final levelXp = {
+      1: 0,
+      2: 5000,
+      3: 15000,
+      4: 35000,
+      5: 75000,
+      6: 150000,
+      7: 300000,
+      8: 600000,
+      9: 1000000,
+      10: 2000000,
+    };
+
+    // Find the highest level the user qualifies for
+    int newLevel = 1;
+    for (int level = 10; level >= 1; level--) {
+      if (rewards.xp >= levelXp[level]!) {
+        newLevel = level;
+        break;
+      }
+    }
+
+    // Only update if the new level is higher than current level
     if (newLevel > rewards.level) {
       rewards.level = newLevel;
     }
@@ -352,24 +442,60 @@ class RewardService {
       final doc = await docRef.get();
 
       if (!doc.exists) {
+        final now = DateTime.now();
+        // Set lastLoginBonusDate to 23 hours ago for new users
+        final lastLoginBonusDate = now.subtract(const Duration(hours: 23));
+
         await docRef.set({
           'userId': user.uid,
           'points': 0,
+          'xp': 0,
           'level': 1,
-          'dailyGoal': 30,
-          'dailyGoalProgress': 0,
-          'lastLoginBonusDate': DateTime.now().toIso8601String(),
+          'registrationDate': now.toIso8601String(),
+          'lastLoginBonusDate': lastLoginBonusDate.toIso8601String(),
           'freeAudiobooks': 0,
           'premiumAudiobooks': 0,
           'inviteRewardCount': 0,
           'usedInviteCodes': [],
           'generatedInviteCodes': [],
+          'currentStreak': 0,
+          'weeklyClaimedDays': [],
+          'weeklyListeningMinutes': 0,
+          'dailyListeningMinutes': 0,
+          'weeklyGoalMinutes': 120,
+          'dailyGoalMinutes': 30,
+          'lastListeningUpdate': now.toIso8601String(),
+          'listeningTips': _generateListeningTips(),
+          'currentMotivation': _generateMotivation(),
         });
       }
     } catch (e) {
       print('Error initializing user rewards: $e');
       rethrow;
     }
+  }
+
+  // Helper method to generate listening tips
+  List<String> _generateListeningTips() {
+    return [
+      'Try listening at 1.25x speed to get through more content',
+      'Use headphones for better audio quality',
+      'Take breaks every hour to rest your ears',
+      'Listen while doing household chores',
+      'Create a dedicated listening space',
+    ];
+  }
+
+  // Helper method to generate motivation message
+  String _generateMotivation() {
+    final messages = [
+      'Keep going! Every minute of listening counts.',
+      'You\'re making great progress!',
+      'Stay consistent with your daily goals.',
+      'Remember why you started this journey.',
+      'Your dedication is inspiring!',
+    ];
+    return messages[DateTime.now().millisecondsSinceEpoch % messages.length];
   }
 
   // Claim daily bonus
@@ -546,27 +672,34 @@ class RewardService {
 
       final now = DateTime.now();
 
-      // Reset streak if it's been more than 1 day since last claim
+      // Reset streak if it's been more than 24 hours since last claim
       if (lastClaimDate != null) {
-        final difference = now.difference(lastClaimDate).inDays;
-        if (difference > 1) {
+        final difference = now.difference(lastClaimDate).inHours;
+        if (difference > 24) {
           currentStreak = 0;
           weeklyClaimedDays = [];
         }
       }
 
-      // Increase streak and calculate points
+      // Increase streak and calculate rewards
       currentStreak = (currentStreak + 1) % 7; // Keep within 0-6 range
-      int pointsToAdd = _getLoginBonusForDay(currentStreak);
+      if (currentStreak == 0) currentStreak = 7;
+
+      // Calculate points and XP based on streak
+      final userData = UserReward.fromMap(data);
+      int pointsToAdd = userData.getPointsForStreakDay();
+      int xpToAdd = userData.getXpForStreakDay();
 
       // Update weekly claimed days
-      if (!weeklyClaimedDays.contains(currentStreak - 1)) {
-        weeklyClaimedDays.add(currentStreak - 1);
+      final currentDayIndex = now.weekday - 1; // 0-6 for Monday-Sunday
+      if (!weeklyClaimedDays.contains(currentDayIndex)) {
+        weeklyClaimedDays.add(currentDayIndex);
       }
 
       // Update document
       transaction.update(docRef, {
         'points': FieldValue.increment(pointsToAdd),
+        'xp': FieldValue.increment(xpToAdd),
         'lastLoginBonusDate': now.toIso8601String(),
         'currentStreak': currentStreak,
         'weeklyClaimedDays': weeklyClaimedDays,
@@ -576,26 +709,64 @@ class RewardService {
     });
   }
 
-  int _getLoginBonusForDay(int day) {
-    // Day is 1-indexed here (after increment)
-    switch (day) {
-      case 1:
-        return 10;
-      case 2:
-        return 15;
-      case 3:
-        return 20;
-      case 4:
-        return 25;
-      case 5:
-        return 30;
-      case 6:
-        return 40;
-      case 7:
-      case 0:
-        return 50; // Day 7 or 0 (after modulo)
-      default:
-        return 10;
-    }
+  // Update listening progress and award points
+  Future<void> updateListeningProgress(int minutes) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+    
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists) return;
+
+      final rewards = UserReward.fromMap(doc.data()!);
+      final pointsToAdd = rewards.calculatePointsForListening(minutes);
+      
+      rewards.updateListeningProgress(minutes);
+      
+      transaction.update(docRef, {
+        'dailyListeningMinutes': rewards.dailyListeningMinutes,
+        'weeklyListeningMinutes': rewards.weeklyListeningMinutes,
+        'lastListeningUpdate': rewards.lastListeningUpdate.toIso8601String(),
+        'points': FieldValue.increment(pointsToAdd),
+        'xp': FieldValue.increment(pointsToAdd * 2), // 2 XP per point
+      });
+    });
+  }
+
+  // Update user's listening goals
+  Future<void> updateListeningGoals({
+    required int dailyGoal,
+    required int weeklyGoal,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    await _firestore.collection('user_rewards').doc(user.uid).update({
+      'dailyGoalMinutes': dailyGoal,
+      'weeklyGoalMinutes': weeklyGoal,
+    });
+  }
+
+  // Refresh tips and motivation
+  Future<void> refreshTipsAndMotivation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final docRef = _firestore.collection('user_rewards').doc(user.uid);
+    
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists) return;
+
+      final rewards = UserReward.fromMap(doc.data()!);
+      rewards.refreshTipsAndMotivation();
+      
+      transaction.update(docRef, {
+        'listeningTips': rewards.listeningTips,
+        'currentMotivation': rewards.currentMotivation,
+      });
+    });
   }
 }

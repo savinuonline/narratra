@@ -4,195 +4,44 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
 
-class GoalsTab extends StatelessWidget {
+class GoalsTab extends StatefulWidget {
   const GoalsTab({Key? key}) : super(key: key);
 
+  @override
+  State<GoalsTab> createState() => _GoalsTabState();
+}
+
+class _GoalsTabState extends State<GoalsTab> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<UserReward>(
       stream: RewardService().userRewardsStream,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final rewards = snapshot.data!;
-        final double progress =
-            rewards.dailyGoal > 0
-                ? (rewards.dailyGoalProgress / rewards.dailyGoal).clamp(
-                  0.0,
-                  1.0,
-                )
-                : 0.0;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Motivation Card
+              _buildMotivationCard(rewards),
+              const SizedBox(height: 24),
+
               // Today's Goal Card with Circular Display
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Today's Reading Goal",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3A5EF0),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Center(
-                        child: GestureDetector(
-                          onTap:
-                              () => _showTimePickerDialog(
-                                context,
-                                rewards.dailyGoal,
-                              ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 180,
-                                height: 180,
-                                child: CircularProgressIndicator(
-                                  value: progress,
-                                  strokeWidth: 15,
-                                  backgroundColor: Colors.grey[200],
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                        Color(0xFF3A5EF0),
-                                      ),
-                                ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    formatMinutes(rewards.dailyGoalProgress),
-                                    style: GoogleFonts.nunito(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF3A5EF0),
-                                    ),
-                                  ),
-                                  Text(
-                                    'of ${formatMinutes(rewards.dailyGoal)}',
-                                    style: GoogleFonts.nunito(
-                                      fontSize: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Icon(
-                                    Icons.edit,
-                                    color: Colors.grey[400],
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF3A5EF0),
-                        ),
-                        minHeight: 10,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${(progress * 100).toInt()}% completed',
-                        style: GoogleFonts.nunito(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
+              _buildDailyGoalCard(rewards),
               const SizedBox(height: 24),
 
-              // Weekly Progress
-              Text(
-                'Weekly Progress',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF3A5EF0),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: _buildWeeklyProgressChart(),
-                ),
-              ),
-
+              // Weekly Progress Chart
+              _buildWeeklyProgressCard(rewards),
               const SizedBox(height: 24),
 
-              // Tips Card
-              Card(
-                elevation: 4,
-                color: const Color(0xFFF0F8FF),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.lightbulb_outline,
-                            color: Colors.amber,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Reading Tip',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Consistent daily reading helps improve comprehension and retention. Try to read at the same time each day to build a habit.',
-                        style: GoogleFonts.nunito(fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Listening Tips Section
+              _buildListeningTipsSection(rewards),
             ],
           ),
         );
@@ -200,108 +49,385 @@ class GoalsTab extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyProgressChart() {
-    final weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    return SizedBox(
-      height: 220,
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceAround,
-          maxY: 100,
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor:
-                  (BarChartGroupData group) =>
-                      const Color.fromARGB(255, 54, 177, 239),
-              tooltipPadding: const EdgeInsets.all(8),
-              tooltipMargin: 8,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                String day = weekDays[group.x.toInt()];
-                int minutes = rod.toY.toInt();
-
-                return BarTooltipItem(
-                  '$minutes mins',
-                  const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+  Widget _buildListeningTipsSection(UserReward rewards) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.lightbulb_outline,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Listening Tips',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...rewards.listeningTips
+              .take(3)
+              .map(
+                (tip) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        margin: const EdgeInsets.only(top: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          tip,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMotivationCard(UserReward rewards) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Daily Motivation',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            rewards.currentMotivation,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.white,
+              height: 1.5,
             ),
           ),
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (double value, TitleMeta meta) {
-                  return Text(
-                    weekDays[value.toInt()],
-                    style: GoogleFonts.nunito(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  );
-                },
-                reservedSize: 30,
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  String text = '';
-                  if (value == 0) text = '0';
-                  if (value == 50) text = '50';
-                  if (value == 100) text = '100';
-                  return Text(
-                    text,
-                    style: GoogleFonts.nunito(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  );
-                },
-                reservedSize: 30,
-              ),
-            ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyGoalCard(UserReward rewards) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-          gridData: FlGridData(show: false), // Remove grid lines
-          borderData: FlBorderData(show: false),
-          barGroups: List.generate(
-            weekDays.length,
-            (index) => BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: 0, // Empty data since real data not available yet
-                  color: const Color(0xFF3A5EF0),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(6),
-                    topRight: Radius.circular(6),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Daily Listening Goal',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _showTimePickerDialog(context, rewards),
+                color: Theme.of(context).primaryColor,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: CircularProgressIndicator(
+                    value: rewards.dailyProgress,
+                    strokeWidth: 12,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor,
+                    ),
                   ),
-                  width: 25,
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${rewards.dailyListeningMinutes}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    Text(
+                      'of ${rewards.dailyGoalMinutes} min',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 16),
+          LinearProgressIndicator(
+            value: rewards.dailyProgress,
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).primaryColor,
+            ),
+            minHeight: 8,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklyProgressCard(UserReward rewards) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Weekly Progress',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: 24,
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipRoundedRadius: 8,
+                    tooltipPadding: const EdgeInsets.all(8),
+                    tooltipMargin: 8,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem
+                      (
+                        '${rod.toY.toInt()} hours',
+                        GoogleFonts.poppins(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        const days = [
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat',
+                          'Sun',
+                        ];
+                        return Text(
+                          days[value.toInt()],
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          '${value.toInt()}h',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: 6,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(color: Colors.grey[200], strokeWidth: 1);
+                  },
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  for (int i = 0; i < 7; i++)
+                    BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: (rewards.weeklyListeningMinutes / 7).toDouble(),
+                          color: Theme.of(context).primaryColor,
+                          width: 20,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          LinearProgressIndicator(
+            value: rewards.weeklyProgress,
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).primaryColor,
+            ),
+            minHeight: 8,
+          ),
+        ],
       ),
     );
   }
 
   Future<void> _showTimePickerDialog(
     BuildContext context,
-    int currentGoal,
+    UserReward rewards,
   ) async {
-    int hours = currentGoal ~/ 60;
-    int minutes = currentGoal % 60;
+    int hours = rewards.dailyGoalMinutes ~/ 60;
+    int minutes = rewards.dailyGoalMinutes % 60;
 
     await showDialog(
       context: context,
@@ -310,7 +436,7 @@ class GoalsTab extends StatelessWidget {
           builder: (context, setState) {
             return AlertDialog(
               title: Text(
-                'Set Daily Reading Goal',
+                'Set Daily Listening Goal',
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
               content: Container(
@@ -319,7 +445,7 @@ class GoalsTab extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Select your daily reading time goal'),
+                    Text('Select your daily listening time goal'),
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -352,7 +478,7 @@ class GoalsTab extends StatelessWidget {
                             ),
                           ),
                           Text(' h ', style: GoogleFonts.nunito(fontSize: 14)),
-                          // Minutes wheel with 1-minute increments
+                          // Minutes wheel
                           Expanded(
                             child: ListWheelScrollView(
                               itemExtent: 50,
@@ -397,16 +523,14 @@ class GoalsTab extends StatelessWidget {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () {
-                    // Calculate total minutes
                     final totalMinutes = hours * 60 + minutes;
-
-                    // Ensure the goal is within bounds (10 min to 10 hours)
                     if (totalMinutes >= 10 && totalMinutes <= 600) {
-                      // Update the daily goal
-                      RewardService().updateDailyGoal(totalMinutes);
+                      RewardService().updateListeningGoals(
+                        dailyGoal: totalMinutes,
+                        weeklyGoal: rewards.weeklyGoalMinutes,
+                      );
                       Navigator.pop(context);
                     } else {
-                      // Show error for invalid goal
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
