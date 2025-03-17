@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen>
                 height: 150,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 1),
             // The "narratra" text using the custom font, fading in.
             FadeTransition(
               opacity: _textFadeAnimation,
