@@ -57,7 +57,7 @@ class _GoalsTabState extends State<GoalsTab> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: const Color(0xFF3A5EF0).withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -71,12 +71,12 @@ class _GoalsTabState extends State<GoalsTab> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: const Color(0xFF3A5EF0).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.lightbulb_outline,
-                  color: Theme.of(context).primaryColor,
+                  color: const Color(0xFF3A5EF0),
                   size: 24,
                 ),
               ),
@@ -86,6 +86,7 @@ class _GoalsTabState extends State<GoalsTab> {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3A5EF0),
                 ),
               ),
             ],
@@ -104,16 +105,14 @@ class _GoalsTabState extends State<GoalsTab> {
                         height: 24,
                         margin: const EdgeInsets.only(top: 4),
                         decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withOpacity(0.1),
+                          color: const Color(0xFF3A5EF0).withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
                             Icons.check,
                             size: 16,
-                            color: Theme.of(context).primaryColor,
+                            color: const Color(0xFF3A5EF0),
                           ),
                         ),
                       ),
@@ -144,14 +143,14 @@ class _GoalsTabState extends State<GoalsTab> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            const Color(0xFF3A5EF0),
+            const Color(0xFF3A5EF0).withOpacity(0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            color: const Color(0xFF3A5EF0).withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -207,7 +206,7 @@ class _GoalsTabState extends State<GoalsTab> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: const Color(0xFF3A5EF0).withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -224,12 +223,13 @@ class _GoalsTabState extends State<GoalsTab> {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3A5EF0),
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () => _showTimePickerDialog(context, rewards),
-                color: Theme.of(context).primaryColor,
+                color: const Color(0xFF3A5EF0),
               ),
             ],
           ),
@@ -244,9 +244,9 @@ class _GoalsTabState extends State<GoalsTab> {
                   child: CircularProgressIndicator(
                     value: rewards.dailyProgress,
                     strokeWidth: 12,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).primaryColor,
+                    backgroundColor: const Color(0xFF3A5EF0).withOpacity(0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF3A5EF0),
                     ),
                   ),
                 ),
@@ -258,11 +258,18 @@ class _GoalsTabState extends State<GoalsTab> {
                       style: GoogleFonts.poppins(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        color: const Color(0xFF3A5EF0),
                       ),
                     ),
                     Text(
                       'of ${rewards.dailyGoalMinutes} min',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      'Daily Goal',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -276,10 +283,8 @@ class _GoalsTabState extends State<GoalsTab> {
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: rewards.dailyProgress,
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).primaryColor,
-            ),
+            backgroundColor: const Color(0xFF3A5EF0).withOpacity(0.1),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3A5EF0)),
             minHeight: 8,
           ),
         ],
@@ -295,7 +300,7 @@ class _GoalsTabState extends State<GoalsTab> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: const Color(0xFF3A5EF0).withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -309,6 +314,7 @@ class _GoalsTabState extends State<GoalsTab> {
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: const Color(0xFF3A5EF0),
             ),
           ),
           const SizedBox(height: 16),
@@ -324,11 +330,10 @@ class _GoalsTabState extends State<GoalsTab> {
                     tooltipPadding: const EdgeInsets.all(8),
                     tooltipMargin: 8,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem
-                      (
+                      return BarTooltipItem(
                         '${rod.toY.toInt()} hours',
                         GoogleFonts.poppins(
-                          color: Theme.of(context).primaryColor,
+                          color: const Color(0xFF3A5EF0),
                           fontWeight: FontWeight.w600,
                         ),
                       );
@@ -387,7 +392,10 @@ class _GoalsTabState extends State<GoalsTab> {
                   drawVerticalLine: false,
                   horizontalInterval: 6,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(color: Colors.grey[200], strokeWidth: 1);
+                    return FlLine(
+                      color: const Color(0xFF3A5EF0).withOpacity(0.1),
+                      strokeWidth: 1,
+                    );
                   },
                 ),
                 borderData: FlBorderData(show: false),
@@ -398,7 +406,7 @@ class _GoalsTabState extends State<GoalsTab> {
                       barRods: [
                         BarChartRodData(
                           toY: (rewards.weeklyListeningMinutes / 7).toDouble(),
-                          color: Theme.of(context).primaryColor,
+                          color: const Color(0xFF3A5EF0),
                           width: 20,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -411,10 +419,8 @@ class _GoalsTabState extends State<GoalsTab> {
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: rewards.weeklyProgress,
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).primaryColor,
-            ),
+            backgroundColor: const Color(0xFF3A5EF0).withOpacity(0.1),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3A5EF0)),
             minHeight: 8,
           ),
         ],

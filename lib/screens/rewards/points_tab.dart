@@ -237,24 +237,27 @@ class PointsTab extends StatelessWidget {
                         'Points increase with daily streaks',
                       ),
                       trailing: ElevatedButton(
-                        onPressed: rewards.canClaimDailyBonus
-                            ? () async {
-                                final points = await RewardService().claimLoginBonus();
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'You received $points points!',
+                        onPressed:
+                            rewards.canClaimDailyBonus
+                                ? () async {
+                                  final points =
+                                      await RewardService().claimLoginBonus();
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'You received $points points!',
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  }
                                 }
-                              }
-                            : null,
+                                : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: rewards.canClaimDailyBonus
-                              ? const Color(0xFF3A5EF0)
-                              : Colors.grey,
+                          backgroundColor:
+                              rewards.canClaimDailyBonus
+                                  ? const Color(0xFF3A5EF0)
+                                  : Colors.grey,
                           foregroundColor: Colors.white,
                         ),
                         child: Text(
@@ -372,33 +375,43 @@ class PointsTab extends StatelessWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isClaimed
-                              ? Colors.green
-                              : (isToday ? Colors.blue[100] : Colors.grey[200]),
-                          border: isToday ? Border.all(color: Colors.blue, width: 2) : null,
+                          color:
+                              isClaimed
+                                  ? Colors.green
+                                  : (isToday
+                                      ? Colors.blue[100]
+                                      : Colors.grey[200]),
+                          border:
+                              isToday
+                                  ? Border.all(color: Colors.blue, width: 2)
+                                  : null,
                         ),
-                        child: isClaimed
-                            ? const Center(
-                                child: Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              )
-                            : Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [          
-                                    Text(
-                                      '+$dayXp XP',
-                                      style: GoogleFonts.nunito(
-                                        color: isToday ? Colors.blue : Colors.grey[600],
-                                        fontSize: 10,
+                        child:
+                            isClaimed
+                                ? const Center(
+                                  child: Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                )
+                                : Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '+$dayXp XP',
+                                        style: GoogleFonts.nunito(
+                                          color:
+                                              isToday
+                                                  ? Colors.blue
+                                                  : Colors.grey[600],
+                                          fontSize: 10,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
                       ),
                       if (isToday && !isClaimed)
                         Positioned(
@@ -438,7 +451,7 @@ class PointsTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Redeem Points',
+          'narratra. Rewards',
           style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
@@ -448,30 +461,30 @@ class PointsTab extends StatelessWidget {
             children: [
               _RewardCard(
                 title: 'Free Audiobook',
-                points: 450,
-                description: 'Redeem for any audiobook',
-                onRedeem: () => _redeemReward(context, 450),
+                points: 500,
+                description: 'Redeem for any available audiobook',
+                onRedeem: () => _redeemReward(context, 500),
               ),
               const SizedBox(width: 12),
               _RewardCard(
                 title: 'Ad-Free Hour',
-                points: 50,
+                points: 100,
                 description: 'Enjoy 1 hour of ad-free listening',
-                onRedeem: () => _redeemReward(context, 50),
+                onRedeem: () => _redeemReward(context, 70),
               ),
               const SizedBox(width: 12),
               _RewardCard(
                 title: '15% Off Premium',
-                points: 200,
+                points: 800,
                 description: 'Discount on premium subscription',
-                onRedeem: () => _redeemReward(context, 200),
+                onRedeem: () => _redeemReward(context, 800),
               ),
               const SizedBox(width: 12),
               _RewardCard(
                 title: 'Ad-Free Week',
-                points: 300,
+                points: 3000,
                 description: 'Enjoy ad-free listening for a week',
-                onRedeem: () => _redeemReward(context, 300),
+                onRedeem: () => _redeemReward(context, 3000),
               ),
             ],
           ),
@@ -484,22 +497,23 @@ class PointsTab extends StatelessWidget {
     // Show confirmation dialog
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Redeem Reward'),
-        content: Text(
-          'Are you sure you want to redeem this reward for $points points?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Redeem Reward'),
+            content: Text(
+              'Are you sure you want to redeem this reward for $points points?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Redeem'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Redeem'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -512,9 +526,9 @@ class PointsTab extends StatelessWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${e.toString()}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
         }
       }
     }
