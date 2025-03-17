@@ -43,7 +43,18 @@ class SubscriptionPage extends StatelessWidget {
               'Priority access to new features',
             ],
           ),
-          // if there are more packages can be added here
+          SubscriptionPlanCard(
+            title: 'Premium (Family)',
+            price: 'Rs.1299/month',
+            features: [
+              'Everything in Premium',
+              'Up to 6 family accounts',
+              'Family Dashboard',
+              'Parental controls',
+              'Shared Playlists',
+              'Family audiobook recommendations',
+            ],
+          ),
         ],
       ),
     );
