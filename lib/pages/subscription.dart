@@ -110,7 +110,9 @@ class SubscriptionPlanCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                 ),
-                child: Text('Get Started'),
+                child: Text(
+                  'Get Started',
+                  style: TextStyle(color: Colors.white)),
               ),
             ),
           ],
