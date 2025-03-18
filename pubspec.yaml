@@ -88,3 +88,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  dependencies:
+  flutter:
+    sdk: flutter
+    flutter_rating_bar: ^4.0.0

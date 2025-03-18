@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -227,7 +229,12 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Rate Narratra",
               icon: Icons.rate_review,
-              onTap: () {},
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const RateNarratraDialog(),
+                );
+              },
             ),
           ],
         ),
@@ -271,6 +278,51 @@ class FeatureTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class RateNarratraDialog extends StatelessWidget {
+  const RateNarratraDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Rate Narratra"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text("Please rate our app:"),
+          const SizedBox(height: 20),
+          RatingBar.builder(
+            initialRating: 0,
+            minRating: 1,
+            direction: Axis.horizontal,
+            allowHalfRating: true,
+            itemCount: 5,
+            itemBuilder:
+                (context, _) => const Icon(Icons.star, color: Colors.amber),
+            onRatingUpdate: (rating) {
+              // Handle rating update
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            // Handle submit rating
+            Navigator.of(context).pop();
+          },
+          child: const Text("Submit"),
+        ),
+      ],
     );
   }
 }

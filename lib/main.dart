@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/firebase_options.dart';
-
+import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
 import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
@@ -16,7 +16,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: MainScreen());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const MainScreen(),
+      routes: {
+        '/media_player':
+            (context) => MediaPlayerPage(), // Added route for MediaPlayerPage
+      },
+    );
   }
 }
 
@@ -34,11 +41,22 @@ class _MainScreenState extends State<MainScreen> {
     Center(child: Text("Explore Page")),
     Center(child: Text("Search Page")),
     Center(child: Text("Library Page")),
-    Center(child: Text("Play Page")),
+    Center(
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            '/media_player',
+          ); // Navigate to MediaPlayerPage
+        },
+        child: Text("Go to Media Player"),
+      ),
+    ),
     const ProfilePage(),
   ];
+
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: CustomBottomNavBar(
