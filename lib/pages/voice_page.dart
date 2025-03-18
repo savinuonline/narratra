@@ -47,11 +47,32 @@ class VoicePage extends StatelessWidget {
   }
 }
 
-class VoiceOption extends StatelessWidget {
+class VoiceOption extends StatefulWidget {
   final String name;
   final String imageUrl;
 
-  VoiceOption({required this.name, required this.imageUrl});
+  const VoiceOption({required this.name, required this.imageUrl, Key? key}) : super(key: key);
+
+  @override
+   _VoiceOptionState createState() => _VoiceOptionState();
+}
+  
+  class _VoiceOptionState extends State<VoiceOption> {
+    bool isplaying = false;
+
+    void togglePlayPause() {
+      setState(() {
+        isplaying = !isplaying;
+      });
+
+      Future.delayed(Duration(seconds: 5), (){
+        if (mounted){
+          setState(() {
+            isplaying = false;
+          });
+        }
+      });
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -67,18 +88,18 @@ class VoiceOption extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CircleAvatar(
-            backgroundImage: NetworkImage(imageUrl),
+            backgroundImage: NetworkImage(widget.imageUrl),
             radius: 50,
           ),
           Text(
-            name,
+            widget.name,
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           IconButton(
-            icon: Icon(Ionicons.play_circle, color: const Color.fromARGB(255, 42, 101, 202), size: 45),
-            onPressed: () {
-              print("Playing $name's voice...");
-            },
+            icon: Icon(
+              isplaying? Ionicons.pause_circle: Ionicons.play_circle,
+              color: const Color.fromARGB(255, 42, 101, 202), size: 45),
+            onPressed: togglePlayPause,
           ),
         ],
       ),
