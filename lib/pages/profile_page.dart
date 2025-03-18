@@ -223,6 +223,12 @@ class ProfilePage extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 10),
+            FeatureTile(
+              title: "Rate Narratra",
+              icon: Icons.rate_review,
+              onTap: () {},
+            ),
           ],
         ),
       ),
