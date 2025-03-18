@@ -23,10 +23,10 @@ class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context,
-      double shrinkOffset,
-      bool overlapsContent,
-      ) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return child;
   }
 
@@ -58,78 +58,81 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
+      widget.user.uid,
+    );
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        // SliverAppBar without a leading icon and with a notification button on the right.
-        SliverAppBar(
-          pinned: true,
-          floating: false,
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          // Removed the leading property
-          title: Text(
-            'narratra.',
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
+    return Container(
+      // Set entire background to white
+      color: Colors.white,
+      child: CustomScrollView(
+        slivers: [
+          // SliverAppBar with white background
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              'narratra.',
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.black),
+                onPressed: () {
+                  // Add your notification action here.
+                },
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.black),
-              onPressed: () {
-                // Add your notification action here.
-              },
-            ),
-          ],
-        ),
 
-        // Trending Section (Not pinned now)
-        SliverPersistentHeader(
-          pinned: false,
-          delegate: TrendingHeaderDelegate(
-            minHeight: 320,
-            maxHeight: 320,
-            child: Container(
-              color: const Color.fromRGBO(255, 255, 255, 1.0),
-              child: _TrendingSection(booksFuture: trendingBooksFuture),
+          // Trending Section (with white background)
+          SliverPersistentHeader(
+            pinned: false,
+            delegate: TrendingHeaderDelegate(
+              minHeight: 320,
+              maxHeight: 320,
+              child: Container(
+                color: Colors.white,
+                child: _TrendingSection(booksFuture: trendingBooksFuture),
+              ),
             ),
           ),
-        ),
 
-        // Other categories
-        SliverToBoxAdapter(
-          child: CategorySection(
-            title: "Uniquely Yours",
-            booksFuture: recommendedBooksFuture,
+          // Other categories
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Uniquely Yours",
+              booksFuture: recommendedBooksFuture,
+            ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: CategorySection(
-            title: "Today For You",
-            booksFuture: todayBooksFuture,
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Today For You",
+              booksFuture: todayBooksFuture,
+            ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: CategorySection(
-            title: "Free Books",
-            booksFuture: freeBooksFuture,
+          SliverToBoxAdapter(
+            child: CategorySection(
+              title: "Free Books",
+              booksFuture: freeBooksFuture,
+            ),
           ),
-        ),
-        // Add bottom padding to account for navigation bar
-        SliverToBoxAdapter(
-          child: SizedBox(height: 80),
-        ),
-      ],
+          // Add bottom padding to account for navigation bar
+          SliverToBoxAdapter(child: SizedBox(height: 80)),
+        ],
+      ),
     );
   }
 }
@@ -188,7 +191,8 @@ class _TrendingSection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 16),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -234,7 +238,7 @@ class CategorySection extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.nunito(
-              fontSize: categoryFontSize,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: const Color(0xff000000),
             ),
@@ -275,7 +279,8 @@ class CategorySection extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: books.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 16),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = books[index];
                     return GestureDetector(
@@ -313,7 +318,7 @@ class BookCard extends StatelessWidget {
       displayImageUrl = book.imageUrl;
     } else if (!book.imageUrl.startsWith('http')) {
       displayImageUrl =
-      "https://firebasestorage.googleapis.com/v0/b/narratradb.firebasestorage.app/o/Book%20covers%2F${Uri.encodeComponent(book.imageUrl)}?alt=media";
+          "https://firebasestorage.googleapis.com/v0/b/narratradb.firebasestorage.app/o/Book%20covers%2F${Uri.encodeComponent(book.imageUrl)}?alt=media";
     } else {
       displayImageUrl = book.imageUrl;
     }
@@ -327,69 +332,72 @@ class BookCard extends StatelessWidget {
           height: 180,
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7F9),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child: Stack(
-            children: [
-              // Background container with rounded corners
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: const Color.fromARGB(255, 31, 38, 45),
-                ),
-              ),
-              // Book cover container
-              Align(
-                alignment: const Alignment(0, -0.2),
-                child: Container(
-                  width: 125,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+          child: Transform(
+            // Add subtle 3D perspective
+            transform:
+                Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(0.05),
+            alignment: Alignment.center,
+            child: Container(
+              width: 125,
+              height: 160,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  // Shadow on the right edge
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(5, 0),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      displayImageUrl,
-                      width: 100,
-                      height: 160,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: const Center(
-                            child: Icon(
-                              Icons.book,
-                              size: 30,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                  // Shadow at the bottom
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 7),
+                    spreadRadius: -2,
                   ),
-                ),
+                ],
               ),
-            ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child:
+                    book.imageUrl.startsWith('lib/')
+                        ? Image.asset(
+                          book.imageUrl,
+                          width: 125,
+                          height: 160,
+                          fit: BoxFit.cover,
+                        )
+                        : Image.network(
+                          book.imageUrl,
+                          width: 125,
+                          height: 160,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(
+                                  Icons.book,
+                                  size: 30,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+              ),
+            ),
           ),
         ),
+
+        // Title and author
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -401,7 +409,7 @@ class BookCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     color: const Color(0xFF000000),
-                    height: 1.2,
+                    height: 1.5,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

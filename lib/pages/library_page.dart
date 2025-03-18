@@ -12,22 +12,22 @@ class LibraryPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: const Color(0xff3dc2ec),
           elevation: 0,
           title: Text(
             'My Narratra.',
             style: GoogleFonts.poppins(
-              color: const Color.fromARGB(255, 0, 0, 0),
+              color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.w500,
             ),
           ),
           bottom: TabBar(
-            indicatorColor: const Color(0xFF402e7a),
-            labelColor: const Color.fromARGB(255, 0, 0, 0),
-            unselectedLabelColor: const Color.fromARGB(255, 58, 65, 65),
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
             labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             tabs: const [
               Tab(text: 'My Playlists'),
@@ -40,7 +40,7 @@ class LibraryPage extends StatelessWidget {
             bottom: MediaQuery.of(context).padding.bottom + 60,
           ),
           child: Column(
-            children: [
+          children: [
               Expanded(
                 child: TabBarView(
                   children: [_SavedAudiobooksTab(), _ListeningHistoryTab()],
@@ -116,26 +116,34 @@ class _SavedAudiobooksTab extends StatelessWidget {
           children: [
             // Liked Audiobooks Section
             if (likedBooks.isNotEmpty) ...[
+              Text(
+                'Liked Audiobooks',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
               _LibraryFolder(
-                title: 'Liked Audiobooks',
+                title: 'My Liked Audiobooks',
                 icon: Icons.favorite_sharp,
                 color: Colors.red,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => PlaylistDetailPage(
-                            title: 'Liked Audiobooks',
-                            books: likedBooks,
-                            playlistId: 'liked',
-                            isLikedPlaylist: true,
-                          ),
+                      builder: (context) => PlaylistDetailPage(
+                        title: 'Liked Audiobooks',
+                        books: likedBooks,
+                        playlistId: 'liked',
+                        isLikedPlaylist: true,
+                      ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
             ],
 
             // User Playlists Section
@@ -160,17 +168,16 @@ class _SavedAudiobooksTab extends StatelessWidget {
                     icon: 'assets/icons/playlist.svg',
                     color: Colors.blue,
                     isSvg: true,
-                    onTap: () {
+              onTap: () {
                       Navigator.push(
-                        context,
+                  context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => PlaylistDetailPage(
-                                title: playlist['name'],
-                                books: playlistBooks,
-                                playlistId: playlist['id'] ?? '',
-                                isLikedPlaylist: false,
-                              ),
+                          builder: (context) => PlaylistDetailPage(
+                            title: playlist['name'],
+                            books: playlistBooks,
+                            playlistId: playlist['id'] ?? '',
+                            isLikedPlaylist: false,
+                          ),
                         ),
                       );
                     },
@@ -204,36 +211,36 @@ class _LibraryFolder extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(177, 255, 239, 239),
+                          decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
+                            boxShadow: [
+                              BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+                              ),
+                            ],
+                          ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8),
               ),
-              child:
-                  isSvg
-                      ? SvgPicture.asset(
-                        icon,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                      )
-                      : Icon(icon, color: color, size: 24),
+              child: isSvg
+                  ? SvgPicture.asset(
+                      icon,
+                      width: 24,
+                      height: 24,
+                      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                    )
+                  : Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -388,7 +395,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final firstBook = hasBooks ? widget.books.first : null;
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
+      backgroundColor:
+          Colors
+              .white, // Changed from Color.fromRGBO(199, 217, 221, 1) to white
       body: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).padding.bottom + 60,
@@ -406,7 +415,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                           children: [
                             Image.asset(
                               'lib/images/default_cover.jpg',
-                              fit: BoxFit.cover,
+                                    fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   color: const Color(0xFF402e7a),
@@ -419,14 +428,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                               },
                             ),
                             Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
                                     Colors.black.withOpacity(0.7),
-                                  ],
+                                ],
                                 ),
                               ),
                             ),
@@ -434,7 +443,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                         )
                         : Container(
                           color: const Color(0xFF402e7a),
-                          child: Icon(
+                              child: Icon(
                             Icons.playlist_play,
                             size: 64,
                             color: Colors.white.withOpacity(0.5),
@@ -443,7 +452,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 title: Text(
                   _playlistTitle,
                   style: GoogleFonts.poppins(
-                    color: Colors.white,
+                                color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -494,7 +503,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF402e7a),
-                              foregroundColor: Colors.white,
+                              foregroundColor: const Color.fromARGB(
+                                255,
+                                255,
+                                255,
+                                255,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -602,9 +616,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                             ),
                           ),
                           title: Text(
-                            book.title,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
+                    book.title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
                             ),
                           ),
                           subtitle: Text(
@@ -650,9 +664,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                         color: Colors.grey[400],
                       ),
                       const SizedBox(height: 16),
-                      Text(
+                  Text(
                         'No audiobooks in this playlist',
-                        style: GoogleFonts.poppins(
+                    style: GoogleFonts.poppins(
                           fontSize: 16,
                           color: Colors.grey[600],
                         ),
@@ -685,4 +699,4 @@ class _ListeningHistoryTab extends StatelessWidget {
       ),
     );
   }
-}
+} 

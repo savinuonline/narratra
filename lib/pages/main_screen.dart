@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen>
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        height: 80, // Changed from 75 to 80
+        height: 80,
         margin: const EdgeInsets.only(bottom: 0),
         child: Container(
           decoration: BoxDecoration(
@@ -113,9 +113,9 @@ class _MainScreenState extends State<MainScreen>
                   height: 1.0,
                 ),
                 type: BottomNavigationBarType.fixed,
-                backgroundColor: const Color.fromRGBO(255, 255, 255, 1.0),
+                backgroundColor: Colors.white,
                 elevation: 10,
-                iconSize: 26, // Changed from 28 to 26
+                iconSize: 26,
                 items:
                     _navigationItems.map((item) {
                       final int index = _navigationItems.indexOf(item);
@@ -139,7 +139,7 @@ class _MainScreenState extends State<MainScreen>
                                   scale: scale,
                                   child: Container(
                                     margin: const EdgeInsets.only(
-                                      bottom: 0,
+                                      bottom: 1,
                                     ), // Changed from 1 to 0
                                     padding: const EdgeInsets.all(
                                       6,
@@ -148,7 +148,7 @@ class _MainScreenState extends State<MainScreen>
                                       shape: BoxShape.circle,
                                       color:
                                           isSelected
-                                              ? Colors.blue.withOpacity(0.1)
+                                              ? const Color(0xff3dc2ec).withOpacity(0.1)
                                               : Colors.transparent,
                                     ),
                                     child: SizedBox(
@@ -158,7 +158,7 @@ class _MainScreenState extends State<MainScreen>
                                         'assets/icons/${item.icon}',
                                         color:
                                             isSelected
-                                                ? Colors.blue
+                                                ? const Color(0xff3dc2ec)
                                                 : const Color.fromARGB(
                                                   255,
                                                   0,
