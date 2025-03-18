@@ -113,7 +113,7 @@ class _MainScreenState extends State<MainScreen>
                   height: 1.0,
                 ),
                 type: BottomNavigationBarType.fixed,
-                backgroundColor: const Color.fromRGBO(199, 217, 221, 1),
+                backgroundColor: const Color.fromRGBO(255, 255, 255, 1.0),
                 elevation: 10,
                 iconSize: 26, // Changed from 28 to 26
                 items:
