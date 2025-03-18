@@ -34,7 +34,7 @@ class VoicePage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             VoiceOption(
-              name: "Male Voice",
+              name: "Male",
               imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png", // Replace with actual female image
             ),
           ],
@@ -60,7 +60,7 @@ class VoiceOption extends StatelessWidget {
       height: 150,
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 154, 150, 150),
+        color: const Color.fromARGB(255, 171, 169, 169),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -72,10 +72,10 @@ class VoiceOption extends StatelessWidget {
           ),
           Text(
             name,
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           IconButton(
-            icon: Icon(Ionicons.play_circle, color: const Color.fromARGB(255, 42, 101, 202), size: 35),
+            icon: Icon(Ionicons.play_circle, color: const Color.fromARGB(255, 42, 101, 202), size: 45),
             onPressed: () {
               print("Playing $name's voice...");
             },
