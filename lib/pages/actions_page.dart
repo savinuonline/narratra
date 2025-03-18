@@ -96,8 +96,8 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
                 const Spacer(),
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 227, 227, 227),
                     borderRadius: BorderRadius.circular(15),
@@ -137,8 +137,8 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
                 const Spacer(),
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 227, 227, 227),
                     borderRadius: BorderRadius.circular(15),
