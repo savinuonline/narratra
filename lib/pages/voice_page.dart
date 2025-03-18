@@ -31,6 +31,11 @@ class VoicePage extends StatelessWidget {
               name: "Female",
               imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png",
             ),
+            SizedBox(height: 15),
+            VoiceOption(
+              name: "Male Voice",
+              imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png", // Replace with actual female image
+            ),
           ],
         ),
       ),
