@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/FreePlan_Page.dart';
 
 
 class MyApp extends StatelessWidget {
@@ -51,20 +52,42 @@ class SubscriptionPage extends StatelessWidget {
               ),
             ),
           ),
-Expanded(
-            child: ListView(
-              children: [
-                SubscriptionPlanCard(
-                  title: 'Free',
-                  price: 'Rs.0/month',
-                  features: [
-                    'Access to Selected Audiobooks',
-                    'Basic Audio Quality',
-                    'Ad-Supported Listening',
-                    'Mobile App Access',
-                    'Basic Recommendations',
+SizedBox(height: 20),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Free',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Rs.0/month',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 10),
+                    Text('Upstream'),
+                    Text('Preheat for Casual Liaverns'),
+                    Text('Access to Selected Audbooks'),
+                    Text('Basic Audio Quality'),
+                    Text('Ad-Supported Listening'),
+                    Text('Mobile App access'),
+                    Text('Basic Recommendations'),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => FreePlanPage()),
+                        );
+                      },
+                      child: Text('Get Started'),
+                    ),
                   ],
                 ),
+              ),
+            ),
                 SubscriptionPlanCard(
                   title: 'Premium',
                   price: 'Rs.699/month',
