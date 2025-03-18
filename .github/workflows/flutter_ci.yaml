@@ -14,10 +14,11 @@ jobs:
       # Step 1: Check out the repository code
       - uses: actions/checkout@v2
 
-      # Step 2: Set up Flutter
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.0'
+          flutter-version: "3.25.0"
+          channel: "stable"
 
       # Step 3: Install dependencies
       - run: flutter pub get
