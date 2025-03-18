@@ -19,6 +19,8 @@ jobs:
         with:
           dart-version: "3.7.0"
 
+      - run: flutter --version
+
       # Step 3: Install dependencies
       - run: flutter pub get
 
