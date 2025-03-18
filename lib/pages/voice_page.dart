@@ -56,9 +56,10 @@ class VoiceOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 300,
+      height: 150,
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: const Color.fromARGB(255, 154, 150, 150),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -73,7 +74,7 @@ class VoiceOption extends StatelessWidget {
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           IconButton(
-            icon: Icon(Ionicons.play_circle, color: Colors.blueAccent, size: 35),
+            icon: Icon(Ionicons.play_circle, color: const Color.fromARGB(255, 42, 101, 202), size: 35),
             onPressed: () {
               print("Playing $name's voice...");
             },
