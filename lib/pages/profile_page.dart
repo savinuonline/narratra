@@ -210,6 +210,19 @@ class ProfilePage extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 10),
+            FeatureTile(
+              title: "Terms of Service",
+              icon: Icons.description,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TermsOfServicePage(),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -278,6 +291,18 @@ class PrivacyPolicyPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Privacy Policy")),
       body: const Center(child: Text("Privacy Policy Content Here")),
+    );
+  }
+}
+
+class TermsOfServicePage extends StatelessWidget {
+  const TermsOfServicePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Terms of Service")),
+      body: const Center(child: Text("Terms of Service Content Here")),
     );
   }
 }
