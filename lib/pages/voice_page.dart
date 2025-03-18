@@ -30,12 +30,12 @@ class VoicePage extends StatelessWidget {
             SizedBox(height: 20),
             VoiceOption(
               name: "Female",
-              imageUrl: "assets/images/female1.png",
+              imageUrl: "assets/images/female2.jpg",
             ),
             SizedBox(height: 20),
             VoiceOption(
               name: "Male",
-              imageUrl: "assets/images/male2.png", // Replace with actual female image
+              imageUrl: "assets/images/male1.jpg", // Replace with actual female image
             ),
           ],
         ),
