@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
             minHeight: 320,
             maxHeight: 320,
             child: Container(
-              color: const Color.fromRGBO(199, 217, 221, 1),
+              color: const Color.fromRGBO(255, 255, 255, 1.0),
               child: _TrendingSection(booksFuture: trendingBooksFuture),
             ),
           ),
@@ -147,7 +147,7 @@ class _TrendingSection extends StatelessWidget {
         children: [
           Text(
             "Trending",
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: const Color(0xff000000),
@@ -233,7 +233,7 @@ class CategorySection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.nunito(
               fontSize: categoryFontSize,
               fontWeight: FontWeight.bold,
               color: const Color(0xff000000),
