@@ -11,21 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Check out the repository code
       - uses: actions/checkout@v2
 
-        name: Set up Dart SDK
-      - uses: dart-lang/setup-dart@v1
+      # Step 2: Set up Flutter
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: '3.7.0'
+          flutter-version: '3.10.0'
 
-          
+      # Step 3: Install dependencies
       - run: flutter pub get
 
-      # Step 4: Build APK
+      # Step 4: Build APK in release mode
       - run: flutter build apk --release
 
-      # Step 5: Upload APK as artifact
-      - name: Upload artifact
+      # Step 5: Upload the generated APK as an artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4.6.1
         with:
           name: release-apk
