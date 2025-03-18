@@ -22,9 +22,59 @@ class VoicePage extends StatelessWidget {
             ),
         ),
       ),
+
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            VoiceOption(
+              name: "Female",
+              imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png",
+            ),
+          ],
+        ),
+      ),
     );  
 
 
 
+  }
+}
+
+class VoiceOption extends StatelessWidget {
+  final String name;
+  final String imageUrl;
+
+  VoiceOption({required this.name, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 300,
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(imageUrl),
+            radius: 25,
+          ),
+          Text(
+            name,
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          IconButton(
+            icon: Icon(Ionicons.play_circle, color: Colors.blueAccent, size: 35),
+            onPressed: () {
+              print("Playing $name's voice...");
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
