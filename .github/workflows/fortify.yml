@@ -1,18 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-################################################################################################################################################
-# Fortify Application Security provides your team with solutions to empower DevSecOps practices, enable cloud transformation, and secure your  #
-# software supply chain. To learn more about Fortify, start a free trial or contact our sales team, visit fortify.com.                         #
-#                                                                                                                                              #
-# Use this starter workflow as a basis for integrating Fortify Application Security Testing into your GitHub workflows. This template          #
-# demonstrates the steps to package the code+dependencies, initiate a scan, and optionally import SAST vulnerabilities into GitHub Security    #
-# Code Scanning Alerts. Additional information is available in the workflow comments and the Fortify AST Action / fcli / Fortify product       #
-# documentation. If you need additional assistance, please contact Fortify support.                                                            #
-################################################################################################################################################
-
 name: Fortify AST Scan
 
 # Customize trigger events based on your DevSecOps process and/or policy
@@ -47,13 +32,9 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      # Perform SAST and optionally SCA scan via Fortify on Demand/Fortify Hosted/Software Security Center, then
-      # optionally export SAST results to the GitHub code scanning dashboard. In case further customization is
-      # required, you can use sub-actions like fortify/github-action/setup@v1 to set up the various Fortify tools
-      # and run them directly from within your pipeline; see https://github.com/fortify/github-action#readme for
-      # details.
+      # Perform SAST scan via Fortify on Demand/Fortify Hosted/Software Security Center
       - name: Run FoD SAST Scan
-        uses: fortify/github-action@a92347297e02391b857e7015792cd1926a4cd418
+        uses: fortify/github-action@v1   # Updated to v1 (latest stable)
         with:
           sast-scan: true
         env:
@@ -63,7 +44,7 @@ jobs:
           FOD_USER: ${{secrets.FOD_USER}}
           FOD_PASSWORD: ${{secrets.FOD_PAT}}
           ### Optional configuration when integrating with Fortify on Demand
-          # EXTRA_PACKAGE_OPTS: -oss                       # Extra 'scancentral package' options, like '-oss'' if
+          # EXTRA_PACKAGE_OPTS: -oss                       # Extra 'scancentral package' options, like '-oss' if
                                                            # Debricked SCA scan is enabled on Fortify on Demand
           # EXTRA_FOD_LOGIN_OPTS: --socket-timeout=60s     # Extra 'fcli fod session login' options
           # FOD_RELEASE: MyApp:MyRelease                   # FoD release name, default: <org>/<repo>:<branch>; may
