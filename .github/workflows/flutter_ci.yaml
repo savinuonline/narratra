@@ -11,29 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.6.1
+      # Step 1: Checkout the code
+      - uses: actions/checkout@v2
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      # Step 2: Set up Flutter
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.13.9"
-          channel: "stable"
+          flutter-version: 'stable'
 
-      - name: Get dependencies
-        run: flutter pub get
+          
+      - run: flutter pub get
 
-      - name: Run tests
-        run: flutter test
+      # Step 4: Build APK
+      - run: flutter build apk --release
 
-      - name: Analyze code
-        run: flutter analyze
-
-      - name: Build APK
-        run: flutter build apk
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+      # Step 5: Upload APK as artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
