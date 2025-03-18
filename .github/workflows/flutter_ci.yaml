@@ -11,13 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - uses: actions/checkout@v2
 
-      # Step 2: Set up Flutter
-      - uses: subosito/flutter-action@v2
+        name: Set up Dart SDK
+      - uses: dart-lang/setup-dart@v1
         with:
-          flutter-version: '3.13.9'
+          sdk: '3.7.0'
 
           
       - run: flutter pub get
