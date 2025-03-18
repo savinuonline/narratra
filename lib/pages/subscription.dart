@@ -115,11 +115,11 @@ class SubscriptionPlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
             margin: EdgeInsets.all(10),
-      color: title == 'Premium' ? Colors.blue : Colors.white, // Set background color for Premium card
+      color: title == 'Premium' ? const Color.fromARGB(255, 53, 68, 227) : Colors.white, // Set background color for Premium card
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center, // Center content for all cards
+          crossAxisAlignment: CrossAxisAlignment.center, 
           children: [
             Text(
               title,
@@ -130,23 +130,23 @@ class SubscriptionPlanCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            // Use RichText to make the numeric part of the price bold for all cards
+            
             RichText(
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: price.split('/')[0], // Extract the numeric part (e.g., "Rs.699")
+                    text: price.split('/')[0], // Extract the numeric part
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold, // Make the numeric part bold
+                      fontWeight: FontWeight.bold, 
                       color: title == 'Premium' ? Colors.white : const Color.fromARGB(255, 0, 0, 0), // Set text color for Premium card
                     ),
                   ),
                   TextSpan(
-                    text: '/${price.split('/')[1]}', // Add the "/month" part
+                    text: '/${price.split('/')[1]}',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.normal, // Keep "/month" normal
+                      fontWeight: FontWeight.normal, 
                       color: title == 'Premium' ? Colors.white : Colors.grey, // Set text color for Premium card
                     ),
                   ),
@@ -176,12 +176,12 @@ class SubscriptionPlanCard extends StatelessWidget {
                   // Handle the get started button press
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: title == 'Premium' ? Colors.white : Colors.blue, // Set button color for Premium card
+                  backgroundColor: title == 'Premium' ? Colors.white : const Color.fromARGB(255, 53, 68, 227), // Set button color for Premium card
                 ),
                 child: Text(
                   'Get Started',
                   style: TextStyle(
-                    color: title == 'Premium' ? Colors.blue : Colors.white, // Set text color for Premium card
+                    color: title == 'Premium' ? const Color.fromARGB(255, 53, 68, 227) : Colors.white, // Set text color for Premium card
                   ),
                 ),
               ),
