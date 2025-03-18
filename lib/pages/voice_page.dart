@@ -25,13 +25,14 @@ class VoicePage extends StatelessWidget {
 
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(height: 20),
             VoiceOption(
               name: "Female",
               imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png",
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 20),
             VoiceOption(
               name: "Male Voice",
               imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png", // Replace with actual female image
@@ -67,7 +68,7 @@ class VoiceOption extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundImage: NetworkImage(imageUrl),
-            radius: 25,
+            radius: 50,
           ),
           Text(
             name,
