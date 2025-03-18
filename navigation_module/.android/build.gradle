@@ -1,0 +1,20 @@
+// Generated file. Do not edit.
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    namespace = "com.example.navigation_module"
+    compileSdk = 35
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 35
+    }
+}
