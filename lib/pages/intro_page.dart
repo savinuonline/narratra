@@ -7,10 +7,9 @@ class IntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: Colors.white,
       body: Column(
         children: [
-          //logo
+          // Logo
           Padding(
             padding: const EdgeInsets.only(
               left: 70.0,
@@ -18,20 +17,26 @@ class IntroPage extends StatelessWidget {
               bottom: 5,
               top: 50.0,
             ),
-            child: Image.asset('lib/images/Books.png'),
+            child: Hero(
+              tag: 'logoHero',
+              child: Image.asset('lib/images/Books.png'),
+            ),
           ),
 
-          //Brand Caption
+          // Brand Caption
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '"Close Your Eyes and Let the Story Unfold!"',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
 
-          //Sub text
+          // Sub Text
           Padding(
             padding: const EdgeInsets.only(top: 1),
             child: Text(
@@ -42,23 +47,28 @@ class IntroPage extends StatelessWidget {
 
           const Spacer(),
 
-          //Get started button
+          // Get Started Button
           GestureDetector(
-            onTap:
-                () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return LoginPage(onTap: () {});
-                    },
-                  ),
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                PageRouteBuilder(
+                  transitionDuration: const Duration(milliseconds: 800),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      LoginPage(onTap: () {}),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
                 ),
+              );
+            },
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.deepPurple,
                 borderRadius: BorderRadius.circular(15),
               ),
-
               padding: const EdgeInsets.all(20),
               child: const Text(
                 "Get Started",
@@ -66,6 +76,7 @@ class IntroPage extends StatelessWidget {
               ),
             ),
           ),
+
           const Spacer(),
         ],
       ),
