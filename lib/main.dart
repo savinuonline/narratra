@@ -6,6 +6,11 @@ import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
 import 'models/user_model.dart';
 import 'pages/main_screen.dart';
+import 'package:frontend/firebase_options.dart';
+import 'package:frontend/pages/auth_page.dart';
+import 'package:frontend/pages/search_page.dart';
+import 'package:frontend/pages/intro_page.dart';
+import 'package:frontend/pages/login_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,8 +49,10 @@ class MyApp extends StatelessWidget {
           elevation: 4,
         ),
       ),
-      initialRoute: '/preferences',
+      initialRoute: '/intro',
       routes: {
+        '/intro': (context) => const IntroPage(),
+        '/loginpage': (context) => const LoginPage(),
         '/preferences':
             (context) => const GenresSelectionPage(uid: 'GEhVv1eBKM4VugcxFlVN'),
         '/main': (context) => const MainScreen(),
@@ -56,6 +63,8 @@ class MyApp extends StatelessWidget {
           return BookInfoPage(bookId: args['bookId']);
         },
       },
+      home: SearchPage(),
+      //AuthPage()
     );
   }
 }
