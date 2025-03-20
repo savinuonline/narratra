@@ -4,6 +4,7 @@ import 'package:frontend/components/my_button.dart';
 import 'package:frontend/components/my_textfield.dart';
 import 'package:frontend/components/squre_tile.dart';
 import 'package:frontend/services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -17,86 +18,173 @@ class _LoginPageState extends State<LoginPage> {
   // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final _authService = AuthService();
+  bool _isLoading = false;
+
+  void showSuccessMessage() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 50),
+                const SizedBox(height: 20),
+                const Text(
+                  'Welcome Back!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Successfully logged in',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Continue'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showNoAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('No Account Found'),
+          content: const Text(
+            'There\'s no account associated with this email. Would you like to join us?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onTap?.call();
+              },
+              child: const Text('Sign Up'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   //sign user in method
   void signUserIn() async {
-    // Validate inputs
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       showErrorMessage('Please fill in all fields');
       return;
     }
 
-    //show loading circle
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
+    if (!emailController.text.contains('@')) {
+      showErrorMessage('Please enter a valid email address');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      // Sign in with email and password
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+      final result = await _authService.signInWithEmailAndPassword(
+        emailController.text.trim(),
+        passwordController.text.trim(),
       );
 
-      // Pop loading circle if successful
-      if (context.mounted) {
-        Navigator.pop(context);
+      if (result != null && mounted) {
+        showSuccessMessage();
+
+        // Check if user has completed registration
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(result.user!.uid)
+                .get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          final preferences = userData['preferences'] as List<dynamic>?;
+
+          if (preferences == null || preferences.isEmpty) {
+            // Navigate to preferences selection if not set
+            Navigator.pushReplacementNamed(
+              context,
+              '/preferences',
+              arguments: {'uid': result.user!.uid},
+            );
+          } else {
+            // Navigate to main screen if preferences are set
+            Navigator.pushReplacementNamed(context, '/main');
+          }
+        } else {
+          showErrorMessage('User data not found. Please try again.');
+        }
+      } else if (mounted) {
+        // Check if the email exists in Firebase Auth
+        try {
+          await FirebaseAuth.instance.fetchSignInMethodsForEmail(
+            emailController.text.trim(),
+          );
+          showErrorMessage('Invalid password. Please try again.');
+        } catch (e) {
+          showNoAccountDialog();
+        }
       }
     } on FirebaseAuthException catch (e) {
-      // Pop loading circle
-      if (context.mounted) {
-        Navigator.pop(context);
-      }
-
-      if (e.code == 'user-not-found') {
-        // Show dialog asking if they want to register
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Account Not Found'),
-                content: const Text(
-                  'No account found under that email! Would you like to register?',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      widget.onTap?.call(); // Switch to registration page
-                    },
-                    child: const Text('Register'),
-                  ),
-                ],
-              );
-            },
-          );
+      if (mounted) {
+        String message = 'An error occurred during sign in.';
+        switch (e.code) {
+          case 'user-not-found':
+            showNoAccountDialog();
+            return;
+          case 'wrong-password':
+            message = 'Wrong password provided.';
+            break;
+          case 'invalid-email':
+            message = 'Invalid email address.';
+            break;
+          case 'user-disabled':
+            message = 'This account has been disabled.';
+            break;
+          case 'too-many-requests':
+            message = 'Too many attempts. Please try again later.';
+            break;
+          default:
+            message = e.message ?? 'An unexpected error occurred.';
         }
-      } else if (e.code == 'wrong-password') {
-        showErrorMessage('Incorrect password');
-      } else if (e.code == 'invalid-email') {
-        showErrorMessage('Invalid email format');
-      } else if (e.code == 'user-disabled') {
-        showErrorMessage('This account has been disabled');
-      } else {
-        showErrorMessage('An error occurred while signing in: ${e.message}');
+        showErrorMessage(message);
       }
     } catch (e) {
-      // Pop loading circle
-      if (context.mounted) {
-        Navigator.pop(context);
+      if (mounted) {
+        showErrorMessage('An unexpected error occurred: $e');
       }
-      showErrorMessage('An unexpected error occurred: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -105,12 +193,12 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Error'),
+          title: const Text('Oops!'),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: const Text('Let\'s fix it!'),
             ),
           ],
         );
@@ -135,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 35),
                 //welcome back
                 Text(
-                  'Welcome back, you\'ve been missed!',
+                  'Nice to see you again, We missed You!!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
 
@@ -174,7 +262,10 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 25),
                 //sign in button
-                MyButton(text: "Log In", onTap: signUserIn),
+                MyButton(
+                  text: _isLoading ? "Signing in..." : "Log In",
+                  onTap: _isLoading ? null : signUserIn,
+                ),
 
                 const SizedBox(height: 30),
                 //or continue with
@@ -208,7 +299,41 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     //Google
                     SqureTile(
-                      onTap: () => AuthService().signInWithGoogle(),
+                      onTap: () async {
+                        final result = await AuthService().signInWithGoogle();
+                        if (result != null && mounted) {
+                          // Check if user has completed registration
+                          final userDoc =
+                              await FirebaseFirestore.instance
+                                  .collection('Users')
+                                  .doc(result.user!.uid)
+                                  .get();
+
+                          if (userDoc.exists) {
+                            final userData =
+                                userDoc.data() as Map<String, dynamic>;
+                            final preferences =
+                                userData['preferences'] as List<dynamic>?;
+
+                            if (preferences == null || preferences.isEmpty) {
+                              // Navigate to preferences selection if not set
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/preferences',
+                                arguments: {'uid': result.user!.uid},
+                              );
+                            } else {
+                              // Navigate to main screen if preferences are set
+                              Navigator.pushReplacementNamed(context, '/main');
+                            }
+                          } else {
+                            // If user document doesn't exist, show error
+                            showErrorMessage(
+                              'User data not found. Please try again.',
+                            );
+                          }
+                        }
+                      },
                       imagePath: 'lib/images/GoogleLogo.png',
                     ),
 

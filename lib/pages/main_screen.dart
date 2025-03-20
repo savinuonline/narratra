@@ -149,7 +149,9 @@ class _MainScreenState extends State<MainScreen>
                                       shape: BoxShape.circle,
                                       color:
                                           isSelected
-                                              ? const Color(0xff3dc2ec).withOpacity(0.1)
+                                              ? const Color(
+                                                0xff3dc2ec,
+                                              ).withOpacity(0.1)
                                               : Colors.transparent,
                                     ),
                                     child: SizedBox(
