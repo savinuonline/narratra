@@ -16,60 +16,106 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   // text editing controllers
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
 
   //sign user in method
   void signUserIn() async {
+    // Validate inputs
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      showErrorMessage('Please fill in all fields');
+      return;
+    }
+
     //show loading circle
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return const Center(child: CircularProgressIndicator());
       },
     );
 
-    //wrong email message popup
-    void wrongEmailMessage() {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(title: Text("Incorrect Email"));
-        },
-      );
-    }
-
-    //wrong password message popup
-    void wrongPasswordMessage() {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(title: Text("Incorrect Password"));
-        },
-      );
-    }
-
-    //try signing in
     try {
+      // Sign in with email and password
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
-    } on FirebaseAuthException catch (e) {
-      //Wring Email
-      if (e.code == 'user-not-found') {
-        //show errors to user
-        wrongEmailMessage();
-      }
-      //Wrong Password
-      else if (e.code == 'wrong-password') {
-        //show errors to user
-        wrongPasswordMessage();
-      }
-    }
 
-    //close loading circle
-    Navigator.pop(context);
+      // Pop loading circle if successful
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+    } on FirebaseAuthException catch (e) {
+      // Pop loading circle
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      if (e.code == 'user-not-found') {
+        // Show dialog asking if they want to register
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Account Not Found'),
+                content: const Text(
+                  'No account found under that email! Would you like to register?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      widget.onTap?.call(); // Switch to registration page
+                    },
+                    child: const Text('Register'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else if (e.code == 'wrong-password') {
+        showErrorMessage('Incorrect password');
+      } else if (e.code == 'invalid-email') {
+        showErrorMessage('Invalid email format');
+      } else if (e.code == 'user-disabled') {
+        showErrorMessage('This account has been disabled');
+      } else {
+        showErrorMessage('An error occurred while signing in: ${e.message}');
+      }
+    } catch (e) {
+      // Pop loading circle
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+      showErrorMessage('An unexpected error occurred: $e');
+    }
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -79,7 +125,6 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            //Scroll view
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -100,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                   controller: emailController,
                   hintText: "Email",
                   obscureText: false,
+                  keyboardType: TextInputType.emailAddress,
                 ),
 
                 const SizedBox(height: 10),
@@ -128,10 +174,10 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 25),
                 //sign in button
-                MyButton(text: "Sign In", onTap: signUserIn),
+                MyButton(text: "Log In", onTap: signUserIn),
 
                 const SizedBox(height: 30),
-                //or contunue with
+                //or continue with
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
@@ -166,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                       imagePath: 'lib/images/GoogleLogo.png',
                     ),
 
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
 
                     //Apple
                     SqureTile(

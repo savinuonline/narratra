@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
 class MyTextField extends StatelessWidget {
-  final controller;
+  final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final Function(String)? onChanged;
+  final TextInputType? keyboardType;
+
   const MyTextField({
-    super.key,
+    Key? key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
-  });
+    this.onChanged,
+    this.keyboardType,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +23,8 @@ class MyTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         obscureText: obscureText, // hide password
+        onChanged: onChanged,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white),

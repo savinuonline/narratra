@@ -5,6 +5,12 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
+        
+        <!-- Add reCAPTCHA meta-data -->
+        <meta-data
+            android:name="com.google.firebase.auth.RecaptchaVerifier.APP_KEY"
+            android:value="6LcZ2PkqAAAAALpq-darUmUFPXBHVvs2uytOO1nw"/>
+            
         <activity
             android:name=".MainActivity"
             android:exported="true"

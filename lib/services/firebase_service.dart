@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/book.dart';
-import '../models/user_model.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FirebaseService {
@@ -124,10 +123,13 @@ class FirebaseService {
   /// Update user's selected genres in Firestore.
   Future<void> updateUserGenres(String uid, List<String> genres) async {
     try {
-      await _firestore.collection('users').doc(uid).set({
-        'selectedGenres': genres,
-      }, SetOptions(merge: true));
+      await _firestore.collection('Users').doc(uid).update({
+        'preferences': genres,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Successfully updated genres for user $uid: $genres');
     } catch (e) {
+      print('Error updating genres: $e');
       rethrow;
     }
   }
@@ -240,44 +242,6 @@ class FirebaseService {
       return nextId;
     } catch (e) {
       print('Error adding book: $e');
-      rethrow;
-    }
-  }
-
-  /// Migrate existing books to have unique IDs.
-  Future<void> migrateExistingBooks() async {
-    try {
-      print('Starting book migration...');
-
-      for (final genre in categories) {
-        print('\nMigrating books in genre: $genre');
-        final booksRef = _firestore
-            .collection('books')
-            .doc(genre)
-            .collection('books');
-
-        final snapshot = await booksRef.get();
-
-        for (final doc in snapshot.docs) {
-          final data = doc.data();
-          final oldId = doc.id;
-
-          if (oldId != '001') {
-            print('Skipping book with unique ID: $oldId');
-            continue;
-          }
-
-          print('Migrating book: ${data['title']}');
-          final newDoc = await booksRef.add(data);
-          print('Created new document with ID: ${newDoc.id}');
-          await doc.reference.delete();
-          print('Deleted old document with ID: $oldId');
-        }
-      }
-
-      print('\nMigration completed successfully!');
-    } catch (e) {
-      print('Error during migration: $e');
       rethrow;
     }
   }

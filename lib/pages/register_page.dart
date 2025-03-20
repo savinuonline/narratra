@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/components/my_button.dart';
 import 'package:frontend/components/my_textfield.dart';
@@ -15,13 +16,41 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final usernameController = TextEditingController();
+  final contactController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  //sign user up method
+  bool isPasswordValid = false;
+  String passwordError = '';
+
+  // Password validation criteria
+  bool hasMinLength = false;
+  bool hasUppercase = false;
+  bool hasLowercase = false;
+  bool hasDigit = false;
+  bool hasSpecialChar = false;
+
+  void checkPassword(String password) {
+    print("Password Changed: $password");
+    setState(() {
+      hasMinLength = password.length >= 8;
+      hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      hasLowercase = password.contains(RegExp(r'[a-z]'));
+      hasDigit = password.contains(RegExp(r'[0-9]'));
+      hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      
+      isPasswordValid = hasMinLength && hasUppercase && hasLowercase && 
+                       hasDigit && hasSpecialChar;
+    });
+  }
+
+  // sign user up method
   void signUserUp() async {
-    //show loading circle
+    // show loading circle
     showDialog(
       context: context,
       builder: (context) {
@@ -29,53 +58,113 @@ class _RegisterPageState extends State<RegisterPage> {
       },
     );
 
-    //wrong email message popup
-    void wrongEmailMessage() {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(title: Text("Incorrect Email"));
-        },
-      );
-    }
-
-    //wrong password message popup
-    void wrongPasswordMessage() {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(title: Text("Incorrect Password"));
-        },
-      );
-    }
-
-    //try creating the user
     try {
-      //check if the password is the same
-      if (passwordController.text == confirmPasswordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-      } else {
-        //show errors to user
-        //showErrorMessge("Passwords do not match");
+      // Validate fields
+      if (firstNameController.text.isEmpty || 
+          lastNameController.text.isEmpty ||
+          usernameController.text.isEmpty ||
+          contactController.text.isEmpty) {
+        throw 'Please fill in all fields';
       }
-    } on FirebaseAuthException catch (e) {
-      //Wring Email
-      if (e.code == 'user-not-found') {
-        //show errors to user
-        wrongEmailMessage();
-      }
-      //Wrong Password
-      else if (e.code == 'wrong-password') {
-        //show errors to user
-        wrongPasswordMessage();
-      }
-    }
 
-    //close loading circle
-    Navigator.pop(context);
+      // Check if passwords match
+      if (passwordController.text != confirmPasswordController.text) {
+        throw 'Passwords don\'t match';
+      }
+
+      if (!isPasswordValid) {
+        throw 'Password does not meet security requirements';
+      }
+
+      // Create user
+      UserCredential userCredential = 
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      // After creating the user, store additional info in Firestore
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'username': usernameController.text,
+        'contact': contactController.text,
+        'email': emailController.text,
+        'userId': userCredential.user!.uid,
+        'preferences': [],
+        'createdAt': Timestamp.now(),
+      });
+
+      // Pop loading circle
+      if (context.mounted) Navigator.pop(context);
+
+      // Show success message
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Success'),
+              content: const Text('Account created successfully!'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Navigate to preferences page with user ID
+                    Navigator.pushReplacementNamed(
+                      context, 
+                      '/preferences',
+                      arguments: {'uid': userCredential.user!.uid},
+                    );
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+
+    } on FirebaseAuthException catch (e) {
+      // Pop loading circle
+      Navigator.pop(context);
+      String errorMessage = 'An error occurred';
+      
+      if (e.code == 'email-already-in-use') {
+        errorMessage = 'This email is already registered';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Invalid email format';
+      } else if (e.code == 'weak-password') {
+        errorMessage = 'Password is too weak';
+      }
+      
+      showErrorMessage(errorMessage);
+    } catch (e) {
+      // Pop loading circle
+      Navigator.pop(context);
+      showErrorMessage(e.toString());
+    }
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -85,114 +174,120 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            //Scroll view
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 15),
-                //logo
+                const SizedBox(height: 25),
+                
+                // Logo
                 Image.asset('lib/images/BlackLogo.png', height: 100),
-
-                const SizedBox(height: 20),
-                //welcome back
+                
+                const SizedBox(height: 25),
+                
                 Text(
                   'Let\'s create an account for you!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
                 ),
 
                 const SizedBox(height: 25),
-                //email textfield
+
+                // First Name
                 MyTextField(
-                  controller: emailController,
-                  hintText: "Email",
+                  controller: firstNameController,
+                  hintText: 'First Name',
                   obscureText: false,
                 ),
 
                 const SizedBox(height: 10),
 
-                //password textfield
+                // Last Name
                 MyTextField(
-                  controller: passwordController,
-                  hintText: "Password",
-                  obscureText: true,
+                  controller: lastNameController,
+                  hintText: 'Last Name',
+                  obscureText: false,
                 ),
 
                 const SizedBox(height: 10),
 
-                //confirm password
+                // Username
+                MyTextField(
+                  controller: usernameController,
+                  hintText: 'Username',
+                  obscureText: false,
+                ),
+
+                const SizedBox(height: 10),
+
+                // Contact
+                MyTextField(
+                  controller: contactController,
+                  hintText: 'Contact Number',
+                  obscureText: false,
+                ),
+
+                const SizedBox(height: 10),
+
+                // Email
+                MyTextField(
+                  controller: emailController,
+                  hintText: 'Email',
+                  obscureText: false,
+                ),
+
+                const SizedBox(height: 10),
+
+                // Password
+                MyTextField(
+                  controller: passwordController,
+                  hintText: 'Password',
+                  obscureText: true,
+                  onChanged: checkPassword,
+                ),
+
+                const SizedBox(height: 10),
+
+                // Confirm Password
                 MyTextField(
                   controller: confirmPasswordController,
-                  hintText: "Confirm Password",
+                  hintText: 'Confirm Password',
                   obscureText: true,
-                ),
-
-                //forgot password?
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // Text(
-                      //   "Forgot Password?",
-                      //   style: TextStyle(color: Colors.grey[600]),
-                      // ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-                //sign in button
-                MyButton(text: "Sign Up", onTap: signUserUp),
-
-                const SizedBox(height: 30),
-                //or contunue with
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(thickness: 0.5, color: Colors.grey[400]),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          "Or continue with",
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-
-                      Expanded(
-                        child: Divider(thickness: 0.5, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-                //google + apple sign in buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    //Google
-                    SqureTile(
-                      onTap: () => AuthService().signInWithGoogle(),
-                      imagePath: 'lib/images/GoogleLogo.png',
-                    ),
-
-                    SizedBox(width: 10),
-
-                    //Apple
-                    SqureTile(
-                      onTap: () => {},
-                      imagePath: 'lib/images/AppleLogo.png',
-                    ),
-                  ],
                 ),
 
                 const SizedBox(height: 20),
 
-                //not a member? register now
+                // Password requirements
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Password Requirements:',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      _buildRequirement('At least 8 characters', hasMinLength),
+                      _buildRequirement('One uppercase letter', hasUppercase),
+                      _buildRequirement('One lowercase letter', hasLowercase),
+                      _buildRequirement('One number', hasDigit),
+                      _buildRequirement('One special character', hasSpecialChar),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                // Sign Up Button
+                MyButton(
+                  text: "Sign Up",
+                  onTap: signUserUp,
+                ),
+
+                const SizedBox(height: 25),
+
+                // Already have an account?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -200,24 +295,46 @@ class _RegisterPageState extends State<RegisterPage> {
                       "Already have an account?",
                       style: TextStyle(color: Colors.grey[700]),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4),
                     GestureDetector(
                       onTap: widget.onTap,
                       child: const Text(
-                        "Login now!",
+                        "Login now!!",
                         style: TextStyle(
-                          color: Colors.blueAccent,
+                          color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 25),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRequirement(String text, bool isMet) {
+    return Row(
+      children: [
+        Icon(
+          isMet ? Icons.check_circle : Icons.cancel,
+          color: isMet ? Colors.green : Colors.red,
+          size: 16,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.grey[700],
+            fontSize: 12,
+          ),
+        ),
+      ],
     );
   }
 }

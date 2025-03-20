@@ -397,7 +397,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     return Scaffold(
       backgroundColor:
           Colors
-              .white, // Changed from Color.fromRGBO(199, 217, 221, 1) to white
+              .white,
       body: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).padding.bottom + 60,

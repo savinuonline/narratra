@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
@@ -40,7 +41,8 @@ class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
-  const HomeScreen({super.key, required this.user});
+
+  const HomeScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
