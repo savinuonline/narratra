@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -108,88 +107,29 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Favorites",
               icon: Icons.favorite_border,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => const PlaceholderPage(title: "Favorites"),
-                  ),
-                );
-              },
+              page: "Favorites",
             ),
-            const SizedBox(height: 10),
             FeatureTile(
               title: "Downloads",
               icon: Icons.download,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => const PlaceholderPage(title: "Downloads"),
-                  ),
-                );
-              },
+              page: "Downloads",
             ),
-            const SizedBox(height: 10),
             FeatureTile(
               title: "Rewards",
               icon: Icons.star_border,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => const PlaceholderPage(title: "Rewards"),
-                  ),
-                );
-              },
+              page: "Rewards",
             ),
-            const SizedBox(height: 10),
             FeatureTile(
               title: "Language Selection",
               icon: Icons.language,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            const PlaceholderPage(title: "Language Selection"),
-                  ),
-                );
-              },
+              page: "Language Selection",
             ),
-            const SizedBox(height: 10),
             FeatureTile(
               title: "Subscription",
               icon: Icons.subscriptions,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            const PlaceholderPage(title: "Subscription"),
-                  ),
-                );
-              },
+              page: "Subscription",
             ),
-            const SizedBox(height: 10),
-            FeatureTile(
-              title: "History",
-              icon: Icons.history,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => const PlaceholderPage(title: "History"),
-                  ),
-                );
-              },
-            ),
+            FeatureTile(title: "History", icon: Icons.history, page: "History"),
             const SizedBox(height: 30),
             const Text(
               "About",
@@ -203,38 +143,25 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Privacy Policy",
               icon: Icons.privacy_tip,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PrivacyPolicyPage(),
-                  ),
-                );
-              },
+              page: "Privacy Policy",
             ),
-            const SizedBox(height: 10),
             FeatureTile(
               title: "Terms of Service",
               icon: Icons.description,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TermsOfServicePage(),
-                  ),
-                );
-              },
+              page: "Terms of Service",
             ),
-            const SizedBox(height: 10),
-            FeatureTile(
-              title: "Rate Narratra",
-              icon: Icons.rate_review,
+            GestureDetector(
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (context) => const RateNarratraDialog(),
                 );
               },
+              child: const FeatureTile(
+                title: "Rate Narratra",
+                icon: Icons.rate_review,
+                page: "",
+              ),
             ),
           ],
         ),
@@ -246,19 +173,28 @@ class ProfilePage extends StatelessWidget {
 class FeatureTile extends StatelessWidget {
   final String title;
   final IconData icon;
-  final VoidCallback onTap;
+  final String page;
 
   const FeatureTile({
     required this.title,
     required this.icon,
-    required this.onTap,
+    required this.page,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        if (page.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PlaceholderPage(title: page),
+            ),
+          );
+        }
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
@@ -327,7 +263,6 @@ class RateNarratraDialog extends StatelessWidget {
   }
 }
 
-// Placeholder pages
 class PlaceholderPage extends StatelessWidget {
   final String title;
   const PlaceholderPage({super.key, required this.title});
@@ -337,30 +272,6 @@ class PlaceholderPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(child: Text("$title Page Content Here")),
-    );
-  }
-}
-
-class PrivacyPolicyPage extends StatelessWidget {
-  const PrivacyPolicyPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Privacy Policy")),
-      body: const Center(child: Text("Privacy Policy Content Here")),
-    );
-  }
-}
-
-class TermsOfServicePage extends StatelessWidget {
-  const TermsOfServicePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Terms of Service")),
-      body: const Center(child: Text("Terms of Service Content Here")),
     );
   }
 }

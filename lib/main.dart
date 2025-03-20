@@ -18,11 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
-      routes: {
-        '/media_player':
-            (context) => MediaPlayerPage(), // Added route for MediaPlayerPage
-      },
+      initialRoute: '/media',
+      routes: {'/media': (context) => MediaPlayerPage()},
     );
   }
 }
@@ -37,23 +34,29 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 4;
 
-  final List<Widget> _pages = [
-    Center(child: Text("Explore Page")),
-    Center(child: Text("Search Page")),
-    Center(child: Text("Library Page")),
-    Center(
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            '/media_player',
-          ); // Navigate to MediaPlayerPage
-        },
-        child: Text("Go to Media Player"),
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _pages.addAll([
+      const Center(child: Text("Explore Page")),
+      const Center(child: Text("Search Page")),
+      const Center(child: Text("Library Page")),
+      Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              '/media_player',
+            ); // Navigate to MediaPlayerPage
+          },
+          child: const Text("Go to Media Player"),
+        ),
       ),
-    ),
-    const ProfilePage(),
-  ];
+      const ProfilePage(),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
