@@ -19,16 +19,27 @@ class MediaPlayerPage extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 40), // Space for status bar
-            Align(
-              alignment: Alignment.topCenter,
-              child: Text(
-                "PLAYING NOW",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: const Color.fromARGB(255, 234, 234, 240),
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(
+                    Icons.arrow_back, // Back icon
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  Text(
+                    "PLAYING NOW",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  SizedBox(width: 28), // Space to balance layout
+                ],
               ),
             ),
             Spacer(), // Pushes content to center
