@@ -2,13 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
-import 'package:frontend/pages/login_or_register_page.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
 import 'pages/main_screen.dart';
-import 'package:frontend/firebase_options.dart';
 import 'package:frontend/pages/auth_page.dart';
-import 'package:frontend/pages/search_page.dart';
 import 'package:frontend/pages/intro_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
@@ -16,6 +13,7 @@ import 'package:frontend/pages/register_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
