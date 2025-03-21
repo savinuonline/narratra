@@ -22,8 +22,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _rememberMe = false;
 
-  void showSuccessMessage() {
-    showGeneralDialog(
+  Future showSuccessMessage() async {
+    return showGeneralDialog(
       context: context,
       barrierDismissible: false,
       barrierLabel: '',
@@ -523,30 +523,39 @@ class _LoginPageState extends State<LoginPage> {
       final result = await _authService.signInWithEmailAndPassword(
         emailController.text.trim(),
         passwordController.text.trim(),
+        rememberMe: _rememberMe,
       );
 
       if (result != null && mounted) {
         // Check if user has completed registration
-        final userDoc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(result.user!.uid)
-            .get();
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(result.user!.uid)
+                .get();
 
         if (userDoc.exists) {
-          showSuccessMessage();
           final userData = userDoc.data() as Map<String, dynamic>;
           final preferences = userData['preferences'] as List<dynamic>?;
 
+          // Show success message first
+          await showSuccessMessage();
+
           if (preferences == null || preferences.isEmpty) {
             // Navigate to preferences selection if not set
-            Navigator.pushReplacementNamed(
+            Navigator.pushNamedAndRemoveUntil(
               context,
               '/preferences',
+              (route) => false,
               arguments: {'uid': result.user!.uid},
             );
           } else {
             // Navigate to main screen if preferences are set
-            Navigator.pushReplacementNamed(context, '/main');
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/main',
+              (route) => false,
+            );
           }
         } else {
           // User exists in Auth but not in Firestore
@@ -566,9 +575,10 @@ class _LoginPageState extends State<LoginPage> {
                 });
 
             // Navigate to preferences selection for new user
-            Navigator.pushReplacementNamed(
+            Navigator.pushNamedAndRemoveUntil(
               context,
               '/preferences',
+              (route) => false,
               arguments: {'uid': result.user!.uid},
             );
           } catch (e) {
@@ -675,40 +685,8 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Remember me
-                      Transform.translate(
-                        offset: const Offset(-10, 0),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: _rememberMe,
-                              onChanged: (value) {
-                                setState(() {
-                                  _rememberMe = value ?? false;
-                                });
-                              },
-                              activeColor: const Color.fromARGB(
-                                255,
-                                12,
-                                171,
-                                245,
-                              ),
-                              checkColor: Colors.white,
-                              side: BorderSide(color: Colors.grey.shade400),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(-5, 0),
-                              child: const Text('Remember me'),
-                            ),
-                          ],
-                        ),
-                      ),
-
                       // Forgot Password
                       GestureDetector(
                         onTap: () {

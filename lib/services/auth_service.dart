@@ -54,6 +54,7 @@ class AuthService {
   Future<UserCredential?> signInWithEmailAndPassword(
     String email,
     String password,
+    {bool rememberMe = true}
   ) async {
     try {
       await initializeFirebase();

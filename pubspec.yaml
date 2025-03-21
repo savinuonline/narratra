@@ -45,6 +45,8 @@ dependencies:
   firebase_auth: ^5.5.1
   google_sign_in: ^6.3.0
   firebase_app_check: ^0.3.2+4
+  shared_preferences: ^2.5.2
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
@@ -76,7 +78,6 @@ flutter:
     - lib/images/
     - assets/icons/
 
-
   #   - images/a_dot_ham.jpeg
 
   # An images asset can refer to one or more resolution-specific "variants", see
@@ -104,3 +105,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/images/LogoBlue.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "lib/images/LogoBlue.png"
+  remove_alpha_ios: true
