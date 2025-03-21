@@ -58,10 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    print('Initializing HomeScreen with user ID: ${widget.user.uid}');
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
-      widget.user.uid,
-    );
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
@@ -111,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Other categories
+          // Uniquely Yours section
           SliverToBoxAdapter(
             child: CategorySection(
               title: "Uniquely Yours",

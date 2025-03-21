@@ -68,32 +68,19 @@ class AuthService {
         print('Successfully signed in user: ${userCredential.user?.email}');
         return userCredential;
       }
-      return null;
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user found for that email.',
+      );
     } on FirebaseAuthException catch (e) {
       print('Firebase Auth Error: ${e.code} - ${e.message}');
-      switch (e.code) {
-        case 'user-not-found':
-          print('No user found for that email.');
-          break;
-        case 'wrong-password':
-          print('Wrong password provided.');
-          break;
-        case 'invalid-email':
-          print('Invalid email address.');
-          break;
-        case 'user-disabled':
-          print('This user account has been disabled.');
-          break;
-        case 'too-many-requests':
-          print('Too many attempts. Please try again later.');
-          break;
-        default:
-          print('Unknown error: ${e.message}');
-      }
-      return null;
+      throw e; // Re-throw the exception to be handled by the caller
     } catch (e) {
       print('Unexpected error: $e');
-      return null;
+      throw FirebaseAuthException(
+        code: 'unknown',
+        message: 'An unexpected error occurred: $e',
+      );
     }
   }
 

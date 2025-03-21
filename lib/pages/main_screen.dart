@@ -19,30 +19,19 @@ class _MainScreenState extends State<MainScreen>
   late Animation<double> _scaleAnimation;
   int _selectedIndex = 0;
   int _previousIndex = 0;
-
-  final List<Widget> _pages = [
-    HomeScreen(
-      user: UserModel(
-        uid: 'GEhVv1eBKM4VugcxFlVN',
-        displayName: 'Test User',
-        selectedGenres: ['Personal Growth', 'Fiction'],
-      ),
-    ),
-    const Center(child: Text('Search')),
-    const LibraryPage(),
-    const Center(child: Text('Profile')),
-  ];
-
-  final List<NavigationItem> _navigationItems = [
-    NavigationItem(icon: 'Home.svg', label: 'Home'),
-    NavigationItem(icon: 'Search.svg', label: 'Search'),
-    NavigationItem(icon: 'Library.svg', label: 'Library'),
-    NavigationItem(icon: 'Profile.svg', label: 'Profile'),
-  ];
+  late UserModel currentUser;
 
   @override
   void initState() {
     super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      currentUser = UserModel(
+        uid: user.uid,
+        displayName: user.displayName ?? user.email?.split('@')[0] ?? 'User',
+        selectedGenres: [],
+      );
+    }
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -71,118 +60,135 @@ class _MainScreenState extends State<MainScreen>
     });
   }
 
+  List<Widget> get _pages => [
+    HomeScreen(user: currentUser),
+    const Center(child: Text('Search')),
+    const LibraryPage(),
+    const Center(child: Text('Profile')),
+  ];
+
+  final List<NavigationItem> _navigationItems = [
+    NavigationItem(icon: 'Home.svg', label: 'Home'),
+    NavigationItem(icon: 'Search.svg', label: 'Search'),
+    NavigationItem(icon: 'Library.svg', label: 'Library'),
+    NavigationItem(icon: 'Profile.svg', label: 'Profile'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        height: 80,
-        margin: const EdgeInsets.only(bottom: 0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
-            ),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          // User is not authenticated, redirect to login
+          Future.microtask(() => Navigator.pushReplacementNamed(context, '/login'));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              _pages[_selectedIndex],
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: List.generate(
+                          _navigationItems.length,
+                          (index) => _buildNavItem(index),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-              ),
-              child: BottomNavigationBar(
-                currentIndex: _selectedIndex,
-                onTap: _onItemTapped,
-                selectedItemColor: Colors.blue,
-                unselectedItemColor: const Color.fromARGB(255, 0, 0, 0),
-                selectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
+        );
+      },
+    );
+  }
+
+  Widget _buildNavItem(int index) {
+    final item = _navigationItems[index];
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        splashColor: Colors.blue.withOpacity(0.2),
+        highlightColor: Colors.blue.withOpacity(0.1),
+        onTap: () => _onItemTapped(index),
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            final bool isSelected = _selectedIndex == index;
+            final bool wasSelected = _previousIndex == index;
+            final double scale = isSelected ? _scaleAnimation.value : 1.0;
+            return Transform.scale(
+              scale: scale,
+              child: Container(
+                margin: const EdgeInsets.only(
+                  bottom: 1,
+                ), // Changed from 1 to 0
+                padding: const EdgeInsets.all(
+                  6,
+                ), // Changed from 7 to 6
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      isSelected
+                          ? const Color(
+                              0xff3dc2ec,
+                            ).withOpacity(0.1)
+                          : Colors.transparent,
                 ),
-                unselectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  height: 1.0,
-                ),
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                elevation: 10,
-                iconSize: 26,
-                items:
-                    _navigationItems.map((item) {
-                      final int index = _navigationItems.indexOf(item);
-                      return BottomNavigationBarItem(
-                        icon: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            splashColor: Colors.blue.withOpacity(0.2),
-                            highlightColor: Colors.blue.withOpacity(0.1),
-                            onTap: () => _onItemTapped(index),
-                            child: AnimatedBuilder(
-                              animation: _animationController,
-                              builder: (context, child) {
-                                final bool isSelected = _selectedIndex == index;
-                                final bool wasSelected =
-                                    _previousIndex == index;
-                                final double scale =
-                                    isSelected ? _scaleAnimation.value : 1.0;
-                                return Transform.scale(
-                                  scale: scale,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(
-                                      bottom: 1,
-                                    ), // Changed from 1 to 0
-                                    padding: const EdgeInsets.all(
-                                      6,
-                                    ), // Changed from 7 to 6
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          isSelected
-                                              ? const Color(
-                                                0xff3dc2ec,
-                                              ).withOpacity(0.1)
-                                              : Colors.transparent,
-                                    ),
-                                    child: SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: SvgPicture.asset(
-                                        'assets/icons/${item.icon}',
-                                        color:
-                                            isSelected
-                                                ? const Color(0xff3dc2ec)
-                                                : const Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                ),
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: SvgPicture.asset(
+                    'assets/icons/${item.icon}',
+                    color:
+                        isSelected
+                            ? const Color(0xff3dc2ec)
+                            : const Color.fromARGB(
+                              255,
+                              0,
+                              0,
+                              0,
                             ),
-                          ),
-                        ),
-                        label: item.label,
-                      );
-                    }).toList(),
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
