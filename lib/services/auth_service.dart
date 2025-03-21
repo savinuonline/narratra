@@ -3,7 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class AuthService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    signInOption: SignInOption.standard,
+  );
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Initialize Firebase with reCAPTCHA configuration
@@ -22,42 +25,27 @@ class AuthService {
   //Google Sign In
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      await initializeFirebase();
-      
-      //Begin interactive signIn process
+      // Begin interactive sign-in process
       final GoogleSignInAccount? gUser = await _googleSignIn.signIn();
 
+      // If user cancels the sign-in flow, return null
       if (gUser == null) {
-        print('Google Sign In was cancelled by the user');
         return null;
       }
 
-      print('Google Sign In successful for user: ${gUser.email}');
-
-      //Obtain auth details from request
+      // Obtain auth details from request
       final GoogleSignInAuthentication gAuth = await gUser.authentication;
 
-      if (gAuth.accessToken == null || gAuth.idToken == null) {
-        print('Failed to get access token or ID token');
-        return null;
-      }
-
-      //Create a new credential for the user
+      // Create new credential for user
       final credential = GoogleAuthProvider.credential(
         accessToken: gAuth.accessToken,
         idToken: gAuth.idToken,
       );
 
-      //Sign in the user with the credential
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
-      print('Firebase Auth successful for user: ${userCredential.user?.email}');
-      return userCredential;
+      // Finally, sign in
+      return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
       print('Error signing in with Google: $e');
-      if (e is FirebaseAuthException) {
-        print('Firebase Auth Error Code: ${e.code}');
-        print('Firebase Auth Error Message: ${e.message}');
-      }
       return null;
     }
   }

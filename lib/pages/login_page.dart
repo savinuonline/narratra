@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  bool _rememberMe = false;
 
   void showSuccessMessage() {
     showDialog(
@@ -41,9 +42,27 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 50),
                 const SizedBox(height: 20),
-                const Text(
-                  'Welcome Back!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                FutureBuilder<DocumentSnapshot>(
+                  future:
+                      FirebaseFirestore.instance
+                          .collection('Users')
+                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                          .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final userData =
+                          snapshot.data!.data() as Map<String, dynamic>?;
+                      final username = userData?['username'] ?? 'User';
+                      return Text(
+                        'Welcome Back! $username!',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }
+                    return const Text('Loading...');
+                  },
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -52,6 +71,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 124, 166, 239),
+                  ),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Continue'),
                 ),
@@ -85,6 +111,55 @@ class _LoginPageState extends State<LoginPage> {
               child: const Text('Sign Up'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void showGoogleSignInSuccess() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 50),
+                const SizedBox(height: 20),
+                const Text(
+                  'Google Sign-In Successful!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Welcome to Narratra',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 124, 166, 239),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Continue'),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -209,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -218,7 +293,7 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 const SizedBox(height: 15),
                 //logo
-                Image.asset('lib/images/BlackLogo.png', height: 100),
+                Image.asset('lib/images/LogoBlue.png', height: 100),
 
                 const SizedBox(height: 35),
                 //welcome back
@@ -246,15 +321,57 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 10),
-                //forgot password?
+
+                //"Remember me" and "Forgot Password?"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Forgot Password?",
-                        style: TextStyle(color: Colors.grey[600]),
+                      // Remember me
+                      Transform.translate(
+                        offset: const Offset(-10, 0),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rememberMe = value ?? false;
+                                });
+                              },
+                              activeColor: const Color.fromARGB(
+                                255,
+                                12,
+                                171,
+                                245,
+                              ),
+                              checkColor: Colors.white,
+                              side: BorderSide(color: Colors.grey.shade400),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            Transform.translate(
+                              offset: const Offset(-5, 0),
+                              child: const Text('Remember me'),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Forgot Password
+                      GestureDetector(
+                        onTap: () {
+                          // Add your forgot password functionality here
+                        },
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -302,6 +419,8 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () async {
                         final result = await AuthService().signInWithGoogle();
                         if (result != null && mounted) {
+                          showGoogleSignInSuccess();
+
                           // Check if user has completed registration
                           final userDoc =
                               await FirebaseFirestore.instance
@@ -327,10 +446,45 @@ class _LoginPageState extends State<LoginPage> {
                               Navigator.pushReplacementNamed(context, '/main');
                             }
                           } else {
-                            // If user document doesn't exist, show error
-                            showErrorMessage(
-                              'User data not found. Please try again.',
-                            );
+                            // Create new user document if it doesn't exist
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('Users')
+                                  .doc(result.user!.uid)
+                                  .set({
+                                    'firstName':
+                                        result.user!.displayName
+                                            ?.split(' ')
+                                            .first ??
+                                        '',
+                                    'lastName':
+                                        result.user!.displayName
+                                            ?.split(' ')
+                                            .last ??
+                                        '',
+                                    'username':
+                                        result.user!.displayName?.replaceAll(
+                                          ' ',
+                                          '',
+                                        ) ??
+                                        '',
+                                    'email': result.user!.email,
+                                    'userId': result.user!.uid,
+                                    'preferences': [],
+                                    'createdAt': Timestamp.now(),
+                                  });
+
+                              // Navigate to preferences selection for new user
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/preferences',
+                                arguments: {'uid': result.user!.uid},
+                              );
+                            } catch (e) {
+                              showErrorMessage(
+                                'Error creating user profile: $e',
+                              );
+                            }
                           }
                         }
                       },

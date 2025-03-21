@@ -6,6 +6,7 @@ class MyTextField extends StatelessWidget {
   final bool obscureText;
   final Function(String)? onChanged;
   final TextInputType? keyboardType;
+  final bool enabled;
 
   const MyTextField({
     Key? key,
@@ -14,12 +15,13 @@ class MyTextField extends StatelessWidget {
     required this.obscureText,
     this.onChanged,
     this.keyboardType,
+    this.enabled = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       child: TextField(
         controller: controller,
         obscureText: obscureText, // hide password
@@ -28,6 +30,7 @@ class MyTextField extends StatelessWidget {
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white),
+            borderRadius: BorderRadius.all(Radius.circular(15)),
           ),
 
           focusedBorder: OutlineInputBorder(
