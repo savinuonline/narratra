@@ -14,7 +14,7 @@ class LibraryPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: const Color(0x3455d8),
+          backgroundColor: const Color(0xff3dc2ec),
           elevation: 0,
           title: Text(
             'My Narratra.',

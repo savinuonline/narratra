@@ -89,13 +89,11 @@ class _RegisterPageState extends State<RegisterPage> {
       if (methods.isNotEmpty) {
         try {
           // Try to sign in with email to get the user
-          final userCredential = await FirebaseAuth.instance
-              .signInWithEmailAndPassword(
-                email: emailController.text.trim(),
-                password:
-                    'dummy-password', // This will likely fail, which is expected
-              );
-
+          final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: 'dummy-password', // This will likely fail, which is expected
+          );
+          
           // If we somehow got here, delete the user
           await userCredential.user?.delete();
         } catch (e) {
@@ -160,8 +158,7 @@ class _RegisterPageState extends State<RegisterPage> {
       String errorMessage = 'An error occurred';
 
       if (e.code == 'email-already-in-use') {
-        errorMessage =
-            'This email is already registered. Please try signing in or use a different email.';
+        errorMessage = 'This email is already registered. Please try signing in or use a different email.';
       } else if (e.code == 'invalid-email') {
         errorMessage = 'Invalid email format';
       } else if (e.code == 'weak-password') {

@@ -51,31 +51,18 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
       icon: Icons.local_police,
       color: Colors.deepPurple,
     ),
-    GenreData(
-      name: 'Fiction', 
-      icon: Icons.auto_awesome, 
-      color: Colors.blue,
-    ),
+    GenreData(name: 'Fiction', icon: Icons.auto_awesome, color: Colors.blue),
     // Updated horror icon to use a ghost icon from FontAwesome
     GenreData(
       name: 'Horror',
       icon: FontAwesomeIcons.ghost,
       color: Colors.deepOrange,
     ),
-    GenreData(
-      name: 'Romance', 
-      icon: Icons.favorite, 
-      color: Colors.red,
-    ),
+    GenreData(name: 'Romance', icon: Icons.favorite, color: Colors.red),
     GenreData(
       name: 'Adventure',
       icon: Icons.flight_takeoff,
       color: Colors.green,
-    ),
-    GenreData(
-      name: 'Romance', 
-      icon: Icons.favorite, 
-      color: Colors.red,
     ),
   ];
 
