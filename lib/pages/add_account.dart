@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
-class AddAccount extends StatefulWidget {
+class AddAccount extends StatelessWidget {
   const AddAccount({super.key});
 
   @override
-  State<AddAccount> createState() => _AddAccountState();
-}
-
-class _AddAccountState extends State<AddAccount> {
-  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context); // Go back to previous page
+          },
+          icon: Icon(Ionicons.chevron_back_outline),
+        ),
+        leadingWidth:100,
+        title: const Text(
+          "Add Account", style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+        ),
+      ),
+    );  
   }
 }

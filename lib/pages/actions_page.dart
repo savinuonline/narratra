@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/add_account.dart';
+import 'package:frontend/pages/update_mali.dart';
 import 'package:ionicons/ionicons.dart';
 
 class ActionsPage extends StatefulWidget {
@@ -95,15 +97,23 @@ class _ActionsPageState extends State<ActionsPage> {
                   ],
                 ),
                 const Spacer(),
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 227, 227, 227),
-                    borderRadius: BorderRadius.circular(15),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddAccount()),
+                    );
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 227, 227, 227),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(Ionicons.chevron_forward_outline),
                   ),
-                  child: Icon(Ionicons.chevron_forward_outline),
-                ),
+                )
               ],
             ),
           ),
@@ -136,15 +146,23 @@ class _ActionsPageState extends State<ActionsPage> {
                   ],
                 ),
                 const Spacer(),
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 227, 227, 227),
-                    borderRadius: BorderRadius.circular(15),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UpdateMali()),
+                    );
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 227, 227, 227),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(Ionicons.chevron_forward_outline),
                   ),
-                  child: Icon(Ionicons.chevron_forward_outline),
-                ),
+                )  
               ],
             ),
           )

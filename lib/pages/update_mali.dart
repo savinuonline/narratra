@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 
-class UpdateMali extends StatefulWidget {
+class UpdateMali extends StatelessWidget {
   const UpdateMali({super.key});
 
   @override
-  State<UpdateMali> createState() => _UpdateMaliState();
-}
-
-class _UpdateMaliState extends State<UpdateMali> {
-  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context); // Go back to previous page
+          },
+          icon: Icon(Ionicons.chevron_back_outline),
+        ),
+        leadingWidth:100,
+        title: const Text(
+          "Update mail", style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+        ),
+      ),
+    );
   }
 }
