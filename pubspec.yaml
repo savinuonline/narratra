@@ -49,6 +49,7 @@ dependencies:
   firebase_app_check: ^0.3.2+4
   shared_preferences: ^2.5.2
   flutter_launcher_icons: ^0.14.3
+  firebase_messaging: ^15.2.4
 
 dev_dependencies:
   flutter_test:

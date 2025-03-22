@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // Added import for FCM
 import 'package:frontend/pages/bookinfo.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
@@ -14,6 +15,15 @@ import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
 import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
+
+// Background message handler for push notifications
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialize Firebase if necessary
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print('Handling a background message: ${message.messageId}');
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +41,9 @@ Future<void> main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // Set the FCM background message handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
@@ -64,52 +77,47 @@ class MyApp extends StatelessWidget {
         // Handle Firebase initialization and navigation after splash screen
         if (settings.name == '/auth') {
           return MaterialPageRoute(
-            builder:
-                (context) => FutureBuilder(
-                  future: Firebase.initializeApp(
-                    options: DefaultFirebaseOptions.currentPlatform,
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Scaffold(
-                        body: Center(
-                          child: Text('Error initializing Firebase'),
-                        ),
-                      );
-                    }
+            builder: (context) => FutureBuilder(
+              future: Firebase.initializeApp(
+                options: DefaultFirebaseOptions.currentPlatform,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Scaffold(
+                    body: Center(
+                      child: Text('Error initializing Firebase'),
+                    ),
+                  );
+                }
 
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return const AuthPage();
-                    }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return const AuthPage();
+                }
 
-                    return const SplashScreen();
-                  },
-                ),
+                return const SplashScreen();
+              },
+            ),
           );
         }
         return null;
       },
       routes: {
         '/intro': (context) => const IntroPage(),
-        '/login':
-            (context) => LoginPage(
-              onTap: () => Navigator.pushReplacementNamed(context, '/register'),
-            ),
-        '/register':
-            (context) => RegisterPage(
-              onTap: () => Navigator.pushReplacementNamed(context, '/login'),
-            ),
+        '/login': (context) => LoginPage(
+          onTap: () => Navigator.pushReplacementNamed(context, '/register'),
+        ),
+        '/register': (context) => RegisterPage(
+          onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+        ),
         '/preferences': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return GenresSelectionPage(uid: args['uid']);
         },
         '/main': (context) => const MainScreen(),
         '/bookinfo': (context) {
           final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return BookInfoPage(bookId: args['bookId']);
         },
         '/media': (context) => MediaPlayerPage(),
