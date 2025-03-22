@@ -106,9 +106,9 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
               ],
             ),
-          ),
+          )
 
-          const SizedBox(height: 10,),
+          /*const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -147,7 +147,7 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
               ],
             ),
-          )
+          )*/
 
       ]
     );  
