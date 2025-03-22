@@ -11,6 +11,9 @@ import 'package:frontend/pages/intro_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/splash_screen.dart';
+import 'package:frontend/pages/media_player.dart';
+import 'package:frontend/pages/profile_page.dart';
+import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,10 +52,10 @@ class MyApp extends StatelessWidget {
           secondary: const Color(0xFF4c3bcf),
           background: const Color(0xFF3dc2ec),
         ),
-        scaffoldBackgroundColor: const Color(0xffc7d9dd),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xff3dc2ec),
-          foregroundColor: Color(0xff3dc2ec),
+          backgroundColor: Color.fromARGB(220, 17, 116, 246),
+          foregroundColor: Color.fromARGB(255, 255, 255, 255),
           elevation: 4,
         ),
       ),
@@ -109,6 +112,8 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return BookInfoPage(bookId: args['bookId']);
         },
+        '/media': (context) => MediaPlayerPage(),
+        '/profile': (context) => ProfilePage(),
       },
     );
   }

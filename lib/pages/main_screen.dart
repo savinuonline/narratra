@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart';
 import 'library_page.dart';
+import 'profile_page.dart';
 import '../models/user_model.dart';
 
 class MainScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _MainScreenState extends State<MainScreen>
     ),
     const Center(child: Text('Search')),
     const LibraryPage(),
-    const Center(child: Text('Profile')),
+    const ProfilePage(),
   ];
 
   final List<NavigationItem> _navigationItems = [

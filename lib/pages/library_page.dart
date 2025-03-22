@@ -494,7 +494,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                           const Spacer(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              // Implement play all functionality
+                              // Navigate to media player with the first book
+                              if (widget.books.isNotEmpty) {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/media',
+                                  arguments: {
+                                    'bookId': widget.books.first.id,
+                                    'playlist': widget.books.map((book) => book.id).toList(),
+                                  },
+                                );
+                              }
                             },
                             icon: const Icon(Icons.play_arrow),
                             label: Text(
@@ -634,7 +644,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                             onPressed: () {
                               Navigator.pushNamed(
                                 context,
-                                '/player',
+                                '/media',
                                 arguments: {'bookId': book.id},
                               );
                             },
