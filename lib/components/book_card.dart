@@ -26,7 +26,7 @@ class BookCard extends StatelessWidget {
         child: Container(
           width: 330,
           padding: const EdgeInsets.all(12),
-          color: Colors.lightGreen[100],
+          color: Colors.white,
           child: Row(
             children: [
               // Book Image
