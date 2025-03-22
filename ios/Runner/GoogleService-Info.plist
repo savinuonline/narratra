@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>872325044778-q8q8o7f82u36ijumui769m3nrttilu9t.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.872325044778-q8q8o7f82u36ijumui769m3nrttilu9t</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>872325044778-blkh7mb54hrque2s4ac938e3s9vravjn.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD_p3GlN_URbLkD65lOzyU7E18_QaLpSz4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>872325044778</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.frontend</string>
+	<key>PROJECT_ID</key>
+	<string>narratradb</string>
+	<key>STORAGE_BUCKET</key>
+	<string>narratradb.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:872325044778:ios:233ae514f2a29e6168c153</string>
+	<key>DATABASE_URL</key>
+	<string>https://narratradb-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>

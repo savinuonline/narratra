@@ -1,13 +1,37 @@
-import 'package:firebase_core/firebase_core.dart';
+// lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/firebase_options.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:frontend/pages/bookinfo.dart';
+import 'firebase_options.dart';
+import 'pages/genres_selection_page.dart';
+import 'pages/main_screen.dart';
+import 'package:frontend/pages/auth_page.dart';
+import 'package:frontend/pages/intro_page.dart';
+import 'package:frontend/pages/login_page.dart';
+import 'package:frontend/pages/register_page.dart';
+import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
 import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
+
   runApp(const MyApp());
 }
 
@@ -17,59 +41,80 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'narratra.',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/media',
-      routes: {'/media': (context) => MediaPlayerPage()},
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 4;
-
-  final List<Widget> _pages = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _pages.addAll([
-      const Center(child: Text("Explore Page")),
-      const Center(child: Text("Search Page")),
-      const Center(child: Text("Library Page")),
-      Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              '/media_player',
-            ); // Navigate to MediaPlayerPage
-          },
-          child: const Text("Go to Media Player"),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF402e7a),
+          brightness: Brightness.light,
+          primary: const Color(0xFF402e7a),
+          secondary: const Color(0xFF4c3bcf),
+          background: const Color(0xFF3dc2ec),
+        ),
+        scaffoldBackgroundColor: const Color(0xffc7d9dd),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xff3dc2ec),
+          foregroundColor: Color(0xff3dc2ec),
+          elevation: 4,
         ),
       ),
-      const ProfilePage(),
-    ]);
-  }
+      home: const SplashScreen(), // Show splash screen immediately
+      onGenerateRoute: (settings) {
+        // Handle Firebase initialization and navigation after splash screen
+        if (settings.name == '/auth') {
+          return MaterialPageRoute(
+            builder:
+                (context) => FutureBuilder(
+                  future: Firebase.initializeApp(
+                    options: DefaultFirebaseOptions.currentPlatform,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Scaffold(
+                        body: Center(
+                          child: Text('Error initializing Firebase'),
+                        ),
+                      );
+                    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return const AuthPage();
+                    }
+
+                    return const SplashScreen();
+                  },
+                ),
+          );
+        }
+        return null;
+      },
+      routes: {
+        '/intro': (context) => const IntroPage(),
+        '/login':
+            (context) => LoginPage(
+              onTap: () => Navigator.pushReplacementNamed(context, '/register'),
+            ),
+        '/register':
+            (context) => RegisterPage(
+              onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+            ),
+        '/preferences': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return GenresSelectionPage(uid: args['uid']);
         },
-      ),
+        '/main': (context) => const MainScreen(),
+        '/bookinfo': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return BookInfoPage(bookId: args['bookId']);
+        },
+        '/media': (context) => const MediaPlayerPage(),
+        '/profile': (context) => const ProfilePage(),
+      },
     );
   }
 }
