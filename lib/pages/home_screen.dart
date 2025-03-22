@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
+import '../widgets/custom_refresh_indicator.dart';
+import '../widgets/skeleton_loading.dart';
 
 // A custom delegate to control the Trending section header
 class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -38,17 +41,33 @@ class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  final UserModel user;
-
-  const HomeScreen({Key? key, required this.user}) : super(key: key);
-
+class CustomScrollBehavior extends ScrollBehavior {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+      decelerationRate: ScrollDecelerationRate.fast,
+    );
+  }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreen extends StatefulWidget {
+  final UserModel user;
+  final VoidCallback onHomeIconTap;
+
+  const HomeScreen({
+    Key? key,
+    required this.user,
+    required this.onHomeIconTap,
+  }) : super(key: key);
+
+  @override
+  HomeScreenState createState() => HomeScreenState();
+}
+
+class HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+  final ScrollController _scrollController = ScrollController();
 
   late Future<List<Book>> trendingBooksFuture;
   late Future<List<Book>> recommendedBooksFuture;
@@ -59,78 +78,115 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     print('Initializing HomeScreen with user ID: ${widget.user.uid}');
-    trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
-    todayBooksFuture = _firebaseService.getTodayForYouBooks();
-    freeBooksFuture = _firebaseService.getFreeBooks();
+    _loadData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      trendingBooksFuture = _firebaseService.getTrendingBooks();
+      recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
+      todayBooksFuture = _firebaseService.getTodayForYouBooks();
+      freeBooksFuture = _firebaseService.getFreeBooks();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Set entire background to white
       color: Colors.white,
-      child: CustomScrollView(
-        slivers: [
-          // SliverAppBar with white background
-          SliverAppBar(
-            pinned: true,
-            floating: false,
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            title: Text(
-              'narratra.',
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
+      child: Stack(
+        children: [
+          ScrollConfiguration(
+            behavior: CustomScrollBehavior(),
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+                decelerationRate: ScrollDecelerationRate.fast,
               ),
+              slivers: [
+                // Transparent space for AppBar
+                SliverToBoxAdapter(
+                  child: SizedBox(height: MediaQuery.of(context).padding.top + 55),
+                ),
+
+                // Trending Section
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 320,
+                    color: Colors.white,
+                    child: _TrendingSection(booksFuture: trendingBooksFuture),
+                  ),
+                ),
+
+                // Other sections
+                SliverToBoxAdapter(
+                  child: CategorySection(
+                    title: "Uniquely Yours",
+                    booksFuture: recommendedBooksFuture,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: CategorySection(
+                    title: "Today For You",
+                    booksFuture: todayBooksFuture,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: CategorySection(
+                    title: "Free Books",
+                    booksFuture: freeBooksFuture,
+                  ),
+                ),
+                // Add bottom padding
+                SliverToBoxAdapter(child: SizedBox(height: 80)),
+              ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications, color: Colors.black),
-                onPressed: () {
-                  // Add your notification action here.
-                },
-              ),
-            ],
           ),
 
-          // Trending Section (with white background)
-          SliverPersistentHeader(
-            pinned: false,
-            delegate: TrendingHeaderDelegate(
-              minHeight: 320,
-              maxHeight: 320,
-              child: Container(
-                color: Colors.white,
-                child: _TrendingSection(booksFuture: trendingBooksFuture),
+          // Blurred AppBar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  height: MediaQuery.of(context).padding.top + 65,
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  color: Colors.white.withOpacity(0.8),
+                  child: AppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    centerTitle: true,
+                    title: Text(
+                      'narratra.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications, color: Colors.black),
+                        onPressed: () {
+                          // Add your notification action here.
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-
-          // Uniquely Yours section
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Uniquely Yours",
-              booksFuture: recommendedBooksFuture,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Today For You",
-              booksFuture: todayBooksFuture,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: CategorySection(
-              title: "Free Books",
-              booksFuture: freeBooksFuture,
-            ),
-          ),
-          // Add bottom padding to account for navigation bar
-          SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
     );
@@ -144,25 +200,25 @@ class _TrendingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
+      padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Trending",
             style: GoogleFonts.nunito(
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: const Color(0xff000000),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Expanded(
             child: FutureBuilder<List<Book>>(
               future: booksFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return _buildSkeletonLoading();
                 }
                 if (snapshot.hasError) {
                   return Center(
@@ -214,6 +270,27 @@ class _TrendingSection extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSkeletonLoading() {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      separatorBuilder: (context, index) => const SizedBox(width: 16),
+      itemBuilder: (context, index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SkeletonLoading(width: 140, height: 180, borderRadius: 15),
+            const SizedBox(height: 12),
+            SkeletonLoading(width: 100, height: 16, borderRadius: 4),
+            const SizedBox(height: 4),
+            SkeletonLoading(width: 80, height: 14, borderRadius: 4),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class CategorySection extends StatelessWidget {
@@ -229,26 +306,26 @@ class CategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
             style: GoogleFonts.nunito(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: const Color(0xff000000),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           SizedBox(
             height: 250,
             child: FutureBuilder<List<Book>>(
               future: booksFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return _buildSkeletonLoading();
                 }
                 if (snapshot.hasError) {
                   return Center(
@@ -301,28 +378,37 @@ class CategorySection extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSkeletonLoading() {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      separatorBuilder: (context, index) => const SizedBox(width: 16),
+      itemBuilder: (context, index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SkeletonLoading(width: 140, height: 180, borderRadius: 15),
+            const SizedBox(height: 12),
+            SkeletonLoading(width: 100, height: 16, borderRadius: 4),
+            const SizedBox(height: 4),
+            SkeletonLoading(width: 80, height: 14, borderRadius: 4),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class BookCard extends StatelessWidget {
   final Book book;
+
   const BookCard({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
-    // If the imageUrl does not start with "http" and is not an asset path (e.g., "lib/"),
-    // we assume it is a filename in your Firebase Storage "Book covers" folder.
-    String displayImageUrl;
-    if (book.imageUrl.startsWith('lib/')) {
-      displayImageUrl = book.imageUrl;
-    } else if (!book.imageUrl.startsWith('http')) {
-      displayImageUrl =
-          "https://firebasestorage.googleapis.com/v0/b/narratradb.firebasestorage.app/o/Book%20covers%2F${Uri.encodeComponent(book.imageUrl)}?alt=media";
-    } else {
-      displayImageUrl = book.imageUrl;
-    }
-
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -332,68 +418,31 @@ class BookCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+                spreadRadius: 0,
+              ),
+            ],
           ),
-          child: Transform(
-            // Add subtle 3D perspective
-            transform:
-                Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(0.05),
-            alignment: Alignment.center,
-            child: Container(
-              width: 125,
-              height: 160,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  // Shadow on the right edge
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(5, 0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.network(
+              book.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported, color: Colors.grey),
                   ),
-                  // Shadow at the bottom
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 7),
-                    spreadRadius: -2,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child:
-                    book.imageUrl.startsWith('lib/')
-                        ? Image.asset(
-                          book.imageUrl,
-                          width: 125,
-                          height: 160,
-                          fit: BoxFit.cover,
-                        )
-                        : Image.network(
-                          book.imageUrl,
-                          width: 125,
-                          height: 160,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.book,
-                                  size: 30,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-              ),
+                );
+              },
             ),
           ),
         ),
-
-        // Title and author
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Column(
@@ -405,7 +454,7 @@ class BookCard extends StatelessWidget {
                   book.title,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: 14,
                     color: const Color(0xFF000000),
                     height: 1.5,
                   ),
@@ -413,13 +462,13 @@ class BookCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               SizedBox(
                 width: 132,
                 child: Text(
                   book.author,
                   style: GoogleFonts.poppins(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: Colors.grey[700],
                     height: 1.2,
                   ),

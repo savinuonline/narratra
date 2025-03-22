@@ -21,6 +21,8 @@ class _MainScreenState extends State<MainScreen>
   int _selectedIndex = 0;
   int _previousIndex = 0;
   late UserModel currentUser;
+  final GlobalKey<HomeScreenState> _homeScreenKey =
+      GlobalKey<HomeScreenState>();
 
   @override
   void initState() {
@@ -46,7 +48,11 @@ class _MainScreenState extends State<MainScreen>
   }
 
   List<Widget> get _pages => [
-    HomeScreen(user: currentUser),
+    HomeScreen(
+      key: _homeScreenKey,
+      user: currentUser,
+      onHomeIconTap: _handleHomeIconTap,
+    ),
     const Center(child: Text('Search')),
     const LibraryPage(),
     const ProfilePage(),
@@ -65,14 +71,25 @@ class _MainScreenState extends State<MainScreen>
     super.dispose();
   }
 
+  void _handleHomeIconTap() {
+    if (_selectedIndex == 0) {
+      // Refresh home screen content
+      setState(() {});
+    }
+  }
+
   void _onItemTapped(int index) {
-    setState(() {
-      _previousIndex = _selectedIndex;
-      _selectedIndex = index;
-    });
-    _animationController.forward().then((_) {
-      _animationController.reverse();
-    });
+    if (index == _selectedIndex && index == 0) {
+      _handleHomeIconTap();
+    } else {
+      setState(() {
+        _previousIndex = _selectedIndex;
+        _selectedIndex = index;
+      });
+      _animationController.forward().then((_) {
+        _animationController.reverse();
+      });
+    }
   }
 
   @override
@@ -82,109 +99,109 @@ class _MainScreenState extends State<MainScreen>
       bottomNavigationBar: Container(
         height: 80,
         margin: const EdgeInsets.only(bottom: 0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
-            ),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
-            ],
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
             ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              selectedItemColor: const Color(0xff3dc2ec),
+              unselectedItemColor: const Color.fromARGB(255, 0, 0, 0),
+              selectedLabelStyle: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                height: 1.0,
               ),
-              child: BottomNavigationBar(
-                currentIndex: _selectedIndex,
-                onTap: _onItemTapped,
-                selectedItemColor: Colors.blue,
-                unselectedItemColor: const Color.fromARGB(255, 0, 0, 0),
-                selectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                ),
-                unselectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  height: 1.0,
-                ),
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                elevation: 10,
-                iconSize: 26,
-                items:
-                    _navigationItems.map((item) {
-                      final int index = _navigationItems.indexOf(item);
-                      return BottomNavigationBarItem(
-                        icon: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            splashColor: Colors.blue.withOpacity(0.2),
-                            highlightColor: Colors.blue.withOpacity(0.1),
-                            onTap: () => _onItemTapped(index),
-                            child: AnimatedBuilder(
-                              animation: _animationController,
-                              builder: (context, child) {
-                                final bool isSelected = _selectedIndex == index;
-                                final bool wasSelected =
-                                    _previousIndex == index;
-                                final double scale =
-                                    isSelected ? _scaleAnimation.value : 1.0;
-                                return Transform.scale(
-                                  scale: scale,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(
-                                      bottom: 1,
-                                    ),
-                                    padding: const EdgeInsets.all(
-                                      6,
-                                    ), 
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
+              unselectedLabelStyle: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                height: 1.0,
+              ),
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              iconSize: 26,
+              items:
+                  _navigationItems.map((item) {
+                    final int index = _navigationItems.indexOf(item);
+                    return BottomNavigationBarItem(
+                      icon: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          splashColor: const Color(0xff3dc2ec).withOpacity(0.2),
+                          highlightColor: const Color(
+                            0xff3dc2ec,
+                          ).withOpacity(0.1),
+                          onTap: () => _onItemTapped(index),
+                          child: AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              final bool isSelected = _selectedIndex == index;
+                              final bool wasSelected = _previousIndex == index;
+                              final double scale =
+                                  isSelected ? _scaleAnimation.value : 1.0;
+                              return Transform.scale(
+                                scale: scale,
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 1),
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        isSelected
+                                            ? const Color(
+                                              0xff3dc2ec,
+                                            ).withOpacity(0.1)
+                                            : Colors.transparent,
+                                  ),
+                                  child: SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: SvgPicture.asset(
+                                      'assets/icons/${item.icon}',
                                       color:
                                           isSelected
-                                              ? const Color(
-                                                0xff3dc2ec,
-                                              ).withOpacity(0.1)
-                                              : Colors.transparent,
-                                    ),
-                                    child: SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: SvgPicture.asset(
-                                        'assets/icons/${item.icon}',
-                                        color:
-                                            isSelected
-                                                ? const Color(0xff3dc2ec)
-                                                : const Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                ),
-                                        fit: BoxFit.contain,
-                                      ),
+                                              ? const Color(0xff3dc2ec)
+                                              : const Color.fromARGB(
+                                                255,
+                                                0,
+                                                0,
+                                                0,
+                                              ),
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        label: item.label,
-                      );
-                    }).toList(),
-              ),
+                      ),
+                      label: item.label,
+                    );
+                  }).toList(),
             ),
           ),
         ),
