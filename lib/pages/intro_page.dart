@@ -15,7 +15,7 @@ class _IntroPageState extends State<IntroPage> {
     {
       'title': 'Welcome to Narratra',
       'description': 'Your personal reading companion',
-      'image': 'lib/images/Books.png',
+      'image': 'lib/images/welcome.png',
     },
     {
       'title': 'Discover New Books',
@@ -25,7 +25,7 @@ class _IntroPageState extends State<IntroPage> {
     {
       'title': 'Track Your Progress',
       'description': 'Keep track of your reading journey and earn rewards',
-      'image': 'lib/images/Books.png',
+      'image': 'lib/images/Track Progress.png',
     },
   ];
 
