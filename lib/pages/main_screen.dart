@@ -19,30 +19,19 @@ class _MainScreenState extends State<MainScreen>
   late Animation<double> _scaleAnimation;
   int _selectedIndex = 0;
   int _previousIndex = 0;
-
-  final List<Widget> _pages = [
-    HomeScreen(
-      user: UserModel(
-        uid: 'GEhVv1eBKM4VugcxFlVN',
-        displayName: 'Test User',
-        selectedGenres: ['Personal Growth', 'Fiction'],
-      ),
-    ),
-    const Center(child: Text('Search')),
-    const LibraryPage(),
-    const Center(child: Text('Profile')),
-  ];
-
-  final List<NavigationItem> _navigationItems = [
-    NavigationItem(icon: 'Home.svg', label: 'Home'),
-    NavigationItem(icon: 'Search.svg', label: 'Search'),
-    NavigationItem(icon: 'Library.svg', label: 'Library'),
-    NavigationItem(icon: 'Profile.svg', label: 'Profile'),
-  ];
+  late UserModel currentUser;
 
   @override
   void initState() {
     super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      currentUser = UserModel(
+        uid: user.uid,
+        displayName: user.displayName ?? user.email?.split('@')[0] ?? 'User',
+        selectedGenres: [],
+      );
+    }
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -54,6 +43,20 @@ class _MainScreenState extends State<MainScreen>
       ),
     );
   }
+
+  List<Widget> get _pages => [
+    HomeScreen(user: currentUser),
+    const Center(child: Text('Search')),
+    const LibraryPage(),
+    const Center(child: Text('Profile')),
+  ];
+
+  final List<NavigationItem> _navigationItems = [
+    NavigationItem(icon: 'Home.svg', label: 'Home'),
+    NavigationItem(icon: 'Search.svg', label: 'Search'),
+    NavigationItem(icon: 'Library.svg', label: 'Library'),
+    NavigationItem(icon: 'Profile.svg', label: 'Profile'),
+  ];
 
   @override
   void dispose() {
@@ -141,10 +144,10 @@ class _MainScreenState extends State<MainScreen>
                                   child: Container(
                                     margin: const EdgeInsets.only(
                                       bottom: 1,
-                                    ), // Changed from 1 to 0
+                                    ),
                                     padding: const EdgeInsets.all(
                                       6,
-                                    ), // Changed from 7 to 6
+                                    ), 
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../services/firebase_service.dart';
-import '../models/user_model.dart';
 
 /// Simple data class for each genre
 class GenreData {
@@ -208,11 +207,11 @@ class GenreButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const GenreButton({
-    Key? key,
+    super.key,
     required this.genre,
     required this.selected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

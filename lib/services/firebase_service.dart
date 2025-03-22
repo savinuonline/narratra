@@ -9,10 +9,11 @@ class FirebaseService {
   /// you have under the top-level "books" collection in Firestore.
   final List<String> categories = [
     "Children's literature",
-    "Fiction",
-    "Romance",
     "Thriller",
-    // Add or remove any others as needed
+    "Fiction",
+    "Horror",
+    "Romance",
+    "Adventure",
   ];
 
   /// "Trending" books: docs with likeCount >= 1 in each subcollection,
@@ -47,31 +48,72 @@ class FirebaseService {
 
   /// "Recommended" books: based on user's selectedGenres.
   Future<List<Book>> getRecommendedBooks(String uid) async {
-    final userDoc = await _firestore.collection('users').doc(uid).get();
-    if (!userDoc.exists) return [];
+    try {
+      print('Available categories: $categories');
 
-    final userData = userDoc.data()!;
-    final userGenres = List<String>.from(userData['selectedGenres'] ?? []);
+      // Get user document from the correct collection
+      final userDoc = await _firestore.collection('Users').doc(uid).get();
+      if (!userDoc.exists) {
+        print('User document not found for uid: $uid');
+        return [];
+      }
 
-    if (userGenres.isEmpty) return [];
+      final userData = userDoc.data()!;
+      print('User data found: ${userData.toString()}');
 
-    final List<Book> recommended = [];
-    for (final genre in userGenres) {
-      final subcollectionRef = _firestore
-          .collection('books')
-          .doc(genre)
-          .collection('books');
-      final querySnapshot = await subcollectionRef.get();
-      final genreBooks =
-          querySnapshot.docs
-              .map(
-                (doc) => Book.fromMap({...doc.data(), 'genre': genre}, doc.id),
-              )
-              .toList();
-      recommended.addAll(genreBooks);
+      final userGenres = List<String>.from(userData['preferences'] ?? []);
+      print('Found user preferences: $userGenres');
+
+      if (userGenres.isEmpty) {
+        print('No preferences found for user');
+        return [];
+      }
+
+      final List<Book> recommended = [];
+      for (final genre in userGenres) {
+        print('Fetching books for genre: $genre');
+        if (!categories.contains(genre)) {
+          print('Warning: Genre $genre is not in available categories!');
+          continue;
+        }
+
+        final subcollectionRef = _firestore
+            .collection('books')
+            .doc(genre)
+            .collection('books');
+
+        final querySnapshot = await subcollectionRef.get();
+        print('Found ${querySnapshot.docs.length} books in $genre');
+
+        final genreBooks =
+            querySnapshot.docs
+                .map(
+                  (doc) =>
+                      Book.fromMap({...doc.data(), 'genre': genre}, doc.id),
+                )
+                .toList();
+
+        recommended.addAll(genreBooks);
+        print(
+          'Added ${genreBooks.length} books from $genre to recommendations',
+        );
+      }
+
+      print('Total books found before shuffle: ${recommended.length}');
+      // Shuffle the recommendations for variety
+      if (recommended.isNotEmpty) {
+        recommended.shuffle();
+        final result = recommended.take(10).toList();
+        print('Returning ${result.length} recommended books');
+        return result;
+      }
+
+      print('No books found in any of the user\'s preferred genres');
+      return recommended;
+    } catch (e) {
+      print('Error fetching recommended books: $e');
+      return [];
     }
-
-    return recommended;
   }
 
   /// "Today For You": gather *all* books from all categories, shuffle,

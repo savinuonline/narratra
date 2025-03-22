@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
 import 'firebase_options.dart';
@@ -9,10 +10,24 @@ import 'package:frontend/pages/auth_page.dart';
 import 'package:frontend/pages/intro_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
+import 'package:frontend/pages/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   runApp(const MyApp());
 }
@@ -23,7 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Narratra.',
+      title: 'narratra.',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -41,10 +56,38 @@ class MyApp extends StatelessWidget {
           elevation: 4,
         ),
       ),
-      initialRoute: '/intro',
+      home: const SplashScreen(), // Show splash screen immediately
+      onGenerateRoute: (settings) {
+        // Handle Firebase initialization and navigation after splash screen
+        if (settings.name == '/auth') {
+          return MaterialPageRoute(
+            builder:
+                (context) => FutureBuilder(
+                  future: Firebase.initializeApp(
+                    options: DefaultFirebaseOptions.currentPlatform,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Scaffold(
+                        body: Center(
+                          child: Text('Error initializing Firebase'),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return const AuthPage();
+                    }
+
+                    return const SplashScreen();
+                  },
+                ),
+          );
+        }
+        return null;
+      },
       routes: {
         '/intro': (context) => const IntroPage(),
-        '/auth': (context) => const AuthPage(),
         '/login':
             (context) => LoginPage(
               onTap: () => Navigator.pushReplacementNamed(context, '/register'),

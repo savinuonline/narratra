@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
@@ -59,10 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    print('Initializing HomeScreen with user ID: ${widget.user.uid}');
     trendingBooksFuture = _firebaseService.getTrendingBooks();
-    recommendedBooksFuture = _firebaseService.getRecommendedBooks(
-      widget.user.uid,
-    );
+    recommendedBooksFuture = _firebaseService.getRecommendedBooks(widget.user.uid);
     todayBooksFuture = _firebaseService.getTodayForYouBooks();
     freeBooksFuture = _firebaseService.getFreeBooks();
   }
@@ -112,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Other categories
+          // Uniquely Yours section
           SliverToBoxAdapter(
             child: CategorySection(
               title: "Uniquely Yours",
@@ -230,8 +228,6 @@ class CategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double categoryFontSize = title == "Trending" ? 22 : 20;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(

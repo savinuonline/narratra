@@ -42,9 +42,13 @@ class _RegisterPageState extends State<RegisterPage> {
       hasLowercase = password.contains(RegExp(r'[a-z]'));
       hasDigit = password.contains(RegExp(r'[0-9]'));
       hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-      
-      isPasswordValid = hasMinLength && hasUppercase && hasLowercase && 
-                       hasDigit && hasSpecialChar;
+
+      isPasswordValid =
+          hasMinLength &&
+          hasUppercase &&
+          hasLowercase &&
+          hasDigit &&
+          hasSpecialChar;
     });
   }
 
@@ -60,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       // Validate fields
-      if (firstNameController.text.isEmpty || 
+      if (firstNameController.text.isEmpty ||
           lastNameController.text.isEmpty ||
           usernameController.text.isEmpty ||
           contactController.text.isEmpty) {
@@ -76,27 +80,48 @@ class _RegisterPageState extends State<RegisterPage> {
         throw 'Password does not meet security requirements';
       }
 
-      // Create user
-      UserCredential userCredential = 
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+      // Check if email exists and get sign-in methods
+      final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(
+        emailController.text.trim(),
       );
+
+      // If the email exists but has no sign-in methods, delete it from authentication
+      if (methods.isNotEmpty) {
+        try {
+          // Try to sign in with email to get the user
+          final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: 'dummy-password', // This will likely fail, which is expected
+          );
+          
+          // If we somehow got here, delete the user
+          await userCredential.user?.delete();
+        } catch (e) {
+          // Ignore sign-in errors as we expect them
+        }
+      }
+
+      // Create new user
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          );
 
       // After creating the user, store additional info in Firestore
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(userCredential.user!.uid)
           .set({
-        'firstName': firstNameController.text,
-        'lastName': lastNameController.text,
-        'username': usernameController.text,
-        'contact': contactController.text,
-        'email': emailController.text,
-        'userId': userCredential.user!.uid,
-        'preferences': [],
-        'createdAt': Timestamp.now(),
-      });
+            'firstName': firstNameController.text,
+            'lastName': lastNameController.text,
+            'username': usernameController.text,
+            'contact': contactController.text,
+            'email': emailController.text,
+            'userId': userCredential.user!.uid,
+            'preferences': [],
+            'createdAt': Timestamp.now(),
+          });
 
       // Pop loading circle
       if (context.mounted) Navigator.pop(context);
@@ -115,7 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Navigator.pop(context);
                     // Navigate to preferences page with user ID
                     Navigator.pushReplacementNamed(
-                      context, 
+                      context,
                       '/preferences',
                       arguments: {'uid': userCredential.user!.uid},
                     );
@@ -127,20 +152,19 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         );
       }
-
     } on FirebaseAuthException catch (e) {
       // Pop loading circle
       Navigator.pop(context);
       String errorMessage = 'An error occurred';
-      
+
       if (e.code == 'email-already-in-use') {
-        errorMessage = 'This email is already registered';
+        errorMessage = 'This email is already registered. Please try signing in or use a different email.';
       } else if (e.code == 'invalid-email') {
         errorMessage = 'Invalid email format';
       } else if (e.code == 'weak-password') {
         errorMessage = 'Password is too weak';
       }
-      
+
       showErrorMessage(errorMessage);
     } catch (e) {
       // Pop loading circle
@@ -178,12 +202,12 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 25),
-                
+
                 // Logo
-                Image.asset('lib/images/BlackLogo.png', height: 100),
-                
+                Image.asset('lib/images/LogoBlue.png', height: 100),
+
                 const SizedBox(height: 25),
-                
+
                 Text(
                   'Let\'s create an account for you!',
                   style: TextStyle(color: Colors.grey[700], fontSize: 16),
@@ -272,7 +296,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       _buildRequirement('One uppercase letter', hasUppercase),
                       _buildRequirement('One lowercase letter', hasLowercase),
                       _buildRequirement('One number', hasDigit),
-                      _buildRequirement('One special character', hasSpecialChar),
+                      _buildRequirement(
+                        'One special character',
+                        hasSpecialChar,
+                      ),
                     ],
                   ),
                 ),
@@ -280,10 +307,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 25),
 
                 // Sign Up Button
-                MyButton(
-                  text: "Sign Up",
-                  onTap: signUserUp,
-                ),
+                MyButton(text: "Sign Up", onTap: signUserUp),
 
                 const SizedBox(height: 25),
 
@@ -327,13 +351,7 @@ class _RegisterPageState extends State<RegisterPage> {
           size: 16,
         ),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: TextStyle(color: Colors.grey[700], fontSize: 12)),
       ],
     );
   }
