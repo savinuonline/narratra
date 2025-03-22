@@ -11,6 +11,9 @@ import 'package:frontend/pages/intro_page.dart';
 import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/splash_screen.dart';
+import 'package:frontend/pages/media_player.dart';
+import 'package:frontend/pages/profile_page.dart';
+import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -109,6 +112,8 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return BookInfoPage(bookId: args['bookId']);
         },
+        '/media': (context) => const MediaPlayerPage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }
