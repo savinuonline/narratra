@@ -16,8 +16,9 @@ class _SearchPageState extends State<SearchPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 50),
-          //App Bar
+          const SizedBox(height: 50),
+
+          // App Bar
           Padding(
             padding: const EdgeInsets.only(left: 25),
             child: Container(
@@ -30,26 +31,26 @@ class _SearchPageState extends State<SearchPage> {
               ),
               child: Image.asset(
                 'lib/images/menu.png',
-                height: 100,
+                height: 30,
                 color: Colors.grey[800],
               ),
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-          //Discover a New Story
+          // Discover a New Story
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
-              "Discover a New Stroy",
+              "Discover a New Story",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
             ),
           ),
 
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
 
-          //Search Bar
+          // Search Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Row(
@@ -73,7 +74,7 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           child: TextField(
                             decoration: InputDecoration(
                               border: InputBorder.none,
@@ -86,7 +87,7 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
 
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
 
                 Container(
                   height: 50,
@@ -104,9 +105,9 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          SizedBox(height: 50),
+          const SizedBox(height: 50),
 
-          //for you book cards
+          // For You
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
@@ -115,25 +116,26 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
 
+          // Book Cards List
           Container(
-            height: 200,
+            height: 250,
             child: ListView.builder(
               itemCount: 3,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return BookCard(
-                  bookName: "Madol Doowa",
-                  authorName: "Martin Wickramasinghe",
-                  bookImagePath: 'lib/images/madoldoowa.jpg',
+                  bookName: "World Most Popular Horror Stories",
+                  authorName: "Nissanka Perera",
+                  bookImagePath:
+                      'lib/images/madoldoowa.jpg', // update if needed
                   rating: 4.5,
+                  duration: "4h 45min",
                 );
               },
             ),
           ),
-
-          //recently added
         ],
       ),
     );
