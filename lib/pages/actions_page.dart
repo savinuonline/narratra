@@ -106,9 +106,9 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
               ],
             ),
-          )
+          ),
 
-          /*const SizedBox(height: 10,),
+          const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -120,7 +120,7 @@ class _ActionsPageState extends State<ActionsPage> {
                     shape: BoxShape.circle,
                     color: Colors.red.shade100,
                   ),
-                  child: Icon(Ionicons.log_out_outline, size: 26,
+                  child: Icon(Ionicons.mail_outline, size: 26,
                   color: const Color.fromARGB(255, 214, 7, 7),),
                 
                 ),
@@ -128,7 +128,7 @@ class _ActionsPageState extends State<ActionsPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Log out", 
+                    Text("Update Email", 
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -147,7 +147,7 @@ class _ActionsPageState extends State<ActionsPage> {
                 ),
               ],
             ),
-          )*/
+          )
 
       ]
     );  
