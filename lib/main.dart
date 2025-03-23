@@ -13,7 +13,6 @@ import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
-import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
