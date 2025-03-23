@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 import '../models/book.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   /// Update this list so it matches exactly the doc names
   /// you have under the top-level "books" collection in Firestore.
@@ -246,12 +249,13 @@ class FirebaseService {
   Future<String> addBook({
     required String title,
     required String author,
-    required String genre,
     required String description,
+    required String genre,
     required String imageUrl,
-    required String audioUrl,
-    bool isFree = false,
-    int likeCount = 0,
+    required String authorImageUrl,
+    required String authorDescription,
+    required List<Map<String, dynamic>> chapters,
+    required List<File> audioFiles,
   }) async {
     try {
       if (!categories.contains(genre)) {
@@ -260,28 +264,50 @@ class FirebaseService {
         );
       }
 
-      final String nextId = await _getNextBookId();
+      // 1. Upload audio files to Firebase Storage
+      List<String> audioUrls = [];
+      for (int i = 0; i < audioFiles.length; i++) {
+        final audioFile = audioFiles[i];
+        final fileName = 'chapter${i + 1}.mp3';
+        final storageRef = _storage.ref().child('audio/$title/$fileName');
+        
+        // Upload the file
+        await storageRef.putFile(audioFile);
+        // Get the download URL
+        final downloadUrl = await storageRef.getDownloadURL();
+        audioUrls.add(downloadUrl);
+      }
 
-      final bookData = {
+      // 2. Calculate total duration
+      int totalDuration = 0;
+      for (var chapter in chapters) {
+        totalDuration += chapter['duration'] as int;
+      }
+
+      // 3. Create book document
+      final bookRef = await _firestore.collection('books').add({
         'title': title,
         'author': author,
         'description': description,
-        'imageUrl': imageUrl,
-        'audioUrl': audioUrl,
         'genre': genre,
-        'isFree': isFree,
-        'likeCount': likeCount,
-      };
+        'imageUrl': imageUrl,
+        'authorImageUrl': authorImageUrl,
+        'authorDescription': authorDescription,
+        'totalDuration': totalDuration,
+        'likeCount': 0,
+        'createdAt': FieldValue.serverTimestamp(),
+        'chapters': chapters.asMap().entries.map((entry) {
+          return {
+            'title': entry.value['title'],
+            'description': entry.value['description'],
+            'duration': entry.value['duration'],
+            'audioUrl': audioUrls[entry.key],
+            'order': entry.key,
+          };
+        }).toList(),
+      });
 
-      await _firestore
-          .collection('books')
-          .doc(genre)
-          .collection('books')
-          .doc(nextId)
-          .set(bookData);
-
-      print('Added book "$title" with ID: $nextId in genre: $genre');
-      return nextId;
+      return bookRef.id;
     } catch (e) {
       print('Error adding book: $e');
       rethrow;
@@ -553,25 +579,38 @@ class FirebaseService {
   }
 
   /// Create a new playlist
-  Future<String> createPlaylist(
-    String userId,
-    String playlistName,
-    String bookId,
-  ) async {
+  Future<String> createPlaylist(String userId, String name, String bookId) async {
     try {
-      final docRef = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('playlists')
-          .add({
-            'name': playlistName,
+      final userRef = _firestore.collection('users').doc(userId);
+      final userDoc = await userRef.get();
+      
+      if (!userDoc.exists) {
+        await userRef.set({
+          'playlists': [{
+            'id': DateTime.now().millisecondsSinceEpoch.toString(),
+            'name': name,
             'books': [bookId],
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-      return docRef.id;
+          }],
+        });
+        return DateTime.now().millisecondsSinceEpoch.toString();
+      }
+
+      final playlists = List<Map<String, dynamic>>.from(userDoc.data()?['playlists'] ?? []);
+      final newPlaylist = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'name': name,
+        'books': [bookId],
+      };
+      
+      playlists.add(newPlaylist);
+      await userRef.update({
+        'playlists': playlists,
+      });
+      
+      return newPlaylist['id'] as String;
     } catch (e) {
       print('Error creating playlist: $e');
-      rethrow;
+      return '';
     }
   }
 
@@ -595,20 +634,26 @@ class FirebaseService {
   }
 
   /// Add a book to an existing playlist
-  Future<void> addBookToPlaylist(
-    String userId,
-    String playlistId,
-    String bookId,
-  ) async {
+  Future<void> addBookToPlaylist(String userId, String playlistId, String bookId) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('playlists')
-          .doc(playlistId)
-          .update({
-            'books': FieldValue.arrayUnion([bookId]),
+      final userRef = _firestore.collection('users').doc(userId);
+      final userDoc = await userRef.get();
+      
+      if (!userDoc.exists) return;
+      
+      final playlists = List<Map<String, dynamic>>.from(userDoc.data()?['playlists'] ?? []);
+      final playlistIndex = playlists.indexWhere((p) => p['id'] == playlistId);
+      
+      if (playlistIndex != -1) {
+        final books = List<String>.from(playlists[playlistIndex]['books'] ?? []);
+        if (!books.contains(bookId)) {
+          books.add(bookId);
+          playlists[playlistIndex]['books'] = books;
+          await userRef.update({
+            'playlists': playlists,
           });
+        }
+      }
     } catch (e) {
       print('Error adding book to playlist: $e');
       rethrow;

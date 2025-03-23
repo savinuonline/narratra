@@ -10,7 +10,7 @@ class LibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 1,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -31,7 +31,6 @@ class LibraryPage extends StatelessWidget {
             labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             tabs: const [
               Tab(text: 'My Playlists'),
-              Tab(text: 'narratra. History'),
             ],
           ),
         ),
@@ -40,10 +39,10 @@ class LibraryPage extends StatelessWidget {
             bottom: MediaQuery.of(context).padding.bottom + 60,
           ),
           child: Column(
-          children: [
+            children: [
               Expanded(
                 child: TabBarView(
-                  children: [_SavedAudiobooksTab(), _ListeningHistoryTab()],
+                  children: [_SavedAudiobooksTab()],
                 ),
               ),
             ],
@@ -687,25 +686,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ListeningHistoryTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('lib/images/history.png', width: 84, height: 84),
-          const SizedBox(height: 16),
-          Text(
-            'Listening history coming soon',
-            style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
-          ),
-        ],
       ),
     );
   }
