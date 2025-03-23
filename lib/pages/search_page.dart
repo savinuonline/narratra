@@ -11,7 +11,6 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final List booksForYou = [
-    //[bookname, authorname, bookImagePath, rating, duration]
     [
       "Madol Doowa",
       "Martin Wickramasinghe",
@@ -19,7 +18,6 @@ class _SearchPageState extends State<SearchPage> {
       4.5,
       "2h 45min",
     ],
-
     [
       "Sherlock Holmes",
       "Sir Arthur Conan Doyle",
@@ -27,7 +25,6 @@ class _SearchPageState extends State<SearchPage> {
       4.9,
       "3h 40min",
     ],
-
     [
       "robinson crusoe",
       "Daniel Defoe",
@@ -38,7 +35,6 @@ class _SearchPageState extends State<SearchPage> {
   ];
 
   final List recentBooks = [
-    //[bookname, authorname, bookImagePath, rating, duration]
     [
       "Madol Doowa",
       "Martin Wickramasinghe",
@@ -46,7 +42,6 @@ class _SearchPageState extends State<SearchPage> {
       4.5,
       "2h 45min",
     ],
-
     [
       "Sherlock Holmes",
       "Sir Arthur Conan Doyle",
@@ -54,7 +49,6 @@ class _SearchPageState extends State<SearchPage> {
       4.9,
       "3h 40min",
     ],
-
     [
       "robinson crusoe",
       "Daniel Defoe",
@@ -73,7 +67,7 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           const SizedBox(height: 50),
 
-          // App Bar
+          // Static App Bar
           Padding(
             padding: const EdgeInsets.only(left: 25),
             child: Container(
@@ -94,7 +88,7 @@ class _SearchPageState extends State<SearchPage> {
 
           const SizedBox(height: 24),
 
-          // Discover a New Story
+          // Static Title
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
@@ -105,7 +99,7 @@ class _SearchPageState extends State<SearchPage> {
 
           const SizedBox(height: 25),
 
-          // Search Bar
+          // Static Search Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Row(
@@ -141,9 +135,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 10),
-
                 Container(
                   height: 50,
                   padding: const EdgeInsets.all(12),
@@ -160,61 +152,83 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
 
-          // For You
-          Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: Text(
-              "For You",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Book Cards List
-          Container(
-            height: 250,
-            child: ListView.builder(
-              itemCount: booksForYou.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return BookCard(
-                  bookName: booksForYou[index][0],
-                  authorName: booksForYou[index][1],
-                  bookImagePath: booksForYou[index][2],
-                  rating: booksForYou[index][3],
-                  duration: booksForYou[index][4],
-                );
-              },
-            ),
-          ),
-
-          SizedBox(height: 25),
-          //recently added
-          Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: Text(
-              "Recently Added",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
-            ),
-          ),
-
+          // Scrollable Section starts here
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: ListView.builder(
-                itemCount: recentBooks.length,
-                itemBuilder: (context, index) {
-                  return RecentBookCard(
-                    bookName: booksForYou[index][0],
-                    authorName: booksForYou[index][1],
-                    bookImagePath: booksForYou[index][2],
-                    rating: booksForYou[index][3],
-                    duration: booksForYou[index][4],
-                  );
-                },
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // For You Title
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25.0),
+                    child: Text(
+                      "For You",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 26,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Horizontal Book Cards
+                  Container(
+                    height: 250,
+                    child: ListView.builder(
+                      itemCount: booksForYou.length,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return BookCard(
+                          bookName: booksForYou[index][0],
+                          authorName: booksForYou[index][1],
+                          bookImagePath: booksForYou[index][2],
+                          rating: booksForYou[index][3],
+                          duration: booksForYou[index][4],
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Recently Added Title
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25.0),
+                    child: Text(
+                      "Recently Added",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 26,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 0),
+
+                  // Non-scrollable Recent Books List
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: ListView.builder(
+                      itemCount: recentBooks.length,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return RecentBookCard(
+                          bookName: recentBooks[index][0],
+                          authorName: recentBooks[index][1],
+                          bookImagePath: recentBooks[index][2],
+                          rating: recentBooks[index][3],
+                          duration: recentBooks[index][4],
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ),

@@ -36,7 +36,7 @@ class RecentBookCard extends StatelessWidget {
                   child: Container(
                     height: 85,
                     padding: EdgeInsets.all(5),
-                    color: Colors.grey,
+                    color: Colors.amber,
                     child: Image.asset(bookImagePath),
                   ),
                 ),
