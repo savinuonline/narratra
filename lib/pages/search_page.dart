@@ -39,7 +39,7 @@ class _SearchPageState extends State<SearchPage> {
       "Sinhala Holman Katha",
       "Nissanka Perera",
       'lib/images/horror.jpg',
-      4.5,
+      4.2,
       "2h 45min",
     ],
     [
@@ -53,7 +53,7 @@ class _SearchPageState extends State<SearchPage> {
       "Baththalangunduwa",
       "Manjula Wediwardena",
       'lib/images/Baththalangunduwa.jpg',
-      4.2,
+      4.5,
       "2h 50min",
     ],
   ];
