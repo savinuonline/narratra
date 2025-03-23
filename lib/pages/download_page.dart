@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/helpers/theme.dart';
 import 'package:frontend/pages/offline_page.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:frontend/pages/quality_page.dart';
@@ -63,7 +64,7 @@ class DownloadPage extends StatelessWidget {
                       color: const Color.fromARGB(255, 227, 227, 227),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Icon(Ionicons.chevron_forward_outline),
+                    child: Icon(Ionicons.chevron_forward_outline, color: Theme.of(context).chevronColor,),
                   ),
                 )
               ],
@@ -112,7 +113,7 @@ class DownloadPage extends StatelessWidget {
                       color: const Color.fromARGB(255, 227, 227, 227),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Icon(Ionicons.chevron_forward_outline),
+                    child: Icon(Ionicons.chevron_forward_outline, color: Theme.of(context).chevronColor,),
                   )
                 )
               ],
