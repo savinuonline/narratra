@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/add_account.dart';
 import 'package:frontend/pages/update_mali.dart';
+import 'package:frontend/settingsBackend/theme_provider.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:frontend/settingsBackend/theme_provider.dart';
+import 'package:frontend/helpers/theme.dart';
+import 'package:provider/provider.dart';
 
 class ActionsPage extends StatefulWidget {
   const ActionsPage({super.key});
@@ -15,6 +19,9 @@ class _ActionsPageState extends State<ActionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -56,12 +63,10 @@ class _ActionsPageState extends State<ActionsPage> {
                   ],
                 ),
                 const Spacer(),
-                Switch(
-                  value: isDarkMode,
+                Switch.adaptive(
+                  value: themeProvider.isDarkMode,
                   onChanged: (value) {
-                    setState(() {
-                      isDarkMode = value;
-                    });
+                    provider.toggleTheme(value);
                   },
                   activeColor: const Color.fromARGB(255, 20, 195, 20),
                 ),

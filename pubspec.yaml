@@ -37,6 +37,9 @@ dependencies:
   firebase_core: ^3.12.1
   cloud_firestore: ^5.6.5
   ionicons: ^0.2.2
+  shared_preferences: ^2.2.2
+  http: ^0.13.6 
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
