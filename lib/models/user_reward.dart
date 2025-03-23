@@ -47,7 +47,7 @@ class UserReward {
     this.weeklyListeningMinutes = 0,
     this.dailyListeningMinutes = 0,
     this.weeklyGoalMinutes = 120, // Default 2 hours per week
-    this.dailyGoalMinutes = 30,   // Default 30 minutes per day
+    this.dailyGoalMinutes = 30, // Default 30 minutes per day
     DateTime? lastListeningUpdate,
     List<String>? listeningTips,
     String? currentMotivation,
@@ -90,7 +90,9 @@ class UserReward {
       weeklyGoalMinutes: map['weeklyGoalMinutes'] ?? 120,
       dailyGoalMinutes: map['dailyGoalMinutes'] ?? 30,
       lastListeningUpdate: parseDate(map['lastListeningUpdate']),
-      listeningTips: List<String>.from(map['listeningTips'] ?? _generateListeningTips()),
+      listeningTips: List<String>.from(
+        map['listeningTips'] ?? _generateListeningTips(),
+      ),
       currentMotivation: map['currentMotivation'] ?? _generateMotivation(),
     );
   }
@@ -188,12 +190,12 @@ class UserReward {
       lastLoginBonusDate.day,
     );
     final today = DateTime(now.year, now.month, now.day);
-    
+
     // Debug print to check the dates
     print('Last claim date: $lastClaimDate');
     print('Today: $today');
     print('Can claim: ${!isSameDay(lastClaimDate, today)}');
-    
+
     // Can claim if it's not the same day
     return !isSameDay(lastClaimDate, today);
   }
@@ -201,21 +203,29 @@ class UserReward {
   // Helper method to check if two dates are the same day
   bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
-           date1.month == date2.month &&
-           date1.day == date2.day;
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   // Helper method to get XP for current streak day
   int getXpForStreakDay() {
     switch (currentStreak) {
-      case 1: return 50;  // Base XP
-      case 2: return 100; // 2x base
-      case 3: return 200; // 4x base
-      case 4: return 400; // 8x base
-      case 5: return 800; // 16x base
-      case 6: return 1600; // 32x base
-      case 7: return 3200; // 64x base
-      default: return 50;
+      case 1:
+        return 50; // Base XP
+      case 2:
+        return 100; // 2x base
+      case 3:
+        return 200; // 4x base
+      case 4:
+        return 400; // 8x base
+      case 5:
+        return 800; // 16x base
+      case 6:
+        return 1600; // 32x base
+      case 7:
+        return 3200; // 64x base
+      default:
+        return 50;
     }
   }
 
@@ -225,29 +235,37 @@ class UserReward {
     // Bonus points for reaching daily goal: 100 points
     // Bonus points for reaching weekly goal: 500 points
     int points = minutes ~/ 2; // 1 point per 2 minutes
-    
+
     if (dailyListeningMinutes + minutes >= dailyGoalMinutes) {
       points += 100;
     }
-    
+
     if (weeklyListeningMinutes + minutes >= weeklyGoalMinutes) {
       points += 500;
     }
-    
+
     return points;
   }
 
   // Helper method to get points for current streak day
   int getPointsForStreakDay() {
     switch (currentStreak) {
-      case 1: return 10;
-      case 2: return 15;
-      case 3: return 20;
-      case 4: return 25;
-      case 5: return 30;
-      case 6: return 40;
-      case 7: return 50;
-      default: return 10;
+      case 1:
+        return 10;
+      case 2:
+        return 15;
+      case 3:
+        return 20;
+      case 4:
+        return 25;
+      case 5:
+        return 30;
+      case 6:
+        return 40;
+      case 7:
+        return 50;
+      default:
+        return 10;
     }
   }
 
@@ -267,7 +285,7 @@ class UserReward {
       "Use the bookmark feature to track your progress",
       "Share your favorite books with friends",
       "Try different genres to keep things interesting",
-      "Listen before bed to help you relax"
+      "Listen before bed to help you relax",
     ];
     tips.shuffle();
     return tips.take(5).toList();
@@ -284,25 +302,26 @@ class UserReward {
       "Remember: small steps lead to big achievements.",
       "Your commitment to learning is admirable!",
       "Keep pushing your boundaries with new stories!",
-      "You're becoming a better listener every day!"
+      "You're becoming a better listener every day!",
     ];
-    return motivations[DateTime.now().millisecondsSinceEpoch % motivations.length];
+    return motivations[DateTime.now().millisecondsSinceEpoch %
+        motivations.length];
   }
 
   // Method to update listening progress
   void updateListeningProgress(int minutes) {
     final now = DateTime.now();
-    
+
     // Reset daily progress if it's a new day
     if (now.difference(lastListeningUpdate).inDays >= 1) {
       dailyListeningMinutes = 0;
     }
-    
+
     // Reset weekly progress if it's a new week
     if (now.difference(lastListeningUpdate).inDays >= 7) {
       weeklyListeningMinutes = 0;
     }
-    
+
     dailyListeningMinutes += minutes;
     weeklyListeningMinutes += minutes;
     lastListeningUpdate = now;
