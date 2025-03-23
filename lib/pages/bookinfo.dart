@@ -16,9 +16,11 @@ class BookInfoPage extends StatefulWidget {
   State<BookInfoPage> createState() => _BookInfoPageState();
 }
 
-class _BookInfoPageState extends State<BookInfoPage> {
+class _BookInfoPageState extends State<BookInfoPage>
+    with SingleTickerProviderStateMixin {
   final FirebaseService _firebaseService = FirebaseService();
   final ScrollController _scrollController = ScrollController();
+  late TabController _tabController;
   bool isLiked = false;
   bool isBookmarked = false;
   bool isLoading = false;
@@ -38,6 +40,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
     super.initState();
     _loadBook();
     _scrollController.addListener(_onScroll);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   Future<void> _loadBook() async {
@@ -68,6 +71,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _playlistNameController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -732,7 +736,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
                             ),
                           ),
                           Text(
-                            '12 Chapters',
+                            '${book.chapters.length} Chapters',
                             style: GoogleFonts.nunitoSans(
                               color: Colors.grey[600],
                               fontSize: 15,
@@ -745,195 +749,320 @@ class _BookInfoPageState extends State<BookInfoPage> {
                   ],
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    Text(
-                      book.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      book.author,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => CategoryPage(genre: book.genre),
-                          ),
-                        );
-                      },
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFF402e7a),
-                              width: 1.2,
-                            ),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                _getCategoryIcon(book.genre),
-                                width: 16,
-                                height: 16,
-                                color: const Color(0xFF402e7a),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                book.genre,
-                                style: GoogleFonts.poppins(
-                                  color: const Color(0xFF402e7a),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+              SliverToBoxAdapter(
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: const Color(0xFF402e7a),
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: const Color(0xFF402e7a),
+                  tabs: [
+                    Tab(
+                      child: Text(
+                        'About',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
-                    Text(
-                      "About",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    Tab(
+                      child: Text(
+                        'Chapters',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          book.description,
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: Colors.grey[800],
-                            height: 1.6,
-                          ),
-                          maxLines: _showAboutDescription ? null : 4,
-                          overflow:
-                              _showAboutDescription
-                                  ? null
-                                  : TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _showAboutDescription = !_showAboutDescription;
-                            });
-                          },
-                          child: Text(
-                            _showAboutDescription ? 'See less' : 'See more',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: const Color(0xFF402e7a),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      "About the Author",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (book.authorImageUrl.isNotEmpty)
-                          Container(
-                            width: 80,
-                            height: 80,
-                            margin: const EdgeInsets.only(right: 16),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                              image: DecorationImage(
-                                image: NetworkImage(book.authorImageUrl),
-                                fit: BoxFit.cover,
+                  ],
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 1.5,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // About Tab
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              book.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                             ),
-                          ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                book.authorDescription,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.grey[800],
-                                  height: 1.6,
-                                ),
-                                maxLines: _showAuthorDescription ? null : 4,
-                                overflow:
-                                    _showAuthorDescription
-                                        ? null
-                                        : TextOverflow.ellipsis,
+                            const SizedBox(height: 5),
+                            Text(
+                              book.author,
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800],
                               ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _showAuthorDescription =
-                                        !_showAuthorDescription;
-                                  });
-                                },
-                                child: Text(
-                                  _showAuthorDescription
-                                      ? 'See less'
-                                      : 'See more',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    color: const Color(0xFF402e7a),
-                                    fontWeight: FontWeight.w600,
+                            ),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) =>
+                                            CategoryPage(genre: book.genre),
+                                  ),
+                                );
+                              },
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color(0xFF402e7a),
+                                      width: 1.2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SvgPicture.asset(
+                                        _getCategoryIcon(book.genre),
+                                        width: 16,
+                                        height: 16,
+                                        color: const Color(0xFF402e7a),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        book.genre,
+                                        style: GoogleFonts.poppins(
+                                          color: const Color(0xFF402e7a),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 32),
+                            Text(
+                              "About",
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  book.description,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.grey[800],
+                                    height: 1.6,
+                                  ),
+                                  maxLines: _showAboutDescription ? null : 4,
+                                  overflow:
+                                      _showAboutDescription
+                                          ? null
+                                          : TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _showAboutDescription =
+                                          !_showAboutDescription;
+                                    });
+                                  },
+                                  child: Text(
+                                    _showAboutDescription
+                                        ? 'See less'
+                                        : 'See more',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      color: const Color(0xFF402e7a),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Text(
+                              "About the Author",
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (book.authorImageUrl.isNotEmpty)
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    margin: const EdgeInsets.only(right: 16),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          book.authorImageUrl,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        book.authorDescription,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          color: Colors.grey[800],
+                                          height: 1.6,
+                                        ),
+                                        maxLines:
+                                            _showAuthorDescription ? null : 4,
+                                        overflow:
+                                            _showAuthorDescription
+                                                ? null
+                                                : TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _showAuthorDescription =
+                                                !_showAuthorDescription;
+                                          });
+                                        },
+                                        child: Text(
+                                          _showAuthorDescription
+                                              ? 'See less'
+                                              : 'See more',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16,
+                                            color: const Color(0xFF402e7a),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
-                  ]),
+                      ),
+                      // Chapters Tab
+                      ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: book.chapters.length,
+                        itemBuilder: (context, index) {
+                          final chapter = book.chapters[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              title: Text(
+                                'Chapter ${index + 1}: ${chapter.title}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    chapter.description,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.timer_outlined,
+                                        size: 16,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${chapter.duration.inMinutes} min',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.play_circle_outline),
+                                color: const Color(0xFF402e7a),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/media',
+                                    arguments: {
+                                      'bookId': book.id,
+                                      'chapterIndex': index,
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -961,7 +1090,7 @@ class _BookInfoPageState extends State<BookInfoPage> {
         ),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.95 * boxProgress),
             boxShadow: [
@@ -983,18 +1112,20 @@ class _BookInfoPageState extends State<BookInfoPage> {
     final threshold =
         (expandedHeight - kToolbarHeight - MediaQuery.of(context).padding.top) *
         0.85;
-    0.9;
     final minPosition =
-        MediaQuery.of(context).padding.top + kToolbarHeight + 20;
+        MediaQuery.of(context).padding.top + kToolbarHeight + (-1.0);
     final maxPosition = expandedHeight - 20;
 
     if (_scrollOffset <= 0) {
       // At the top of the page
       return maxPosition;
     } else if (_scrollOffset >= threshold) {
+      // At the bottom of the page
       return minPosition;
     } else {
-      return maxPosition - _scrollOffset;
+      // During scroll, calculate a smooth transition
+      final progress = (_scrollOffset / threshold).clamp(0.0, 1.0);
+      return maxPosition - (maxPosition - minPosition) * progress;
     }
   }
 }

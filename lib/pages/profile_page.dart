@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:frontend/pages/history_page.dart';
 import '../screens/rewards/reward_dashboard.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -19,11 +20,10 @@ class ProfilePage extends StatelessWidget {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
-          "My Profile",
-          style: TextStyle(
+        title: Text(
+          'Profile',
+          style: GoogleFonts.poppins(
             color: Colors.black,
-            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -40,8 +40,8 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

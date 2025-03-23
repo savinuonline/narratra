@@ -1,4 +1,36 @@
 // lib/models/book.dart
+class Chapter {
+  final String title;
+  final String description;
+  final Duration duration;
+  final String audioUrl;
+
+  Chapter({
+    required this.title,
+    required this.description,
+    required this.duration,
+    required this.audioUrl,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'duration': duration.inSeconds,
+      'audioUrl': audioUrl,
+    };
+  }
+
+  factory Chapter.fromMap(Map<String, dynamic> map) {
+    return Chapter(
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      duration: Duration(seconds: map['duration'] ?? 0),
+      audioUrl: map['audioUrl'] ?? '',
+    );
+  }
+}
+
 class Book {
   final String id;
   final String title;
@@ -11,6 +43,7 @@ class Book {
   final String genre;
   final bool isFree;
   final int likeCount; // New field for the number of likes
+  final List<Chapter> chapters;
 
   Book({
     required this.id,
@@ -24,6 +57,7 @@ class Book {
     required this.genre,
     required this.isFree,
     required this.likeCount,
+    this.chapters = const [],
   });
 
   // Convert Book to map for saving to Firestore
@@ -40,6 +74,7 @@ class Book {
       'genre': genre,
       'isFree': isFree,
       'likeCount': likeCount,
+      'chapters': chapters.map((chapter) => chapter.toMap()).toList(),
     };
   }
 
@@ -57,6 +92,9 @@ class Book {
       genre: map['genre'] ?? '',
       isFree: map['isFree'] ?? false,
       likeCount: map['likeCount'] != null ? map['likeCount'] as int : 0,
+      chapters: (map['chapters'] as List<dynamic>?)
+          ?.map((chapter) => Chapter.fromMap(chapter))
+          .toList() ?? [],
     );
   }
 }
