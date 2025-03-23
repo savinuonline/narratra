@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/book_card.dart';
+import 'package:frontend/components/recent_book_card.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -10,6 +11,33 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final List booksForYou = [
+    //[bookname, authorname, bookImagePath, rating, duration]
+    [
+      "Madol Doowa",
+      "Martin Wickramasinghe",
+      'lib/images/madoldoowa.jpg',
+      4.5,
+      "2h 45min",
+    ],
+
+    [
+      "Sherlock Holmes",
+      "Sir Arthur Conan Doyle",
+      'lib/images/sherlockHolmes.jpeg',
+      4.9,
+      "3h 40min",
+    ],
+
+    [
+      "robinson crusoe",
+      "Daniel Defoe",
+      'lib/images/robinson.jpg',
+      4.2,
+      "2h 50min",
+    ],
+  ];
+
+  final List recentBooks = [
     //[bookname, authorname, bookImagePath, rating, duration]
     [
       "Madol Doowa",
@@ -177,8 +205,15 @@ class _SearchPageState extends State<SearchPage> {
 
           Expanded(
             child: ListView.builder(
+              itemCount: recentBooks.length,
               itemBuilder: (context, index) {
-                return RecentBookCard();
+                return RecentBookCard(
+                  bookName: booksForYou[index][0],
+                  authorName: booksForYou[index][1],
+                  bookImagePath: booksForYou[index][2],
+                  rating: booksForYou[index][3],
+                  duration: booksForYou[index][4],
+                );
               },
             ),
           ),
