@@ -4,47 +4,71 @@ class subscription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Upgrade to Premium'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 380),
+            Text(
+              'Upgrade to Premium',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
             Text(
               'Unlimited Al Generations',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
             Text(
               'Unlimited Pro Sketches',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
             Text(
               'Adds Free!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
+            // Premium Section with Blue Background
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Premium',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Rs.699/month',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 24),
             Text(
-              'Monthly',
+              'Premium (Family)',
               style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
             Text(
-              '\$32/Month',
+              '\Rs.1299/month',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Yearly',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '\$90/Month',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
             Center(
@@ -52,8 +76,12 @@ class subscription extends StatelessWidget {
                 onPressed: () {
                   // Handle continue action
                 },
-                child: Text('Continue'),
+                child: Text(
+                  'Continue with Free Package',
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
               ),
