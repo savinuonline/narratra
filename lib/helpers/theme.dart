@@ -19,5 +19,5 @@ class MyTheme{
 }
 
 extension ThemeExtensions on ThemeData {
-  Color get chevronColor => brightness == Brightness.dark ? Colors.white : const Color(0xff171725);
+  Color get chevronColor => brightness == Brightness.dark ? Colors.black : const Color(0xff171725);
 }
