@@ -160,7 +160,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          const SizedBox(height: 50),
+          const SizedBox(height: 40),
 
           // For You
           Padding(
@@ -171,7 +171,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          const SizedBox(height: 25),
+          const SizedBox(height: 10),
 
           // Book Cards List
           Container(
@@ -201,20 +201,21 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          const SizedBox(height: 25),
-
           Expanded(
-            child: ListView.builder(
-              itemCount: recentBooks.length,
-              itemBuilder: (context, index) {
-                return RecentBookCard(
-                  bookName: booksForYou[index][0],
-                  authorName: booksForYou[index][1],
-                  bookImagePath: booksForYou[index][2],
-                  rating: booksForYou[index][3],
-                  duration: booksForYou[index][4],
-                );
-              },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: ListView.builder(
+                itemCount: recentBooks.length,
+                itemBuilder: (context, index) {
+                  return RecentBookCard(
+                    bookName: booksForYou[index][0],
+                    authorName: booksForYou[index][1],
+                    bookImagePath: booksForYou[index][2],
+                    rating: booksForYou[index][3],
+                    duration: booksForYou[index][4],
+                  );
+                },
+              ),
             ),
           ),
         ],
