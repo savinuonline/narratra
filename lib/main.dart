@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'services/book_service.dart';
 import 'firebase_options.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,13 +124,49 @@ class _BookManagerHomeState extends State<BookManagerHome> {
   String _author = '';
   String _description = '';
   String _imageUrl = '';
-  String _audioUrl = '';
+  String _authorImageUrl = '';
+  String _authorDescription = '';
   String _selectedGenre = "Children's literature";
   bool _isFree = false;
 
-  void _showAddBookDialog() {
-    bool localIsFree = _isFree;
+  // Chapter details
+  final List<ChapterForm> _chapters = [];
+  final List<File?> _audioFiles = [];
 
+  void _addChapter() {
+    setState(() {
+      _chapters.add(ChapterForm());
+      _audioFiles.add(null);
+    });
+  }
+
+  void _removeChapter(int index) {
+    setState(() {
+      _chapters.removeAt(index);
+      _audioFiles.removeAt(index);
+    });
+  }
+
+  Future<void> _pickAudioFile(int index) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.audio,
+        allowMultiple: false,
+      );
+
+      if (result != null) {
+        setState(() {
+          _audioFiles[index] = File(result.files.single.path!);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e')),
+      );
+    }
+  }
+
+  void _showAddBookDialog() {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -148,32 +186,35 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                   ),
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Author'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an author'
-                        : null,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter an author' : null,
                     onSaved: (value) => _author = value ?? '',
                   ),
                   TextFormField(
                     decoration: const InputDecoration(labelText: 'Description'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter a description'
-                        : null,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter a description' : null,
                     onSaved: (value) => _description = value ?? '',
                     maxLines: 3,
                   ),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Image URL'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an image URL'
-                        : null,
+                    decoration: const InputDecoration(labelText: 'Book Cover Image URL'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter an image URL' : null,
                     onSaved: (value) => _imageUrl = value ?? '',
                   ),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Audio URL'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an audio URL'
-                        : null,
-                    onSaved: (value) => _audioUrl = value ?? '',
+                    decoration: const InputDecoration(labelText: 'Author Image URL'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter author image URL' : null,
+                    onSaved: (value) => _authorImageUrl = value ?? '',
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Author Description'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter author description' : null,
+                    onSaved: (value) => _authorDescription = value ?? '',
+                    maxLines: 3,
                   ),
                   DropdownButtonFormField<String>(
                     value: _selectedGenre,
@@ -185,17 +226,111 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                             ))
                         .toList(),
                     onChanged: (value) =>
-                        setState(() => _selectedGenre = value!),
+                        setDialogState(() => _selectedGenre = value!),
                   ),
                   SwitchListTile(
                     title: const Text('Is Free?'),
-                    value: localIsFree,
-                    onChanged: (value) {
-                      setDialogState(() => localIsFree = value);
-                      setState(
-                          () => _isFree = value); // Also update parent state
-                    },
+                    value: _isFree,
+                    onChanged: (value) => setDialogState(() => _isFree = value),
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Chapters',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle),
+                        onPressed: () {
+                          setDialogState(() => _addChapter());
+                        },
+                      ),
+                    ],
+                  ),
+                  ..._chapters.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final chapter = entry.value;
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Chapter ${index + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setDialogState(() => _removeChapter(index));
+                                  },
+                                ),
+                              ],
+                            ),
+                            TextFormField(
+                              controller: chapter.titleController,
+                              decoration: const InputDecoration(labelText: 'Chapter Title'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Please enter chapter title' : null,
+                            ),
+                            TextFormField(
+                              controller: chapter.descriptionController,
+                              decoration: const InputDecoration(labelText: 'Chapter Description'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Please enter chapter description' : null,
+                              maxLines: 2,
+                            ),
+                            TextFormField(
+                              controller: chapter.durationController,
+                              decoration: const InputDecoration(labelText: 'Duration (in seconds)'),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) {
+                                  return 'Please enter duration';
+                                }
+                                if (int.tryParse(value!) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: () => _pickAudioFile(index),
+                              icon: const Icon(Icons.upload_file),
+                              label: Text(
+                                _audioFiles[index] != null
+                                    ? 'Change Audio File'
+                                    : 'Upload Audio File',
+                              ),
+                            ),
+                            if (_audioFiles[index] != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Selected: ${_audioFiles[index]!.path.split('/').last}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
@@ -206,11 +341,7 @@ class _BookManagerHomeState extends State<BookManagerHome> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                // Update the _isFree variable before submitting
-                setState(() => _isFree = localIsFree);
-                _submitForm();
-              },
+              onPressed: _submitForm,
               child: const Text('Add Book'),
             ),
           ],
@@ -222,21 +353,57 @@ class _BookManagerHomeState extends State<BookManagerHome> {
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
+
+      // Validate chapters
+      if (_chapters.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one chapter')),
+        );
+        return;
+      }
+
+      // Check if all chapters have audio files
+      if (_audioFiles.any((file) => file == null)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please upload audio files for all chapters')),
+        );
+        return;
+      }
+
       try {
+        // Prepare chapters data
+        final chaptersData = _chapters.asMap().entries.map((entry) {
+          return {
+            'title': entry.value.titleController.text,
+            'description': entry.value.descriptionController.text,
+            'duration': int.parse(entry.value.durationController.text),
+          };
+        }).toList();
+
+        // Add book to Firebase
         final id = await _bookService.addBook(
           title: _title,
           author: _author,
           genre: _selectedGenre,
           description: _description,
           imageUrl: _imageUrl,
-          audioUrl: _audioUrl,
+          authorImageUrl: _authorImageUrl,
+          authorDescription: _authorDescription,
+          chapters: chaptersData,
+          audioFiles: _audioFiles.whereType<File>().toList(),
           isFree: _isFree,
         );
+
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Book added successfully with ID: $id')),
           );
+          // Clear form
+          setState(() {
+            _chapters.clear();
+            _audioFiles.clear();
+          });
         }
       } catch (e) {
         if (mounted) {
@@ -253,9 +420,25 @@ class _BookManagerHomeState extends State<BookManagerHome> {
     String author = book['author'];
     String description = book['description'];
     String imageUrl = book['imageUrl'];
-    String audioUrl = book['audioUrl'];
+    String authorImageUrl = book['authorImageUrl'];
+    String authorDescription = book['authorDescription'];
     String selectedGenre = book['genre'];
     bool isFree = book['isFree'] ?? false;
+
+    // Initialize chapters and audio files from book data
+    List<ChapterForm> chapters = [];
+    List<File?> audioFiles = [];
+
+    if (book['chapters'] != null) {
+      for (var chapterData in book['chapters']) {
+        final chapter = ChapterForm();
+        chapter.titleController.text = chapterData['title'];
+        chapter.descriptionController.text = chapterData['description'];
+        chapter.durationController.text = chapterData['duration'].toString();
+        chapters.add(chapter);
+        audioFiles.add(null); // We'll need to re-upload audio files
+      }
+    }
 
     showDialog(
       context: context,
@@ -278,35 +461,39 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                   TextFormField(
                     initialValue: author,
                     decoration: const InputDecoration(labelText: 'Author'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an author'
-                        : null,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter an author' : null,
                     onSaved: (value) => author = value ?? '',
                   ),
                   TextFormField(
                     initialValue: description,
                     decoration: const InputDecoration(labelText: 'Description'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter a description'
-                        : null,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter a description' : null,
                     onSaved: (value) => description = value ?? '',
                     maxLines: 3,
                   ),
                   TextFormField(
                     initialValue: imageUrl,
-                    decoration: const InputDecoration(labelText: 'Image URL'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an image URL'
-                        : null,
+                    decoration: const InputDecoration(labelText: 'Book Cover Image URL'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter an image URL' : null,
                     onSaved: (value) => imageUrl = value ?? '',
                   ),
                   TextFormField(
-                    initialValue: audioUrl,
-                    decoration: const InputDecoration(labelText: 'Audio URL'),
-                    validator: (value) => value?.isEmpty ?? true
-                        ? 'Please enter an audio URL'
-                        : null,
-                    onSaved: (value) => audioUrl = value ?? '',
+                    initialValue: authorImageUrl,
+                    decoration: const InputDecoration(labelText: 'Author Image URL'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter author image URL' : null,
+                    onSaved: (value) => authorImageUrl = value ?? '',
+                  ),
+                  TextFormField(
+                    initialValue: authorDescription,
+                    decoration: const InputDecoration(labelText: 'Author Description'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Please enter author description' : null,
+                    onSaved: (value) => authorDescription = value ?? '',
+                    maxLines: 3,
                   ),
                   DropdownButtonFormField<String>(
                     value: selectedGenre,
@@ -325,6 +512,130 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                     value: isFree,
                     onChanged: (value) => setDialogState(() => isFree = value),
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Chapters',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle),
+                        onPressed: () {
+                          setDialogState(() {
+                            chapters.add(ChapterForm());
+                            audioFiles.add(null);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  ...chapters.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final chapter = entry.value;
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Chapter ${index + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setDialogState(() {
+                                      chapters.removeAt(index);
+                                      audioFiles.removeAt(index);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            TextFormField(
+                              controller: chapter.titleController,
+                              decoration: const InputDecoration(labelText: 'Chapter Title'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Please enter chapter title' : null,
+                            ),
+                            TextFormField(
+                              controller: chapter.descriptionController,
+                              decoration: const InputDecoration(labelText: 'Chapter Description'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Please enter chapter description' : null,
+                              maxLines: 2,
+                            ),
+                            TextFormField(
+                              controller: chapter.durationController,
+                              decoration: const InputDecoration(labelText: 'Duration (in seconds)'),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) {
+                                  return 'Please enter duration';
+                                }
+                                if (int.tryParse(value!) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                try {
+                                  FilePickerResult? result =
+                                      await FilePicker.platform.pickFiles(
+                                    type: FileType.audio,
+                                    allowMultiple: false,
+                                  );
+
+                                  if (result != null) {
+                                    setDialogState(() {
+                                      audioFiles[index] =
+                                          File(result.files.single.path!);
+                                    });
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text('Error picking file: $e')),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.upload_file),
+                              label: Text(
+                                audioFiles[index] != null
+                                    ? 'Change Audio File'
+                                    : 'Upload Audio File',
+                              ),
+                            ),
+                            if (audioFiles[index] != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Selected: ${audioFiles[index]!.path.split('/').last}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
@@ -338,7 +649,27 @@ class _BookManagerHomeState extends State<BookManagerHome> {
               onPressed: () async {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState!.save();
+
+                  // Validate chapters
+                  if (chapters.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Please add at least one chapter')),
+                    );
+                    return;
+                  }
+
                   try {
+                    // Prepare chapters data
+                    final chaptersData = chapters.asMap().entries.map((entry) {
+                      return {
+                        'title': entry.value.titleController.text,
+                        'description': entry.value.descriptionController.text,
+                        'duration': int.parse(entry.value.durationController.text),
+                      };
+                    }).toList();
+
+                    // Update book in Firebase
                     await _bookService.updateBook(
                       id: book['id'],
                       genre: selectedGenre,
@@ -346,14 +677,17 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                       author: author,
                       description: description,
                       imageUrl: imageUrl,
-                      audioUrl: audioUrl,
+                      authorImageUrl: authorImageUrl,
+                      authorDescription: authorDescription,
+                      chapters: chaptersData,
+                      audioFiles: audioFiles.whereType<File>().toList(),
                       isFree: isFree,
                     );
+
                     if (mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Book updated successfully')),
+                        const SnackBar(content: Text('Book updated successfully')),
                       );
                     }
                   } catch (e) {
@@ -437,7 +771,7 @@ class _BookManagerHomeState extends State<BookManagerHome> {
                     ),
                   ),
                   subtitle: Text(
-                    '${book['author']} - ${book['genre']}${book['isFree'] ? ' (Free)' : ''}',
+                    '${book['author']} - ${book['genre']}${book['isFree'] ? ' (Free)' : ''}\n${book['chapterCount']} chapters • ${(book['totalDuration'] / 60).toStringAsFixed(1)} minutes',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -476,5 +810,17 @@ class _BookManagerHomeState extends State<BookManagerHome> {
         },
       ),
     );
+  }
+}
+
+class ChapterForm {
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final durationController = TextEditingController();
+
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    durationController.dispose();
   }
 }
