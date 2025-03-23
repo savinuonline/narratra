@@ -4,99 +4,100 @@ class subscription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 380),
-            Text(
-              'Upgrade to Premium',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            const SizedBox(height: 10),
+            Image.asset(
+              'images/LogoBlue.png',
+              height: 80,
             ),
-            SizedBox(height: 24),
-            Text(
-              'Unlimited Al Generations',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Unlimited Pro Sketches',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Adds Free!',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 24),
-            // Premium Section with Blue Background
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 20),
+            const Text(
+              "Become a Premium",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              child: Column(
+            ),
+            const SizedBox(height: 20),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: TextStyle(color: Colors.black54),
                 children: [
-                  Text(
-                    'Premium',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                    textAlign: TextAlign.center,
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Rs.699/month',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                    textAlign: TextAlign.center,
+                  TextSpan(text: " Unlimited access to all Audiobooks\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
                   ),
+                  TextSpan(text: " Ad-free Experience\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  ),
+                  TextSpan(text: " Multiple Voice Options\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  ),
+                  TextSpan(text: " High Quality Audio"),
                 ],
               ),
             ),
-            SizedBox(height: 24),
-            Text(
-              'Premium (Family)',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              '\Rs.1299/month',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle continue action
-                },
-                child: Text(
-                  'Continue with Free Package',
-                  style: TextStyle(color: Colors.white),
+            const SizedBox(height: 50),
+            subscriptionOption("Premium", "Rs.699/month", true),
+            const SizedBox(height: 30),
+            subscriptionOption("Premium (Family)", "Rs.1299/month", false),
+            const SizedBox(height: 150),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
-            ),
-            SizedBox(height: 16),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // Handle restore purchase action
-                },
-                child: Text('Restore Purchase'),
+              onPressed: () {},
+              child: const Text(
+                "Continue with Free Package",
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget subscriptionOption(String title, String price, bool isSelected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.grey[200],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            price,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
