@@ -182,14 +182,6 @@ class UserReward {
   // Getter to check if user can claim daily bonus
   bool get canClaimDailyBonus {
     final now = DateTime.now();
-    final timeSinceLastClaim = now.difference(lastLoginBonusDate);
-    
-    // Check if it's been at least 22 hours since last claim
-    if (timeSinceLastClaim.inHours < 22) {
-      return false;
-    }
-    
-    // Check if we're on a new day
     final lastClaimDate = DateTime(
       lastLoginBonusDate.year,
       lastLoginBonusDate.month,
@@ -197,7 +189,20 @@ class UserReward {
     );
     final today = DateTime(now.year, now.month, now.day);
     
-    return lastClaimDate.isBefore(today);
+    // Debug print to check the dates
+    print('Last claim date: $lastClaimDate');
+    print('Today: $today');
+    print('Can claim: ${!isSameDay(lastClaimDate, today)}');
+    
+    // Can claim if it's not the same day
+    return !isSameDay(lastClaimDate, today);
+  }
+
+  // Helper method to check if two dates are the same day
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+           date1.month == date2.month &&
+           date1.day == date2.day;
   }
 
   // Helper method to get XP for current streak day

@@ -6,6 +6,7 @@ import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PointsTab extends StatelessWidget {
   // Add level names as a static map
@@ -80,241 +81,474 @@ class PointsTab extends StatelessWidget {
 
         final rewards = snapshot.data!;
         final currentUser = FirebaseAuth.instance.currentUser;
-        final userName = currentUser?.displayName ?? "User";
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Points Card
-              Stack(
-                clipBehavior: Clip.none,
+        return StreamBuilder<DocumentSnapshot>(
+          stream: currentUser != null 
+            ? FirebaseFirestore.instance
+                .collection('Users')
+                .doc(currentUser.uid)
+                .snapshots()
+            : null,
+          builder: (context, userSnapshot) {
+            String userName = "User";
+            if (userSnapshot.hasData && userSnapshot.data?.exists == true) {
+              final data = userSnapshot.data!.data() as Map<String, dynamic>?;
+              if (data != null && data.containsKey('username')) {
+                userName = data['username'] as String;
+              }
+            }
+
+            final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : "U";
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    color: const Color(0xFF3A5EF0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            userName,
-                            style: GoogleFonts.nunito(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Column(
+                  // Points Card
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        color: const Color(0xFF3A5EF0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                'Current XP',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white70,
-                                ),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: Colors.white,
+                                    child: Text(
+                                      userInitial,
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF3A5EF0),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      userName,
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${rewards.xp}',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                              const SizedBox(height: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Current XP',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${rewards.xp}',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Points: ${rewards.points}',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: LinearProgressIndicator(
+                                  value: rewards.levelProgress,
+                                  backgroundColor: Colors.blue[200],
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                  minHeight: 10,
                                 ),
                               ),
                               const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    rewards.levelName,
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${rewards.xpToNextLevel} XP to next level',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 14,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
                               Text(
-                                'Points: ${rewards.points}',
+                                rewards.levelDescription,
                                 style: GoogleFonts.nunito(
-                                  fontSize: 16,
+                                  fontSize: 12,
                                   color: Colors.white70,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: LinearProgressIndicator(
-                              value: rewards.levelProgress,
-                              backgroundColor: Colors.blue[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                              minHeight: 10,
+                        ),
+                      ),
+                      Positioned(
+                        top: -20,
+                        right: 20,
+                        child: Container(
+                          padding: const EdgeInsets.all(1),
+                          child: SvgPicture.asset(
+                            'lib/images/medal.svg',
+                            width: 50,
+                            height: 50,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Daily & Weekly Rewards Section
+                  Text(
+                    'Daily Rewards',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          leading: SvgPicture.asset(
+                            'lib/assets/icons/calendar.svg',
+                            width: 30,
+                            height: 30,
+                            colorFilter: ColorFilter.mode(
+                              Colors.amber,
+                              BlendMode.srcIn,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          title: const Text('Daily Login Bonus'),
+                          subtitle: const Text(
+                            'Points increase with daily streaks',
+                          ),
+                          trailing: ElevatedButton(
+                            onPressed:
+                                rewards.canClaimDailyBonus
+                                    ? () async {
+                                      final points =
+                                          await RewardService()
+                                              .claimDailyLoginBonus();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'You received $points points!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                    : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  rewards.canClaimDailyBonus
+                                      ? const Color(0xFF3A5EF0)
+                                      : Colors.grey,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text(
+                              rewards.canClaimDailyBonus
+                                  ? 'Claim'
+                                  : 'Claimed',
+                              style: GoogleFonts.nunito(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Divider(),
+
+                        // Weekly streak header
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 8,
+                          ),
+                          child: Text(
+                            'Weekly Login Streak',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF3A5EF0),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            'Log in daily to earn increasing rewards!',
+                            style: GoogleFonts.nunito(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+
+                        // Weekly streak indicator
+                        _buildWeeklyStreakIndicator(rewards),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Refer and Earn Section
+                  Text(
+                    'Refer and Earn',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                rewards.levelName,
-                                style: GoogleFonts.nunito(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: SvgPicture.asset(
+                                  'lib/assets/icons/gift_card.svg',
+                                  width: 32,
+                                  height: 32,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.blue.shade700,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
-                              Text(
-                                '${rewards.xpToNextLevel} XP to next level',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 14,
-                                  color: Colors.white70,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'Share Narratra with friends and earn rewards!',
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[800],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            rewards.levelDescription,
-                            style: GoogleFonts.nunito(
-                              fontSize: 12,
-                              color: Colors.white70,
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    await RewardService().shareReferralLink(
+                                      context,
+                                    );
+                                  },
+                                  icon: const Icon(Icons.share, size: 20),
+                                  label: const Text('Share Invite'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue.shade700,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed:
+                                      () => _showRedeemInviteDialog(context),
+                                  icon: const Icon(
+                                    Icons.card_giftcard,
+                                    size: 20,
+                                  ),
+                                  label: const Text('Redeem Code'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceAround,
+                              children: [
+                                Expanded(
+                                  child: _buildRewardItem(
+                                    'You Get',
+                                    '100 Points + Premium Audiobook',
+                                    Icons.star,
+                                  ),
+                                ),
+                                Container(
+                                  height: 40,
+                                  width: 1,
+                                  color: Colors.grey.shade300,
+                                ),
+                                Expanded(
+                                  child: _buildRewardItem(
+                                    'Friend Gets',
+                                    '50 Points + Free Audiobook',
+                                    Icons.card_giftcard,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: -20,
-                    right: 20,
-                    child: Container(
-                      padding: const EdgeInsets.all(1),
-                      child: SvgPicture.asset(
-                        'lib/images/medal.svg',
-                        width: 50,
-                        height: 50,
-                      ),
-                    ),
-                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Redeem Points Section
+                  _buildRewardsSection(context),
                 ],
               ),
-
-              const SizedBox(height: 24),
-
-              // Daily & Weekly Rewards Section
-              Text(
-                'Daily Rewards',
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Daily Login Bonus section
-                    ListTile(
-                      leading: SvgPicture.asset(
-                        'lib/assets/icons/calendar.svg',
-                        width: 30,
-                        height: 30,
-                        colorFilter: ColorFilter.mode(
-                          Colors.amber,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: const Text('Daily Login Bonus'),
-                      subtitle: const Text(
-                        'Points increase with daily streaks',
-                      ),
-                      trailing: ElevatedButton(
-                        onPressed:
-                            rewards.canClaimDailyBonus
-                                ? () async {
-                                  final points =
-                                      await RewardService().claimLoginBonus();
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'You received $points points!',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                                : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              rewards.canClaimDailyBonus
-                                  ? const Color(0xFF3A5EF0)
-                                  : Colors.grey,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(
-                          rewards.canClaimDailyBonus ? 'Claim' : 'Claim',
-                          style: GoogleFonts.nunito(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-
-                    // Weekly streak header
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        top: 8,
-                      ),
-                      child: Text(
-                        'Weekly Login Streak',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3A5EF0),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        'Log in daily to earn increasing rewards!',
-                        style: GoogleFonts.nunito(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-
-                    // Weekly streak indicator
-                    _buildWeeklyStreakIndicator(rewards),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Redeem Points Section
-              _buildRewardsSection(context),
-            ],
-          ),
+            );
+          },
         );
       },
+    );
+  }
+
+  void _showRedeemInviteDialog(BuildContext context) {
+    final inviteCodeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Redeem Invite Code'),
+            content: TextField(
+              controller: inviteCodeController,
+              decoration: const InputDecoration(
+                hintText: 'Enter your invite code',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await RewardService().redeemInviteCode(
+                      inviteCodeController.text,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Invite code redeemed successfully!'),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Redeem'),
+              ),
+            ],
+          ),
     );
   }
 
@@ -532,6 +766,43 @@ class PointsTab extends StatelessWidget {
         }
       }
     }
+  }
+
+  Widget _buildRewardItem(String title, String description, IconData icon) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade200,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.blue.shade700, size: 24),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: GoogleFonts.nunito(
+            fontWeight: FontWeight.bold,
+            color: Colors.blue.shade700,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: GoogleFonts.nunito(fontSize: 12, color: Colors.grey.shade700),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   }
 }
 

@@ -210,9 +210,6 @@ class RewardService {
       print('Checking daily bonus eligibility:');
       print('Current time: ${now.toString()}');
       print('Last claim time: ${userData.lastLoginBonusDate.toString()}');
-      print(
-        'Hours since last claim: ${now.difference(userData.lastLoginBonusDate).inHours}',
-      );
       print('Can claim bonus: ${userData.canClaimDailyBonus}');
       print('Current streak: ${userData.currentStreak}');
 

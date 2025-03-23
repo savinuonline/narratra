@@ -49,6 +49,9 @@ dependencies:
   firebase_app_check: ^0.3.2+4
   shared_preferences: ^2.5.2
   flutter_launcher_icons: ^0.14.3
+  fl_chart: ^0.70.2
+  share_plus: ^10.1.4
+  firebase_dynamic_links: ^6.1.4
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +83,7 @@ flutter:
     - lib/images/
     - lib/assets/icons/
     - assets/icons/
+    - assets/images/
 
   #   - images/a_dot_ham.jpeg
 

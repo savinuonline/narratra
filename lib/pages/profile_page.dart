@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:frontend/pages/history_page.dart';
+import '../screens/rewards/reward_dashboard.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -187,7 +189,17 @@ class FeatureTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (page.isNotEmpty) {
+        if (title == "Rewards") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RewardDashboard()),
+          );
+        } else if (title == "History") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HistoryPage()),
+          );
+        } else if (page.isNotEmpty) {
           Navigator.push(
             context,
             MaterialPageRoute(
