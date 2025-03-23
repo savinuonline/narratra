@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'screens/auth/signup_page.dart';
-import 'screens/auth/login_page.dart';
 import 'screens/rewards/reward_dashboard.dart';
 
 
@@ -27,11 +25,6 @@ class MyApp extends StatelessWidget {
           // Show loading while checking auth state
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          // If no user, show login
-          if (!snapshot.hasData) {
-            return const LoginPage();
           }
 
           return FutureBuilder<DocumentSnapshot>(
@@ -75,8 +68,6 @@ class MyApp extends StatelessWidget {
         },
       ),
       routes: {
-        '/login': (context) => const LoginPage(),
-        '/signUp': (context) => const SignUpPage(),
         '/rewardDashboard': (context) => const RewardDashboard(),
       },
     );
