@@ -9,6 +9,33 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  final List booksForYou = [
+    //[bookname, authorname, bookImagePath, rating, duration]
+    [
+      "Madol Doowa",
+      "Martin Wickramasinghe",
+      'lib/images/madoldoowa.jpg',
+      4.5,
+      "2h 45min",
+    ],
+
+    [
+      "Sherlock Holmes",
+      "Sir Arthur Conan Doyle",
+      'lib/images/sherlockHolmes.jpeg',
+      4.9,
+      "3h 40min",
+    ],
+
+    [
+      "robinson crusoe",
+      "Daniel Defoe",
+      'lib/images/robinson.jpg',
+      4.2,
+      "2h 50min",
+    ],
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,17 +149,36 @@ class _SearchPageState extends State<SearchPage> {
           Container(
             height: 250,
             child: ListView.builder(
-              itemCount: 3,
+              itemCount: booksForYou.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return BookCard(
-                  bookName: "World Most Popular Horror Stories",
-                  authorName: "Nissanka Perera",
-                  bookImagePath:
-                      'lib/images/madoldoowa.jpg', // update if needed
-                  rating: 4.5,
-                  duration: "4h 45min",
+                  bookName: booksForYou[index][0],
+                  authorName: booksForYou[index][1],
+                  bookImagePath: booksForYou[index][2],
+                  rating: booksForYou[index][3],
+                  duration: booksForYou[index][4],
                 );
+              },
+            ),
+          ),
+
+          SizedBox(height: 25),
+          //recently added
+          Padding(
+            padding: const EdgeInsets.only(left: 25.0),
+            child: Text(
+              "Recently Added",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return RecentBookCard();
               },
             ),
           ),
