@@ -26,7 +26,7 @@ class _SearchPageState extends State<SearchPage> {
       "3h 40min",
     ],
     [
-      "robinson crusoe",
+      "Robinson Crusoe",
       "Daniel Defoe",
       'lib/images/robinson.jpg',
       4.2,
@@ -36,9 +36,9 @@ class _SearchPageState extends State<SearchPage> {
 
   final List recentBooks = [
     [
-      "Madol Doowa",
-      "Martin Wickramasinghe",
-      'lib/images/madoldoowa.jpg',
+      "Sinhala Holman Katha",
+      "Nissanka Perera",
+      'lib/images/horror.jpg',
       4.5,
       "2h 45min",
     ],
@@ -50,9 +50,9 @@ class _SearchPageState extends State<SearchPage> {
       "3h 40min",
     ],
     [
-      "robinson crusoe",
-      "Daniel Defoe",
-      'lib/images/robinson.jpg',
+      "Baththalangunduwa",
+      "Manjula Wediwardena",
+      'lib/images/Baththalangunduwa.jpg',
       4.2,
       "2h 50min",
     ],
