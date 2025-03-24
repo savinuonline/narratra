@@ -53,6 +53,8 @@ dependencies:
   share_plus: ^10.1.4
   firebase_dynamic_links: ^6.1.4
   file_picker: ^9.2.1
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
 
 dev_dependencies:
   flutter_test:
