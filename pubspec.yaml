@@ -60,7 +60,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_rating_bar: ^4.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -90,7 +89,6 @@ flutter:
     - lib/images/madoldoowa.jpg
     - lib/assets/icons/
     - assets/icons/
-    - assets/images/
 
   #   - images/a_dot_ham.jpeg
 

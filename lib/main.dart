@@ -16,6 +16,55 @@ import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
 
+class FeaturePage extends StatelessWidget {
+  final String title;
+  final IconData icon;
+
+  const FeaturePage({required this.title, required this.icon, Key? key})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 80, color: const Color.fromARGB(255, 40, 37, 223)),
+            const SizedBox(height: 20),
+            Text(
+              "$title Page",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "This feature will be available soon!",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -106,7 +155,7 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return GenresSelectionPage(uid: args['uid']);
         },
-        '/subscription': (context) {
+        '/genre-selection': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
@@ -120,7 +169,7 @@ class MyApp extends StatelessWidget {
           return BookInfoPage(bookId: args['bookId']);
         },
         '/media': (context) => MediaPlayerPage(),
-        '/profile': (context) => ProfilePage(),
+        '/profile': (context) => const ProfilePage(),
         '/favorites':
             (context) => const FeaturePage(
               title: "Favorites",
