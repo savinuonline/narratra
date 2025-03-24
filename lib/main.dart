@@ -15,7 +15,6 @@ import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
 import 'package:frontend/pages/profile_page.dart';
-import 'package:frontend/widgets/custom_bottom_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -116,6 +115,48 @@ class MyApp extends StatelessWidget {
         },
         '/media': (context) => MediaPlayerPage(),
         '/profile': (context) => ProfilePage(),
+        '/favorites':
+            (context) => const FeaturePage(
+              title: "Favorites",
+              icon: Icons.favorite_border,
+            ),
+        '/downloads':
+            (context) =>
+                const FeaturePage(title: "Downloads", icon: Icons.download),
+        '/rewards':
+            (context) =>
+                const FeaturePage(title: "Rewards", icon: Icons.star_border),
+        '/language':
+            (context) => const FeaturePage(
+              title: "Language Selection",
+              icon: Icons.language,
+            ),
+        '/subscription':
+            (context) => const FeaturePage(
+              title: "Subscription",
+              icon: Icons.subscriptions,
+            ),
+        '/history':
+            (context) =>
+                const FeaturePage(title: "History", icon: Icons.history),
+        '/privacy-policy':
+            (context) => const FeaturePage(
+              title: "Privacy Policy",
+              icon: Icons.privacy_tip,
+            ),
+        '/terms':
+            (context) => const FeaturePage(
+              title: "Terms of Service",
+              icon: Icons.description,
+            ),
+        '/rate-app':
+            (context) => const FeaturePage(
+              title: "Rate Narratra",
+              icon: Icons.rate_review,
+            ),
+        '/edit-profile':
+            (context) =>
+                const FeaturePage(title: "Edit Profile", icon: Icons.edit),
       },
     );
   }
