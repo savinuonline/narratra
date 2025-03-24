@@ -12,6 +12,7 @@ import 'package:frontend/pages/login_page.dart';
 import 'package:frontend/pages/register_page.dart';
 import 'package:frontend/pages/splash_screen.dart';
 import 'package:frontend/pages/media_player.dart';
+
 import 'package:frontend/pages/profile_page.dart';
 
 Future<void> main() async {
