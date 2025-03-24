@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
+import 'package:frontend/pages/subscription.dart';
+import 'package:frontend/screens/rewards/reward_dashboard.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
 import 'pages/main_screen.dart';
@@ -155,6 +157,7 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return GenresSelectionPage(uid: args['uid']);
         },
+        '/subscription': (context) => const subscription(),
         '/genre-selection': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
@@ -178,9 +181,7 @@ class MyApp extends StatelessWidget {
         '/downloads':
             (context) =>
                 const FeaturePage(title: "Downloads", icon: Icons.download),
-        '/rewards':
-            (context) =>
-                const FeaturePage(title: "Rewards", icon: Icons.star_border),
+        '/rewards': (context) => const RewardDashboard(),
         '/language':
             (context) => const FeaturePage(
               title: "Language Selection",

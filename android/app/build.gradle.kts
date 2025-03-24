@@ -16,7 +16,6 @@ dependencies {
 
 android {
     namespace = "com.example.frontend"
-    compileSdkVersion(35)
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 
@@ -29,13 +28,8 @@ android {
         jvmTarget = "17"
     }
 
-    android {
-    compileSdk = 35 // Ensure you have a valid compile SDK version
-
     defaultConfig {
         applicationId = "com.example.frontend"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
         targetSdk = 35
         versionCode = 1
@@ -49,7 +43,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    }
+}
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
@@ -60,7 +54,6 @@ dependencies {
 
 flutter {
     source = "../.."
-}
 }
 
 
