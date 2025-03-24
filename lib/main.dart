@@ -106,6 +106,12 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return GenresSelectionPage(uid: args['uid']);
         },
+        '/subscription': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return GenresSelectionPage(uid: args['uid']);
+        },
         '/main': (context) => const MainScreen(),
         '/bookinfo': (context) {
           final args =
