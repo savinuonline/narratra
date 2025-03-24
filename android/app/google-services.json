@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "872325044778",
+    "firebase_url": "https://narratradb-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "narratradb",
     "storage_bucket": "narratradb.firebasestorage.app"
   },
@@ -12,7 +13,28 @@
           "package_name": "com.example.frontend"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "872325044778-9j92hm7b1bj2ert2ln58hct9q5lu3j6u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.frontend",
+            "certificate_hash": "5ea7ffb9ee48dcf4f69b0583555f91e596ec3d68"
+          }
+        },
+        {
+          "client_id": "872325044778-t83gi5gnilg4o0o5hr50idom64q1k4dl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.frontend",
+            "certificate_hash": "18e9c092b03105534eb9f56b1ea217de67dbf1d5"
+          }
+        },
+        {
+          "client_id": "872325044778-9ah4vssjegtnl73pq1pkubvulfc5pqf9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCS5fQ5UzXAwY0rWe5bm0l9LGvVKkvdU3Q"
@@ -20,7 +42,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872325044778-91qt2in88i5nbr14ajpsfn2q4b5g3klq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "872325044778-q8q8o7f82u36ijumui769m3nrttilu9t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.frontend"
+              }
+            }
+          ]
         }
       }
     }

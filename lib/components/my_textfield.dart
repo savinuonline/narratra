@@ -1,26 +1,36 @@
 import 'package:flutter/material.dart';
 
 class MyTextField extends StatelessWidget {
-  final controller;
+  final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final Function(String)? onChanged;
+  final TextInputType? keyboardType;
+  final bool enabled;
+
   const MyTextField({
-    super.key,
+    Key? key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
-  });
+    this.onChanged,
+    this.keyboardType,
+    this.enabled = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       child: TextField(
         controller: controller,
         obscureText: obscureText, // hide password
+        onChanged: onChanged,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white),
+            borderRadius: BorderRadius.all(Radius.circular(15)),
           ),
 
           focusedBorder: OutlineInputBorder(
