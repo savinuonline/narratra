@@ -1,7 +1,9 @@
+//import 'package:navigation_module/navigation_module.dart';
+import 'package:firebase_core/firebase_core.dart';
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
+//import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
