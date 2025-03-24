@@ -1,7 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:navigation_module/navigation_module.dart';
 import 'package:firebase_core/firebase_core.dart';
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/firebase_options.dart';
+import 'package:frontend/helpers/theme.dart';
+import 'package:frontend/pages/settings_page.dart';
+import 'package:frontend/settingsBackend/theme_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/settingsBackend/theme_provider.dart';
 import 'package:flutter/services.dart';
 //import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
@@ -215,5 +222,6 @@ class MyApp extends StatelessWidget {
                 const FeaturePage(title: "Edit Profile", icon: Icons.edit),
       },
     );
+  
   }
 }
