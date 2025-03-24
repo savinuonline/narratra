@@ -58,6 +58,7 @@ class BookService {
     required String authorDescription,
     required List<Map<String, dynamic>> chapters,
     required List<File> audioFiles,
+    List<File>? alternateAudioFiles, // Optional alternate voice files
     bool isFree = false,
   }) async {
     try {
@@ -70,16 +71,30 @@ class BookService {
 
       // 1. Upload audio files to Firebase Storage
       List<String> audioUrls = [];
+      List<String> alternateAudioUrls = [];
+
+      // Upload main audio files
       for (int i = 0; i < audioFiles.length; i++) {
         final audioFile = audioFiles[i];
         final fileName = 'chapter${i + 1}.mp3';
         final storageRef = _storage.ref().child('audio/$title/$fileName');
 
-        // Upload the file
         await storageRef.putFile(audioFile);
-        // Get the download URL
         final downloadUrl = await storageRef.getDownloadURL();
         audioUrls.add(downloadUrl);
+      }
+
+      // Upload alternate audio files if provided
+      if (alternateAudioFiles != null) {
+        for (int i = 0; i < alternateAudioFiles.length; i++) {
+          final audioFile = alternateAudioFiles[i];
+          final fileName = 'chapter${i + 1}_alternate.mp3';
+          final storageRef = _storage.ref().child('audio/$title/$fileName');
+
+          await storageRef.putFile(audioFile);
+          final downloadUrl = await storageRef.getDownloadURL();
+          alternateAudioUrls.add(downloadUrl);
+        }
       }
 
       // 2. Calculate total duration
@@ -103,12 +118,17 @@ class BookService {
         'createdAt': FieldValue.serverTimestamp(),
         'chapters':
             chapters.asMap().entries.map((entry) {
+              final index = entry.key;
               return {
                 'title': entry.value['title'],
                 'description': entry.value['description'],
                 'duration': entry.value['duration'],
-                'audioUrl': audioUrls[entry.key],
-                'order': entry.key,
+                'audioUrl': audioUrls[index],
+                'alternateAudioUrl':
+                    index < alternateAudioUrls.length
+                        ? alternateAudioUrls[index]
+                        : '',
+                'order': index,
               };
             }).toList(),
       };
@@ -130,8 +150,6 @@ class BookService {
 
   /// Get all books across all genres as a Stream
   Stream<List<Map<String, dynamic>>> getAllBooksStream() {
-    print('Starting to listen to books stream');
-
     final streams =
         categories.map((genre) {
           return _firestore
@@ -141,16 +159,13 @@ class BookService {
               .orderBy('createdAt', descending: true)
               .snapshots()
               .map((snapshot) {
-                print('Received update for genre: $genre');
                 return snapshot.docs.map((doc) {
                   return {'id': doc.id, 'genre': genre, ...doc.data()};
                 }).toList();
               });
         }).toList();
 
-    return Rx.combineLatestList(streams).map((
-      List<List<Map<String, dynamic>>> lists,
-    ) {
+    return Rx.combineLatestList(streams).map((lists) {
       final allBooks = lists.expand((list) => list).toList();
       allBooks.sort((a, b) {
         final aTime =
@@ -159,9 +174,27 @@ class BookService {
             (b['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
         return bTime.compareTo(aTime);
       });
-      print('Total books in stream: ${allBooks.length}');
       return allBooks;
     });
+  }
+
+  /// Get a book by ID
+  Future<Map<String, dynamic>?> getBookById(String genre, String id) async {
+    try {
+      final doc =
+          await _firestore
+              .collection('books')
+              .doc(genre)
+              .collection('books')
+              .doc(id)
+              .get();
+
+      if (!doc.exists) return null;
+      return {'id': doc.id, 'genre': genre, ...doc.data()!};
+    } catch (e) {
+      print('Error getting book: $e');
+      return null;
+    }
   }
 
   /// Delete a book by ID and genre
@@ -217,6 +250,7 @@ class BookService {
     required String authorDescription,
     required List<Map<String, dynamic>> chapters,
     required List<File> audioFiles,
+    List<File>? alternateAudioFiles,
     bool isFree = false,
   }) async {
     try {
@@ -224,8 +258,11 @@ class BookService {
         throw ArgumentError('Invalid genre: $genre');
       }
 
-      // 1. Upload new audio files
+      // 1. Upload audio files
       List<String> audioUrls = [];
+      List<String> alternateAudioUrls = [];
+
+      // Upload main audio files
       for (int i = 0; i < audioFiles.length; i++) {
         final audioFile = audioFiles[i];
         final fileName = 'chapter${i + 1}.mp3';
@@ -234,6 +271,19 @@ class BookService {
         await storageRef.putFile(audioFile);
         final downloadUrl = await storageRef.getDownloadURL();
         audioUrls.add(downloadUrl);
+      }
+
+      // Upload alternate audio files if provided
+      if (alternateAudioFiles != null) {
+        for (int i = 0; i < alternateAudioFiles.length; i++) {
+          final audioFile = alternateAudioFiles[i];
+          final fileName = 'chapter${i + 1}_alternate.mp3';
+          final storageRef = _storage.ref().child('audio/$title/$fileName');
+
+          await storageRef.putFile(audioFile);
+          final downloadUrl = await storageRef.getDownloadURL();
+          alternateAudioUrls.add(downloadUrl);
+        }
       }
 
       // 2. Calculate total duration
@@ -256,12 +306,17 @@ class BookService {
         'updatedAt': FieldValue.serverTimestamp(),
         'chapters':
             chapters.asMap().entries.map((entry) {
+              final index = entry.key;
               return {
                 'title': entry.value['title'],
                 'description': entry.value['description'],
                 'duration': entry.value['duration'],
-                'audioUrl': audioUrls[entry.key],
-                'order': entry.key,
+                'audioUrl': audioUrls[index],
+                'alternateAudioUrl':
+                    index < alternateAudioUrls.length
+                        ? alternateAudioUrls[index]
+                        : '',
+                'order': index,
               };
             }).toList(),
       };

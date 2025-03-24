@@ -34,6 +34,8 @@ class _BookInfoPageState extends State<BookInfoPage>
   bool _isLoadingBook = true;
   String? _errorMessage;
   final TextEditingController _playlistNameController = TextEditingController();
+  Duration? _lastPosition;
+  int? _lastChapterIndex;
 
   @override
   void initState() {
@@ -46,10 +48,27 @@ class _BookInfoPageState extends State<BookInfoPage>
   Future<void> _loadBook() async {
     try {
       final book = await _firebaseService.getBookById(widget.bookId);
+      final lastPosition = await _firebaseService.getListeningProgress(
+        'USER_ID',
+        widget.bookId,
+      );
+
       if (mounted) {
         setState(() {
           _book = book;
           _isLoadingBook = false;
+          _lastPosition = lastPosition;
+          if (book != null && lastPosition != null) {
+            // Find the chapter based on the last position
+            int totalDuration = 0;
+            for (int i = 0; i < book.chapters.length; i++) {
+              totalDuration += book.chapters[i].duration.inSeconds;
+              if (totalDuration > lastPosition.inSeconds) {
+                _lastChapterIndex = i;
+                break;
+              }
+            }
+          }
           if (book != null && book.imageUrl.startsWith('http')) {
             _updatePaletteGenerator(book.imageUrl);
           }
@@ -557,12 +576,17 @@ class _BookInfoPageState extends State<BookInfoPage>
               Navigator.pushNamed(
                 context,
                 '/media',
-                arguments: {'bookId': book.id},
+                arguments: {
+                  'bookId': book.id,
+                  'chapterIndex': _lastChapterIndex ?? 0,
+                },
               );
             },
             icon: const Icon(Icons.play_circle_fill, size: 30),
             label: Text(
-              'Listen Now',
+              _lastChapterIndex != null
+                  ? 'Continue Ch. ${_lastChapterIndex! + 1}'
+                  : 'Listen Now',
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -912,70 +936,39 @@ class _BookInfoPageState extends State<BookInfoPage>
                               ),
                             ),
                             const SizedBox(height: 16),
-                            Row(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (book.authorImageUrl.isNotEmpty)
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    margin: const EdgeInsets.only(right: 16),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                          book.authorImageUrl,
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
+                                Text(
+                                  book.authorDescription,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.grey[800],
+                                    height: 1.6,
                                   ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        book.authorDescription,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          color: Colors.grey[800],
-                                          height: 1.6,
-                                        ),
-                                        maxLines:
-                                            _showAuthorDescription ? null : 4,
-                                        overflow:
-                                            _showAuthorDescription
-                                                ? null
-                                                : TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _showAuthorDescription =
-                                                !_showAuthorDescription;
-                                          });
-                                        },
-                                        child: Text(
-                                          _showAuthorDescription
-                                              ? 'See less'
-                                              : 'See more',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 16,
-                                            color: const Color(0xFF402e7a),
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  maxLines: _showAuthorDescription ? null : 4,
+                                  overflow:
+                                      _showAuthorDescription
+                                          ? null
+                                          : TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _showAuthorDescription =
+                                          !_showAuthorDescription;
+                                    });
+                                  },
+                                  child: Text(
+                                    _showAuthorDescription
+                                        ? 'See less'
+                                        : 'See more',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      color: const Color(0xFF402e7a),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
