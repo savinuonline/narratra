@@ -198,11 +198,42 @@ class FirebaseService {
         if (bookDoc.exists) {
           print('Found book in genre: $genre');
           final bookData = bookDoc.data()!;
+          final title = bookData['title'] as String;
 
           // Get author details
           final authorDetails = await getAuthorByName(bookData['author'] ?? '');
 
-          // Merge book data with genre and author details
+          // Get chapters data and construct audio URLs
+          final List<Map<String, dynamic>> chaptersData = 
+              List<Map<String, dynamic>>.from(bookData['chapters'] ?? []);
+
+          // Update each chapter with the correct audio URLs
+          for (int i = 0; i < chaptersData.length; i++) {
+            final chapterNum = i + 1;
+            final storageRef = _storage.ref().child('audio/$title/chapter${chapterNum}_voice1.mp3');
+            final alternateStorageRef = _storage.ref().child('audio/$title/chapter${chapterNum}_voice2.mp3');
+
+            try {
+              final audioUrl = await storageRef.getDownloadURL();
+              chaptersData[i]['audioUrl'] = audioUrl;
+              print('Audio URL for chapter $chapterNum: $audioUrl');
+
+              try {
+                final alternateAudioUrl = await alternateStorageRef.getDownloadURL();
+                chaptersData[i]['alternateAudioUrl'] = alternateAudioUrl;
+                print('Alternate audio URL for chapter $chapterNum: $alternateAudioUrl');
+              } catch (e) {
+                print('No alternate voice available for chapter $chapterNum');
+                chaptersData[i]['alternateAudioUrl'] = '';
+              }
+            } catch (e) {
+              print('Error getting audio URL for chapter $chapterNum: $e');
+              chaptersData[i]['audioUrl'] = '';
+              chaptersData[i]['alternateAudioUrl'] = '';
+            }
+          }
+
+          // Merge book data with genre, author details, and updated chapters
           final mergedData = {
             ...bookData,
             'genre': genre,
@@ -210,6 +241,7 @@ class FirebaseService {
                 authorDetails?['description'] ??
                 'No author description available.',
             'authorImageUrl': authorDetails?['imageUrl'] ?? '',
+            'chapters': chaptersData,
           };
 
           return Book.fromMap(mergedData, bookId);
@@ -218,6 +250,7 @@ class FirebaseService {
 
       return null;
     } catch (e) {
+      print('Error in getBookById: $e');
       return null;
     }
   }
@@ -270,7 +303,7 @@ class FirebaseService {
         final audioFile = audioFiles[i];
         final fileName = 'chapter${i + 1}.mp3';
         final storageRef = _storage.ref().child('audio/$title/$fileName');
-        
+
         // Upload the file
         await storageRef.putFile(audioFile);
         // Get the download URL
@@ -296,15 +329,16 @@ class FirebaseService {
         'totalDuration': totalDuration,
         'likeCount': 0,
         'createdAt': FieldValue.serverTimestamp(),
-        'chapters': chapters.asMap().entries.map((entry) {
-          return {
-            'title': entry.value['title'],
-            'description': entry.value['description'],
-            'duration': entry.value['duration'],
-            'audioUrl': audioUrls[entry.key],
-            'order': entry.key,
-          };
-        }).toList(),
+        'chapters':
+            chapters.asMap().entries.map((entry) {
+              return {
+                'title': entry.value['title'],
+                'description': entry.value['description'],
+                'duration': entry.value['duration'],
+                'audioUrl': audioUrls[entry.key],
+                'order': entry.key,
+              };
+            }).toList(),
       });
 
       return bookRef.id;
@@ -579,34 +613,40 @@ class FirebaseService {
   }
 
   /// Create a new playlist
-  Future<String> createPlaylist(String userId, String name, String bookId) async {
+  Future<String> createPlaylist(
+    String userId,
+    String name,
+    String bookId,
+  ) async {
     try {
       final userRef = _firestore.collection('users').doc(userId);
       final userDoc = await userRef.get();
-      
+
       if (!userDoc.exists) {
         await userRef.set({
-          'playlists': [{
-            'id': DateTime.now().millisecondsSinceEpoch.toString(),
-            'name': name,
-            'books': [bookId],
-          }],
+          'playlists': [
+            {
+              'id': DateTime.now().millisecondsSinceEpoch.toString(),
+              'name': name,
+              'books': [bookId],
+            },
+          ],
         });
         return DateTime.now().millisecondsSinceEpoch.toString();
       }
 
-      final playlists = List<Map<String, dynamic>>.from(userDoc.data()?['playlists'] ?? []);
+      final playlists = List<Map<String, dynamic>>.from(
+        userDoc.data()?['playlists'] ?? [],
+      );
       final newPlaylist = {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'name': name,
         'books': [bookId],
       };
-      
+
       playlists.add(newPlaylist);
-      await userRef.update({
-        'playlists': playlists,
-      });
-      
+      await userRef.update({'playlists': playlists});
+
       return newPlaylist['id'] as String;
     } catch (e) {
       print('Error creating playlist: $e');
@@ -634,24 +674,30 @@ class FirebaseService {
   }
 
   /// Add a book to an existing playlist
-  Future<void> addBookToPlaylist(String userId, String playlistId, String bookId) async {
+  Future<void> addBookToPlaylist(
+    String userId,
+    String playlistId,
+    String bookId,
+  ) async {
     try {
       final userRef = _firestore.collection('users').doc(userId);
       final userDoc = await userRef.get();
-      
+
       if (!userDoc.exists) return;
-      
-      final playlists = List<Map<String, dynamic>>.from(userDoc.data()?['playlists'] ?? []);
+
+      final playlists = List<Map<String, dynamic>>.from(
+        userDoc.data()?['playlists'] ?? [],
+      );
       final playlistIndex = playlists.indexWhere((p) => p['id'] == playlistId);
-      
+
       if (playlistIndex != -1) {
-        final books = List<String>.from(playlists[playlistIndex]['books'] ?? []);
+        final books = List<String>.from(
+          playlists[playlistIndex]['books'] ?? [],
+        );
         if (!books.contains(bookId)) {
           books.add(bookId);
           playlists[playlistIndex]['books'] = books;
-          await userRef.update({
-            'playlists': playlists,
-          });
+          await userRef.update({'playlists': playlists});
         }
       }
     } catch (e) {

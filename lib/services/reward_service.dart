@@ -712,16 +712,16 @@ class RewardService {
     if (user == null) return;
 
     final docRef = _firestore.collection('user_rewards').doc(user.uid);
-    
+
     await _firestore.runTransaction((transaction) async {
       final doc = await transaction.get(docRef);
       if (!doc.exists) return;
 
       final rewards = UserReward.fromMap(doc.data()!);
       final pointsToAdd = rewards.calculatePointsForListening(minutes);
-      
+
       rewards.updateListeningProgress(minutes);
-      
+
       transaction.update(docRef, {
         'dailyListeningMinutes': rewards.dailyListeningMinutes,
         'weeklyListeningMinutes': rewards.weeklyListeningMinutes,
@@ -752,14 +752,14 @@ class RewardService {
     if (user == null) return;
 
     final docRef = _firestore.collection('user_rewards').doc(user.uid);
-    
+
     await _firestore.runTransaction((transaction) async {
       final doc = await transaction.get(docRef);
       if (!doc.exists) return;
 
       final rewards = UserReward.fromMap(doc.data()!);
       rewards.refreshTipsAndMotivation();
-      
+
       transaction.update(docRef, {
         'listeningTips': rewards.listeningTips,
         'currentMotivation': rewards.currentMotivation,
