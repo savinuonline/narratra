@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/pages/search_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart';
 import 'library_page.dart';
@@ -47,7 +48,7 @@ class _MainScreenState extends State<MainScreen>
 
   List<Widget> get _pages => [
     HomeScreen(user: currentUser),
-    const Center(child: Text('Search')),
+    const SearchPage(),
     const LibraryPage(),
     const ProfilePage(),
   ];
@@ -143,12 +144,8 @@ class _MainScreenState extends State<MainScreen>
                                 return Transform.scale(
                                   scale: scale,
                                   child: Container(
-                                    margin: const EdgeInsets.only(
-                                      bottom: 1,
-                                    ),
-                                    padding: const EdgeInsets.all(
-                                      6,
-                                    ), 
+                                    margin: const EdgeInsets.only(bottom: 1),
+                                    padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:
