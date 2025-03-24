@@ -169,7 +169,7 @@ class VoiceOption extends StatefulWidget {
           ),
           Text(
             widget.name,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           IconButton(
             icon: Icon(
