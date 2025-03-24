@@ -3,7 +3,6 @@ import 'package:frontend/pages/add_account.dart';
 import 'package:frontend/pages/update_mali.dart';
 import 'package:frontend/settingsBackend/theme_provider.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:frontend/settingsBackend/theme_provider.dart';
 import 'package:frontend/helpers/theme.dart';
 import 'package:provider/provider.dart';
 
