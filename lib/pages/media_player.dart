@@ -351,11 +351,11 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
 
               // Book Cover
               Container(
-                width: 250,
-                height: 250,
+                width: 300,
+                height: 400,
                 margin: const EdgeInsets.symmetric(vertical: 32),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.3),
