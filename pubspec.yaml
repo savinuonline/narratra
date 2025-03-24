@@ -87,7 +87,6 @@ flutter:
     - lib/images/
     - lib/assets/icons/
     - assets/icons/
-    - assets/images/
 
   #   - images/a_dot_ham.jpeg
 
