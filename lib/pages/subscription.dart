@@ -62,7 +62,7 @@ class subscription extends StatelessWidget {
             ),
             const SizedBox(height: 50),
             subscriptionOption("Premium", "Rs.699/month", true),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             subscriptionOption("Premium (Family)", "Rs.1299/month", false),
             const SizedBox(height: 100),
             ElevatedButton(
