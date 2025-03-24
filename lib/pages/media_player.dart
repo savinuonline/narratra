@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
@@ -33,26 +34,41 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
 
   Future<void> _initAudioSession() async {
     final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playback,
-      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers,
-      avAudioSessionMode: AVAudioSessionMode.defaultMode,
-    ));
+    await session.configure(
+      const AudioSessionConfiguration(
+        avAudioSessionCategory: AVAudioSessionCategory.playback,
+        avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers,
+        avAudioSessionMode: AVAudioSessionMode.defaultMode,
+      ),
+    );
   }
 
   Future<void> _loadBook() async {
     try {
-      final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      print('Starting to load book...');
+
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      print('Received arguments: $args');
+
       final bookId = args['bookId'] as String;
-      final genre = args['genre'] as String;
+      print('Book ID: $bookId');
+
       final initialChapterIndex = args['chapterIndex'] as int? ?? 0;
+      print('Initial chapter index: $initialChapterIndex');
 
-      final bookData = await _firebaseService.getBookById(bookId);
-      if (bookData == null) throw Exception('Book not found');
-
-      final book = Book.fromMap(bookData as Map<String, dynamic>, bookId);
+      print('Fetching book data from Firebase...');
+      final book = await _firebaseService.getBookById(bookId);
+      if (book == null) {
+        print('Error: Book data is null');
+        throw Exception('Book not found');
+      }
+      print('Book data received: $book');
+      print('Book details:');
+      print('- Number of chapters: ${book.chapters.length}');
 
       if (mounted) {
+        print('Setting state with book data...');
         setState(() {
           _book = book;
           _currentChapterIndex = initialChapterIndex;
@@ -60,21 +76,33 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
         });
       }
 
-      // Load the audio file
+      print('Loading initial chapter...');
       await _loadChapter(initialChapterIndex);
 
-      // Get and set the last position
-      final lastPosition = await _firebaseService.getListeningProgress('USER_ID', bookId);
+      print('Fetching last listening position...');
+      final lastPosition = await _firebaseService.getListeningProgress(
+        'USER_ID',
+        bookId,
+      );
       if (lastPosition != null) {
+        print('Last position found: ${lastPosition.inSeconds} seconds');
         await _audioPlayer.seek(lastPosition);
+      } else {
+        print('No last position found, starting from beginning');
       }
 
-      // Start position tracking
+      print('Setting up position tracking...');
       _audioPlayer.positionStream.listen((position) {
+        print('Current position: ${position.inSeconds} seconds');
         _firebaseService.saveListeningProgress('USER_ID', bookId, position);
       });
 
-    } catch (e) {
+      print('Book loading completed successfully');
+    } catch (e, stackTrace) {
+      print('Error in _loadBook:');
+      print('Error message: $e');
+      print('Stack trace: $stackTrace');
+
       if (mounted) {
         setState(() {
           _errorMessage = 'Error loading audiobook: $e';
@@ -85,27 +113,67 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
   }
 
   Future<void> _loadChapter(int index) async {
-    if (_book == null || index < 0 || index >= _book!.chapters.length) return;
+    print('Starting to load chapter $index...');
+
+    if (_book == null) {
+      print('Error: Book is null');
+      return;
+    }
+
+    if (index < 0 || index >= _book!.chapters.length) {
+      print(
+        'Error: Invalid chapter index. Book has ${_book!.chapters.length} chapters',
+      );
+      return;
+    }
 
     try {
       final chapter = _book!.chapters[index];
-      final audioUrl = _useAlternateVoice && chapter.alternateAudioUrl.isNotEmpty
-          ? chapter.alternateAudioUrl
-          : chapter.audioUrl;
+      print('Chapter details:');
+      print('- Title: ${chapter.title}');
+      print('- Duration: ${chapter.duration.inMinutes} minutes');
+      print('- Primary audio URL: ${chapter.audioUrl}');
+      print('- Alternate audio URL: ${chapter.alternateAudioUrl}');
+      print('- Has alternate voice: ${chapter.alternateAudioUrl.isNotEmpty}');
+
+      if (chapter.audioUrl.isEmpty) {
+        throw Exception('Primary audio URL is empty');
+      }
+
+      final audioUrl =
+          _useAlternateVoice && chapter.alternateAudioUrl.isNotEmpty
+              ? chapter.alternateAudioUrl
+              : chapter.audioUrl;
+
+      if (audioUrl.isEmpty) {
+        throw Exception('Selected audio URL is empty');
+      }
 
       await _audioPlayer.setUrl(audioUrl);
+
+      print('Starting playback...');
       _audioPlayer.play();
-    } catch (e) {
+      print('Playback started');
+    } catch (e, stackTrace) {
+      print('Error in _loadChapter:');
+      print('Error message: $e');
+      print('Stack trace: $stackTrace');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading chapter: $e')),
+          SnackBar(
+            content: Text('Error loading chapter: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
   }
 
   void _skipForward() {
-    if (_audioPlayer.position + const Duration(seconds: 10) > _audioPlayer.duration!) {
+    if (_audioPlayer.position + const Duration(seconds: 10) >
+        _audioPlayer.duration!) {
       _nextChapter();
     } else {
       _audioPlayer.seek(_audioPlayer.position + const Duration(seconds: 10));
@@ -121,7 +189,8 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
   }
 
   void _nextChapter() {
-    if (_book == null || _currentChapterIndex >= _book!.chapters.length - 1) return;
+    if (_book == null || _currentChapterIndex >= _book!.chapters.length - 1)
+      return;
     setState(() {
       _currentChapterIndex++;
     });
@@ -152,16 +221,12 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_errorMessage != null || _book == null) {
       return Scaffold(
-        body: Center(
-          child: Text(_errorMessage ?? 'Error loading audiobook'),
-        ),
+        body: Center(child: Text(_errorMessage ?? 'Error loading audiobook')),
       );
     }
 
@@ -195,49 +260,222 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                       onPressed: () => Navigator.pop(context),
                     ),
                     Text(
-                      "PLAYING NOW",
-                      style: TextStyle(
+                      "Playing Now",
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         color: Colors.white70,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (hasAlternateVoice)
-                      IconButton(
-                        icon: Icon(
-                          _useAlternateVoice ? Icons.record_voice_over : Icons.voice_over_off,
-                          color: Colors.white,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        onPressed: _toggleVoice,
-                        tooltip: _useAlternateVoice ? 'Switch to Voice 1' : 'Switch to Voice 2',
+                        child: PopupMenuButton<bool>(
+                          icon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _useAlternateVoice
+                                    ? Icons.man_rounded
+                                    : Icons.woman_rounded,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _useAlternateVoice ? 'Savoy' : 'Oshadi',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                          ),
+                          tooltip: 'Select voice',
+                          onSelected: (bool value) {
+                            setState(() {
+                              _useAlternateVoice = value;
+                            });
+                            _loadChapter(_currentChapterIndex);
+                          },
+                          itemBuilder:
+                              (BuildContext context) => <PopupMenuEntry<bool>>[
+                                PopupMenuItem<bool>(
+                                  value: false,
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.woman_rounded,
+                                        color: Colors.pink,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'Oshadi',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<bool>(
+                                  value: true,
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.man_rounded,
+                                        color: Colors.blue,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'Savoy',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                        ),
                       )
                     else
-                      const SizedBox(width: 48),
+                      const SizedBox(width: 60),
                   ],
                 ),
               ),
 
-              // Book Cover
-              Container(
-                width: 250,
-                height: 250,
-                margin: const EdgeInsets.symmetric(vertical: 32),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              // 3D Book Cover
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Book shadow
+                    Container(
+                      width: 280,
+                      height: 390,
+                      margin: const EdgeInsets.only(top: 10, right: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 25,
+                            spreadRadius: 2,
+                            offset: const Offset(10, 10),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Book spine
+                    Positioned(
+                      left: 42,
+                      child: Container(
+                        width: 20,
+                        height: 380,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.8),
+                              Colors.grey.shade700,
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            bottomLeft: Radius.circular(5),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Book front cover
+                    Transform(
+                      alignment: Alignment.center,
+                      transform:
+                          Matrix4.identity()
+                            ..setEntry(3, 2, 0.001) // perspective
+                            ..rotateY(0.1), // slight rotation for 3D effect
+                      child: Container(
+                        width: 280,
+                        height: 380,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 15,
+                              offset: const Offset(5, 5),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Stack(
+                            children: [
+                              // Cover image
+                              Image.network(
+                                _book!.imageUrl,
+                                fit: BoxFit.cover,
+                                width: 280,
+                                height: 380,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // Title overlay at the top
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.8),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    _book!.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
 
@@ -327,11 +565,19 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.skip_previous, color: Colors.white, size: 32),
+                      icon: const Icon(
+                        Icons.skip_previous,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                       onPressed: _previousChapter,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.replay_10, color: Colors.white, size: 32),
+                      icon: const Icon(
+                        Icons.replay_10,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                       onPressed: _skipBackward,
                     ),
                     StreamBuilder<PlayerState>(
@@ -354,7 +600,7 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                           );
                         } else if (playing != true) {
                           return IconButton(
-                            icon: const Icon(Icons.play_circle_filled),
+                            icon: const Icon(Icons.play_circle),
                             iconSize: 64,
                             color: Colors.white,
                             onPressed: _audioPlayer.play,
@@ -370,11 +616,19 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.forward_10, color: Colors.white, size: 32),
+                      icon: const Icon(
+                        Icons.forward_10,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                       onPressed: _skipForward,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.skip_next, color: Colors.white, size: 32),
+                      icon: const Icon(
+                        Icons.skip_next,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                       onPressed: _nextChapter,
                     ),
                   ],
@@ -392,6 +646,8 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return duration.inHours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+    return duration.inHours > 0
+        ? '$hours:$minutes:$seconds'
+        : '$minutes:$seconds';
   }
 }

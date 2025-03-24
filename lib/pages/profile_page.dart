@@ -7,6 +7,33 @@ import 'package:google_fonts/google_fonts.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  void _logout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Logout"),
+            content: const Text("Are you sure you want to log out?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: const Text(
+                  "Logout",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,9 +43,7 @@ class ProfilePage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Profile',
@@ -28,18 +53,10 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
-            },
-          ),
-        ],
       ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -52,7 +69,9 @@ class ProfilePage extends StatelessWidget {
                   children: [
                     const CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage("assets/profile.jpg"),
+                      backgroundImage: AssetImage(
+                        "lib/images/profile_picture.png",
+                      ),
                     ),
                     Positioned(
                       bottom: 0,
@@ -67,7 +86,7 @@ class ProfilePage extends StatelessWidget {
                             size: 12,
                           ),
                           onPressed: () {
-                            // Edit profile picture functionality
+                            Navigator.pushNamed(context, '/edit-profile');
                           },
                         ),
                       ),
@@ -88,7 +107,7 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 5),
                     ElevatedButton(
                       onPressed: () {
-                        // Edit profile functionality
+                        Navigator.pushNamed(context, '/edit-profile');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -110,29 +129,33 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Favorites",
               icon: Icons.favorite_border,
-              page: "Favorites",
+              onTap: () => Navigator.pushNamed(context, '/favorites'),
             ),
             FeatureTile(
               title: "Downloads",
               icon: Icons.download,
-              page: "Downloads",
+              onTap: () => Navigator.pushNamed(context, '/downloads'),
             ),
             FeatureTile(
               title: "Rewards",
               icon: Icons.star_border,
-              page: "Rewards",
+              onTap: () => Navigator.pushNamed(context, '/rewards'),
             ),
             FeatureTile(
               title: "Language Selection",
               icon: Icons.language,
-              page: "Language Selection",
+              onTap: () => Navigator.pushNamed(context, '/language'),
             ),
             FeatureTile(
               title: "Subscription",
               icon: Icons.subscriptions,
-              page: "Subscription",
+              onTap: () => Navigator.pushNamed(context, '/subscription'),
             ),
-            FeatureTile(title: "History", icon: Icons.history, page: "History"),
+            FeatureTile(
+              title: "History",
+              icon: Icons.history,
+              onTap: () => Navigator.pushNamed(context, '/history'),
+            ),
             const SizedBox(height: 30),
             const Text(
               "About",
@@ -146,26 +169,41 @@ class ProfilePage extends StatelessWidget {
             FeatureTile(
               title: "Privacy Policy",
               icon: Icons.privacy_tip,
-              page: "Privacy Policy",
+              onTap: () => Navigator.pushNamed(context, '/privacy-policy'),
             ),
             FeatureTile(
               title: "Terms of Service",
               icon: Icons.description,
-              page: "Terms of Service",
+              onTap: () => Navigator.pushNamed(context, '/terms'),
             ),
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const RateNarratraDialog(),
-                );
-              },
-              child: const FeatureTile(
-                title: "Rate Narratra",
-                icon: Icons.rate_review,
-                page: "",
+            FeatureTile(
+              title: "Rate Narratra",
+              icon: Icons.rate_review,
+              onTap: () => Navigator.pushNamed(context, '/rate-app'),
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _logout(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 52, 72, 84),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Logout",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -173,20 +211,22 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class FeatureTile extends StatelessWidget {
+class FeaturePage extends StatelessWidget {
   final String title;
   final IconData icon;
-  final String page;
 
-  const FeatureTile({
-    required this.title,
-    required this.icon,
-    required this.page,
-    super.key,
-  });
+  const FeaturePage({required this.title, required this.icon, Key? key})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
     return GestureDetector(
       onTap: () {
         if (title == "Rewards") {
@@ -226,44 +266,34 @@ class FeatureTile extends StatelessWidget {
             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class RateNarratraDialog extends StatelessWidget {
-  const RateNarratraDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("Rate Narratra"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text("Please rate our app:"),
-          const SizedBox(height: 20),
-          RatingBar.builder(
-            initialRating: 0,
-            minRating: 1,
-            direction: Axis.horizontal,
-            allowHalfRating: true,
-            itemCount: 5,
-            itemBuilder:
-                (context, _) => const Icon(Icons.star, color: Colors.amber),
-            onRatingUpdate: (rating) {
-              // Handle rating update
-            },
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text("Cancel"),
         ),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 80, color: const Color.fromARGB(255, 40, 37, 223)),
+            const SizedBox(height: 20),
+            Text(
+              "$title Page",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "This feature will be available soon!",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
         TextButton(
           onPressed: () {
             // Handle submit rating
@@ -285,6 +315,28 @@ class PlaceholderPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(child: Text("$title Page Content Here")),
+    );
+  }
+}
+  class FeatureTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const FeatureTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: const Color.fromARGB(255, 40, 37, 223)),
+      title: Text(title, style: const TextStyle(color: Colors.black)),
+      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+      onTap: onTap,
     );
   }
 }

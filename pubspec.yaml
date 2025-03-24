@@ -55,10 +55,12 @@ dependencies:
   file_picker: ^9.2.1
   just_audio: ^0.9.36
   audio_session: ^0.1.18
+  firebase_messaging: ^15.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_rating_bar: ^4.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -85,6 +87,7 @@ flutter:
   assets:
     - lib/images/
     - lib/images/LogoBlue.png
+    - lib/images/madoldoowa.jpg
     - lib/assets/icons/
     - assets/icons/
     - assets/images/
