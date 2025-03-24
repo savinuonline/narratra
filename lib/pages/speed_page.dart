@@ -56,9 +56,6 @@ class _SpeedPageState extends State<SpeedPage> {
                   onTap: () {
                     setState(() {
                       selectedSpeed = speed;
-                    });
-                    Future.delayed(Duration(milliseconds: 300), () {
-                    Navigator.pop(context, selectedSpeed);
                     }); 
                   },
                   child: Container(
