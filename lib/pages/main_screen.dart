@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/pages/profile_page.dart';
 import 'package:frontend/pages/search_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart';
@@ -51,7 +50,6 @@ class _MainScreenState extends State<MainScreen>
     HomeScreen(user: currentUser),
     const SearchPage(),
     const LibraryPage(),
-    ProfilePage(),
     const ProfilePage(),
   ];
 

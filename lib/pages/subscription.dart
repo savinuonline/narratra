@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class subscription extends StatelessWidget {
+  const subscription({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,17 +13,11 @@ class subscription extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 10),
-            Image.asset(
-              'images/LogoBlue.png',
-              height: 80,
-            ),
+            Image.asset('lib/images/LogoBlue.png', height: 100),
             const SizedBox(height: 20),
             const Text(
               "Become a Premium",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             RichText(
@@ -30,19 +26,35 @@ class subscription extends StatelessWidget {
                 style: TextStyle(color: Colors.black54),
                 children: [
                   WidgetSpan(
-                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 16,
+                    ),
                   ),
                   TextSpan(text: " Unlimited access to all Audiobooks\n\n"),
                   WidgetSpan(
-                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 16,
+                    ),
                   ),
                   TextSpan(text: " Ad-free Experience\n\n"),
                   WidgetSpan(
-                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 16,
+                    ),
                   ),
                   TextSpan(text: " Multiple Voice Options\n\n"),
                   WidgetSpan(
-                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 16,
+                    ),
                   ),
                   TextSpan(text: " High Quality Audio"),
                 ],
@@ -50,16 +62,19 @@ class subscription extends StatelessWidget {
             ),
             const SizedBox(height: 50),
             subscriptionOption("Premium", "Rs.699/month", true),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             subscriptionOption("Premium (Family)", "Rs.1299/month", false),
-            const SizedBox(height: 150),
+            const SizedBox(height: 100),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
               ),
               onPressed: () {},
               child: const Text(
