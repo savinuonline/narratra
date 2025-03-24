@@ -1,0 +1,35 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          dart-version: "3.7.0"
+
+      - run: flutter --version
+
+      # Step 3: Install dependencies
+      - run: flutter pub get
+
+      # Step 4: Build APK in release mode
+      - run: flutter build apk --release
+
+      # Step 5: Upload the generated APK as an artifact
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
