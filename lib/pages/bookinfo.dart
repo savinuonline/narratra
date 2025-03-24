@@ -585,7 +585,7 @@ class _BookInfoPageState extends State<BookInfoPage>
             icon: const Icon(Icons.play_circle_fill, size: 30),
             label: Text(
               _lastChapterIndex != null
-                  ? 'Continue Ch. ${_lastChapterIndex! + 1}'
+                  ? 'Continue Chapter. ${_lastChapterIndex! + 1}'
                   : 'Listen Now',
               style: GoogleFonts.poppins(
                 fontSize: 13,
