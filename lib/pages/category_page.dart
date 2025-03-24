@@ -263,7 +263,7 @@ class CategoryPage extends StatelessWidget {
                                         fontWeight: FontWeight.w600,
                                         color: Colors.black87,
                                       ),
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 4),
@@ -291,6 +291,7 @@ class CategoryPage extends StatelessWidget {
                                             fontSize: 12,
                                             color: Colors.grey[600],
                                           ),
+
                                         ),
                                       ],
                                     ),
