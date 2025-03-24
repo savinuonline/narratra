@@ -575,7 +575,7 @@ class FirebaseService {
     }
   }
 
-  /// Rename a playlist
+  /// Rename a playlist by name
   Future<void> renamePlaylist(
     String userId,
     String playlistId,
