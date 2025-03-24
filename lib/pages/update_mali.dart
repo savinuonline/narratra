@@ -16,7 +16,7 @@ class UpdateMali extends StatelessWidget {
         ),
         leadingWidth:100,
         title: const Text(
-          "Update mail", style: TextStyle(
+          "Update Email", style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
