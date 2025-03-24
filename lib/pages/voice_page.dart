@@ -112,68 +112,75 @@ class VoiceOption extends StatefulWidget {
           });
         });
       }
-    }
+    
     
     void togglePlayPause() async {
-        if (isPlaying) {
-          await _audioPlayer.stop(); // Stop audio if playing
-        } else {
-          await _audioPlayer.play(AssetSource(widget.audioPath)); // Play audio
-        }
-
-        setState(() {
-          isPlaying = !isPlaying;
-        });
+    if (isPlaying) {
+      await _audioPlayer.stop(); // Stop audio if playing
+      setState(() {
+        isPlaying = false;
+      });
+    } else {
+      await _audioPlayer.play(AssetSource(widget.audioPath)); // Play audio
+      setState(() {
+        isPlaying = true;
+      });
 
       if (audioDuration > Duration.zero) {
-        Future.delayed(audioDuration, (){
-          if (mounted){
+        Future.delayed(audioDuration, () {
+          if (mounted) {
             setState(() {
               isPlaying = false;
             });
           }
         });
-      }  
-
-      @override
-      void dispose() {
-        _audioPlayer.dispose(); // Cleanup audio player
-        super.dispose();
       }
-
-    @override
-    Widget build(BuildContext context) {
-      return Container(
-        width: 300,
-        height: 150,
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          color: widget.isSelected ? const Color.fromARGB(255, 171, 212, 247) : Color.fromARGB(255, 171, 169, 169), // highlight selected
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: widget.isSelected ? Colors.blue : Colors.transparent,
-            width: 3,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            CircleAvatar(
-              backgroundImage: AssetImage(widget.imageUrl),
-              radius: 50,
-            ),
-            Text(
-              widget.name,
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-            IconButton(
-              icon: Icon(
-                isPlaying? Ionicons.pause_circle: Ionicons.play_circle,
-                color: const Color.fromARGB(255, 42, 101, 202), size: 45),
-              onPressed: togglePlayPause,
-            ),
-          ],
-        ),
-      );
     }
   }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose(); // Cleanup audio player
+    super.dispose();
+  }
+
+    @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 300,
+      height: 150,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      decoration: BoxDecoration(
+        color: widget.isSelected
+            ? const Color.fromARGB(255, 171, 212, 247)
+            : const Color.fromARGB(255, 171, 169, 169), // Highlight selected
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: widget.isSelected ? Colors.blue : Colors.transparent,
+          width: 3,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(widget.imageUrl),
+            radius: 50,
+          ),
+          Text(
+            widget.name,
+            style: const TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          IconButton(
+            icon: Icon(
+              isPlaying ? Ionicons.pause_circle : Ionicons.play_circle,
+              color: const Color.fromARGB(255, 42, 101, 202),
+              size: 45,
+            ),
+            onPressed: togglePlayPause,
+          ),
+        ],
+      ),
+    );
+  }
+}
