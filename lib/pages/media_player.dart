@@ -349,24 +349,133 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                 ),
               ),
 
-              // Book Cover
-              Container(
-                width: 300,
-                height: 400,
-                margin: const EdgeInsets.symmetric(vertical: 32),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              // 3D Book Cover
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Book shadow
+                    Container(
+                      width: 280,
+                      height: 390,
+                      margin: const EdgeInsets.only(top: 10, right: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 25,
+                            spreadRadius: 2,
+                            offset: const Offset(10, 10),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Book spine
+                    Positioned(
+                      left: 42,
+                      child: Container(
+                        width: 20,
+                        height: 380,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.8),
+                              Colors.grey.shade700,
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            bottomLeft: Radius.circular(5),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Book front cover
+                    Transform(
+                      alignment: Alignment.center,
+                      transform:
+                          Matrix4.identity()
+                            ..setEntry(3, 2, 0.001) // perspective
+                            ..rotateY(0.1), // slight rotation for 3D effect
+                      child: Container(
+                        width: 280,
+                        height: 380,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 15,
+                              offset: const Offset(5, 5),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Stack(
+                            children: [
+                              // Cover image
+                              Image.network(
+                                _book!.imageUrl,
+                                fit: BoxFit.cover,
+                                width: 280,
+                                height: 380,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // Title overlay at the top
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.8),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(_book!.imageUrl, fit: BoxFit.cover),
                 ),
               ),
 
