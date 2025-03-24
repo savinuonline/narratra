@@ -1,8 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/user_model.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
+import 'notification_screen.dart';
 
 // A custom delegate to control the Trending section header
 class TrendingHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -90,11 +92,38 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications, color: Colors.black),
-                onPressed: () {
-                  // Add your notification action here.
+                onPressed: () async {
+                  // Request permissions on iOS (alert, badge, sound)
+                  NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+                    alert: true,
+                    badge: true,
+                    sound: true,
+                  );
+
+                  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+                    // Subscribe to a topic so we can send notifications from the console
+                    await FirebaseMessaging.instance.subscribeToTopic('allUsers');
+
+                    // Show a confirmation SnackBar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Subscribed to notifications!')),
+                    );
+
+                    // Navigate to the notifications screen to display push messages
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notification permission denied')),
+                    );
+                  }
                 },
               ),
             ],
+
+
           ),
 
           // Trending Section (with white background)
