@@ -1,160 +1,103 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SubscriptionPage(),
-    );
-  }
-}
-
-class SubscriptionPage extends StatelessWidget {
+class subscription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(
-                child: Text(
-                  'Become a Premium',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black, // Adjust color if needed
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              const Center(
-                child: Text(
-                  'Get access to the Premium Features of Narratra and feel the Book',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
-              SizedBox(height: 40),
-              SubscriptionOption(
-                title: 'Free',
-                price: 'Rs.0/month',
-                description: 'Perfect for Casual Listeners',
-              ),
-              Divider(height: 20, thickness: 1),
-              SubscriptionOption(
-                title: 'Premium',
-                price: 'Rs.499/month',
-                description: 'Most Popular Choice',
-              ),
-              Divider(height: 20, thickness: 1),
-              SubscriptionOption(
-                title: 'Premium',
-                price: 'Rs.1299/month',
-                description: 'Best Values for Families',
-              ),
-              Divider(height: 20, thickness: 1),
-              const Center(
-                child: Text(
-                  'Cancel Anytime ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  'Restore Purchases ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey, // Adjust color if needed
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SubscriptionOption extends StatelessWidget {
-  final String title;
-  final String price;
-  final String description;
-
-  SubscriptionOption({
-    required this.title,
-    required this.price,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4, // Adds shadow to the card
-      margin: EdgeInsets.symmetric(vertical: 10), // Adds margin around the card
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
+            const SizedBox(height: 10),
+            Image.asset(
+              'images/LogoBlue.png',
+              height: 80,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Become a Premium",
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black, // Adjust color if needed
               ),
             ),
-            SizedBox(height: 35),
-            Text(
-              price,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Adjust color if needed
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey, // Adjust color if needed
-              ),
-            ),
-            SizedBox(height: 10),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add subscribe logic here
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Button background color
-                  foregroundColor: Colors.white, // Button text color
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 20),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: TextStyle(color: Colors.black54),
+                children: [
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
                   ),
+                  TextSpan(text: " Unlimited access to all Audiobooks\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  ),
+                  TextSpan(text: " Ad-free Experience\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  ),
+                  TextSpan(text: " Multiple Voice Options\n\n"),
+                  WidgetSpan(
+                    child: Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  ),
+                  TextSpan(text: " High Quality Audio"),
+                ],
+              ),
+            ),
+            const SizedBox(height: 50),
+            subscriptionOption("Premium", "Rs.699/month", true),
+            const SizedBox(height: 30),
+            subscriptionOption("Premium (Family)", "Rs.1299/month", false),
+            const SizedBox(height: 150),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                child: Text('Subscribe'),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              ),
+              onPressed: () {},
+              child: const Text(
+                "Continue with Free Package",
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget subscriptionOption(String title, String price, bool isSelected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.grey[200],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            price,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
