@@ -40,6 +40,7 @@ dependencies:
   shared_preferences: ^2.2.2
   http: ^0.13.6 
   provider: ^6.1.2
+  audioplayers: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,8 @@ flutter:
     - lib/images/
     - assets/images/male1.jpg
     - assets/images/female2.jpg
+    - assets/audio/female_voice.mp3
+    - assets/audio/male_voice.mp3
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
