@@ -30,17 +30,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  flutter_rating_bar: 4.0.1
+  firebase_core: ^3.12.1
+  cloud_firestore: ^5.6.5
+  image_picker: ^1.0.7 # Check for latest version
+  flutter_svg: ^2.0.5
+  font_awesome_flutter: ^10.1.0
+  google_fonts: ^6.2.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  firebase_core: ^3.12.1
-  cloud_firestore: ^5.6.5
   ionicons: ^0.2.2
   shared_preferences: ^2.2.2
   http: ^0.13.6 
   provider: ^6.1.2
   audioplayers: ^6.4.0
+  palette_generator: ^0.3.3
+  rxdart: ^0.27.7
+  firebase_storage: ^12.0.0
+  cached_network_image: ^3.3.1
+  firebase_auth: ^5.5.1
+  google_sign_in: ^6.3.0
+  firebase_app_check: ^0.3.2+4
+  shared_preferences: ^2.5.2
+  flutter_launcher_icons: ^0.14.3
+  fl_chart: ^0.70.2
+  share_plus: ^10.1.4
+  firebase_dynamic_links: ^6.1.4
+  file_picker: ^9.2.1
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
+  firebase_messaging: ^15.2.4
 
 dev_dependencies:
   flutter_test:
@@ -62,17 +82,22 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: NarratraFont
+      fonts:
+        - asset: assets/fonts/Narratra-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   assets:
     - lib/images/
-    - assets/images/male1.jpg
-    - assets/images/female2.jpg
-    - assets/audio/female_voice.mp3
-    - assets/audio/male_voice.mp3
+    - lib/images/LogoBlue.png
+    - lib/images/madoldoowa.jpg
+    - lib/assets/icons/
+    - assets/icons/
+
   #   - images/a_dot_ham.jpeg
 
-  # An image asset can refer to one or more resolution-specific "variants", see
+  # An images asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
   # For details regarding adding assets from package dependencies, see
@@ -97,3 +122,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/images/LogoBlue.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "lib/images/LogoBlue.png"
+  remove_alpha_ios: true
