@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
           secondary: const Color(0xFF4c3bcf),
           background: const Color(0xFF3dc2ec),
         ),
-        scaffoldBackgroundColor: const Color(0xffc7d9dd),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xff3dc2ec),
           foregroundColor: Color(0xff3dc2ec),
@@ -111,8 +111,50 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>;
           return BookInfoPage(bookId: args['bookId']);
         },
-        '/media': (context) => const MediaPlayerPage(),
-        '/profile': (context) => const ProfilePage(),
+        '/media': (context) => MediaPlayerPage(),
+        '/profile': (context) => ProfilePage(),
+        '/favorites':
+            (context) => const FeaturePage(
+              title: "Favorites",
+              icon: Icons.favorite_border,
+            ),
+        '/downloads':
+            (context) =>
+                const FeaturePage(title: "Downloads", icon: Icons.download),
+        '/rewards':
+            (context) =>
+                const FeaturePage(title: "Rewards", icon: Icons.star_border),
+        '/language':
+            (context) => const FeaturePage(
+              title: "Language Selection",
+              icon: Icons.language,
+            ),
+        '/subscription':
+            (context) => const FeaturePage(
+              title: "Subscription",
+              icon: Icons.subscriptions,
+            ),
+        '/history':
+            (context) =>
+                const FeaturePage(title: "History", icon: Icons.history),
+        '/privacy-policy':
+            (context) => const FeaturePage(
+              title: "Privacy Policy",
+              icon: Icons.privacy_tip,
+            ),
+        '/terms':
+            (context) => const FeaturePage(
+              title: "Terms of Service",
+              icon: Icons.description,
+            ),
+        '/rate-app':
+            (context) => const FeaturePage(
+              title: "Rate Narratra",
+              icon: Icons.rate_review,
+            ),
+        '/edit-profile':
+            (context) =>
+                const FeaturePage(title: "Edit Profile", icon: Icons.edit),
       },
     );
   }

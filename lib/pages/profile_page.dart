@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-// Ensure FeatureTile is imported
 
 class FeatureTile extends StatelessWidget {
   final String title;
   final IconData icon;
+  final VoidCallback onTap;
 
-  const FeatureTile({required this.title, required this.icon, Key? key})
-    : super(key: key);
+  const FeatureTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +18,7 @@ class FeatureTile extends StatelessWidget {
       leading: Icon(icon, color: const Color.fromARGB(255, 40, 37, 223)),
       title: Text(title, style: const TextStyle(color: Colors.black)),
       trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
-      onTap: () {
-        // TODO: Implement navigation or action
-      },
+      onTap: onTap,
     );
   }
 }
@@ -38,15 +40,12 @@ class ProfilePage extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '/login',
-                  ); // Redirect to login page
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
                 child: const Text(
                   "Logout",
-                  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
             ],
@@ -74,121 +73,129 @@ class ProfilePage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: ListView(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Stack(
-                        children: [
-                          const CircleAvatar(
-                            radius: 50,
-                            backgroundImage: AssetImage("assets/profile.jpg"),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.blueAccent,
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                onPressed: () {
-                                  // TODO: Implement profile picture update
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 20),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Mashinee Maleesha",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          ElevatedButton(
-                            onPressed: () {
-                              // TODO: Implement Edit Profile
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.blueAccent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            child: const Text(
-                              "Edit Profile",
-                              style: TextStyle(color: Colors.blueAccent),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  const FeatureTile(
-                    title: "Favorites",
-                    icon: Icons.favorite_border,
-                  ),
-                  const FeatureTile(title: "Downloads", icon: Icons.download),
-                  const FeatureTile(title: "Rewards", icon: Icons.star_border),
-                  const FeatureTile(
-                    title: "Language Selection",
-                    icon: Icons.language,
-                  ),
-                  const FeatureTile(
-                    title: "Subscription",
-                    icon: Icons.subscriptions,
-                  ),
-                  const FeatureTile(title: "History", icon: Icons.history),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "About",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 0, 0, 0),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage("assets/profile.jpg"),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  const FeatureTile(
-                    title: "Privacy Policy",
-                    icon: Icons.privacy_tip,
-                  ),
-                  const FeatureTile(
-                    title: "Terms of Service",
-                    icon: Icons.description,
-                  ),
-                  GestureDetector(
-                    child: const FeatureTile(
-                      title: "Rate Narratra",
-                      icon: Icons.rate_review,
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.blueAccent,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/edit-profile');
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                const SizedBox(width: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Mashinee Maleesha",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/edit-profile');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.blueAccent),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        "Edit Profile",
+                        style: TextStyle(color: Colors.blueAccent),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            FeatureTile(
+              title: "Favorites",
+              icon: Icons.favorite_border,
+              onTap: () => Navigator.pushNamed(context, '/favorites'),
+            ),
+            FeatureTile(
+              title: "Downloads",
+              icon: Icons.download,
+              onTap: () => Navigator.pushNamed(context, '/downloads'),
+            ),
+            FeatureTile(
+              title: "Rewards",
+              icon: Icons.star_border,
+              onTap: () => Navigator.pushNamed(context, '/rewards'),
+            ),
+            FeatureTile(
+              title: "Language Selection",
+              icon: Icons.language,
+              onTap: () => Navigator.pushNamed(context, '/language'),
+            ),
+            FeatureTile(
+              title: "Subscription",
+              icon: Icons.subscriptions,
+              onTap: () => Navigator.pushNamed(context, '/subscription'),
+            ),
+            FeatureTile(
+              title: "History",
+              icon: Icons.history,
+              onTap: () => Navigator.pushNamed(context, '/history'),
+            ),
+            const SizedBox(height: 30),
+            const Text(
+              "About",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: SizedBox(
+            const SizedBox(height: 10),
+            FeatureTile(
+              title: "Privacy Policy",
+              icon: Icons.privacy_tip,
+              onTap: () => Navigator.pushNamed(context, '/privacy-policy'),
+            ),
+            FeatureTile(
+              title: "Terms of Service",
+              icon: Icons.description,
+              onTap: () => Navigator.pushNamed(context, '/terms'),
+            ),
+            FeatureTile(
+              title: "Rate Narratra",
+              icon: Icons.rate_review,
+              onTap: () => Navigator.pushNamed(context, '/rate-app'),
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => _logout(context),
@@ -209,22 +216,57 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
 }
 
-class ProfilePage extends StatelessWidget {
+class FeaturePage extends StatelessWidget {
+  final String title;
+  final IconData icon;
+
+  const FeaturePage({required this.title, required this.icon, Key? key})
+    : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Profile")),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Center(
-        child: Text(
-          "Welcome to Your Profile!",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 80, color: const Color.fromARGB(255, 40, 37, 223)),
+            const SizedBox(height: 20),
+            Text(
+              "$title Page",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "This feature will be available soon!",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
