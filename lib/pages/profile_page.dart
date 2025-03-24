@@ -1,27 +1,8 @@
 import 'package:flutter/material.dart';
-
-class FeatureTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const FeatureTile({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: const Color.fromARGB(255, 40, 37, 223)),
-      title: Text(title, style: const TextStyle(color: Colors.black)),
-      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
-      onTap: onTap,
-    );
-  }
-}
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:frontend/pages/history_page.dart';
+import '../screens/rewards/reward_dashboard.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -56,18 +37,18 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "My Profile",
-          style: TextStyle(
+        title: Text(
+          'Profile',
+          style: GoogleFonts.poppins(
             color: Colors.black,
-            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -76,6 +57,10 @@ class ProfilePage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -242,6 +227,44 @@ class FeaturePage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
+    return GestureDetector(
+      onTap: () {
+        if (title == "Rewards") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RewardDashboard()),
+          );
+        } else if (title == "History") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HistoryPage()),
+          );
+        } else if (page.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PlaceholderPage(title: page),
+            ),
+          );
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blueAccent),
+            const SizedBox(width: 20),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
+          ],
         ),
         title: Text(
           title,
@@ -271,6 +294,61 @@ class FeaturePage extends StatelessWidget {
           ],
         ),
       ),
+        TextButton(
+          onPressed: () {
+            // Handle submit rating
+            Navigator.of(context).pop();
+          },
+          child: const Text("Submit"),
+        ),
+      ],
+    );
+  }
+}
+
+class PlaceholderPage extends StatelessWidget {
+  final String title;
+  const PlaceholderPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(child: Text("$title Page Content Here")),
+    );
+  }
+}
+  class FeatureTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const FeatureTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: const Color.fromARGB(255, 40, 37, 223)),
+      title: Text(title, style: const TextStyle(color: Colors.black)),
+      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+      onTap: onTap,
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Settings")),
+      body: const Center(child: Text("Settings Page")),
     );
   }
 }

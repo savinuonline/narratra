@@ -1,7 +1,9 @@
+//import 'package:navigation_module/navigation_module.dart';
+import 'package:firebase_core/firebase_core.dart';
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
+//import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/pages/bookinfo.dart';
 import 'firebase_options.dart';
 import 'pages/genres_selection_page.dart';
@@ -53,8 +55,8 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xff3dc2ec),
-          foregroundColor: Color(0xff3dc2ec),
+          backgroundColor: Color.fromARGB(220, 17, 116, 246),
+          foregroundColor: Color.fromARGB(255, 255, 255, 255),
           elevation: 4,
         ),
       ),

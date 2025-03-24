@@ -4,13 +4,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
 
-class LibraryPage extends StatelessWidget {
+class LibraryPage extends StatefulWidget {
   const LibraryPage({Key? key}) : super(key: key);
+  
+  @override
+  State<LibraryPage> createState() => _LibraryPageState();
+}
+
+class _LibraryPageState extends State<LibraryPage> {
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 1,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -31,7 +38,6 @@ class LibraryPage extends StatelessWidget {
             labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             tabs: const [
               Tab(text: 'My Playlists'),
-              Tab(text: 'narratra. History'),
             ],
           ),
         ),
@@ -40,10 +46,289 @@ class LibraryPage extends StatelessWidget {
             bottom: MediaQuery.of(context).padding.bottom + 60,
           ),
           child: Column(
-          children: [
+            children: [
               Expanded(
                 child: TabBarView(
-                  children: [_SavedAudiobooksTab(), _ListeningHistoryTab()],
+                  children: [
+                    StreamBuilder<List<Book>>(
+                      stream: _firebaseService.getListeningHistoryStream('USER_ID'),
+                      builder: (context, historySnapshot) {
+                        if (historySnapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        final recentlyPlayed = historySnapshot.data ?? [];
+
+                        return StreamBuilder<Map<String, dynamic>>(
+                          stream: _firebaseService.getUserLibraryStream('USER_ID'),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text(
+                                  'Error loading library: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              );
+                            }
+
+                            final data = snapshot.data ?? {};
+                            final List<Book> likedBooks = List<Book>.from(data['likedBooks'] ?? []);
+                            final List<Map<String, dynamic>> playlists =
+                                List<Map<String, dynamic>>.from(data['playlists'] ?? []);
+
+                            if (recentlyPlayed.isEmpty && likedBooks.isEmpty && playlists.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'lib/images/empty_playlist.png',
+                                      width: 200,
+                                      height: 200,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Text(
+                                      'It seems pretty empty here...',
+                                      style: GoogleFonts.poppins(
+                                        color: const Color.fromARGB(255, 0, 0, 0),
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Add some audiobooks to make them your own!!',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return ListView(
+                              padding: const EdgeInsets.all(20),
+                              children: [
+                                // Continue Playing Section
+                                if (recentlyPlayed.isNotEmpty) ...[
+                                  Text(
+                                    'Continue Playing',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    height: 120,
+                                    margin: const EdgeInsets.only(bottom: 24),
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: recentlyPlayed.length,
+                                      itemBuilder: (context, index) {
+                                        final book = recentlyPlayed[index];
+                                        return GestureDetector(
+                                          onTap: () async {
+                                            final lastPosition = await _firebaseService.getListeningProgress(
+                                              'USER_ID',
+                                              book.id,
+                                            );
+                                            if (mounted) {
+                                              Navigator.pushNamed(
+                                                context,
+                                                '/media',
+                                                arguments: {
+                                                  'bookId': book.id,
+                                                  'chapterIndex': lastPosition != null ? 0 : 0,
+                                                },
+                                              );
+                                            }
+                                          },
+                                          child: Container(
+                                            width: 280,
+                                            margin: const EdgeInsets.only(right: 16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.05),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: const BorderRadius.horizontal(
+                                                    left: Radius.circular(12),
+                                                  ),
+                                                  child: Image.network(
+                                                    book.imageUrl,
+                                                    width: 80,
+                                                    height: 120,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(12),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Text(
+                                                          book.title,
+                                                          style: GoogleFonts.poppins(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                        const SizedBox(height: 4),
+                                                        Text(
+                                                          book.author,
+                                                          style: GoogleFonts.poppins(
+                                                            fontSize: 14,
+                                                            color: Colors.grey[600],
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                        const SizedBox(height: 8),
+                                                        FutureBuilder<Duration?>(
+                                                          future: _firebaseService.getListeningProgress(
+                                                            'USER_ID',
+                                                            book.id,
+                                                          ),
+                                                          builder: (context, snapshot) {
+                                                            if (!snapshot.hasData) {
+                                                              return const SizedBox.shrink();
+                                                            }
+                                                            final progress = snapshot.data!;
+                                                            return Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                LinearProgressIndicator(
+                                                                  value: progress.inSeconds /
+                                                                      book.chapters
+                                                                          .fold(0, (sum, chapter) => sum + chapter.duration.inSeconds),
+                                                                  backgroundColor: Colors.grey[200],
+                                                                  valueColor: const AlwaysStoppedAnimation<Color>(
+                                                                    Color(0xFF402e7a),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(height: 4),
+                                                                Text(
+                                                                  '${_formatDuration(progress)} left',
+                                                                  style: GoogleFonts.poppins(
+                                                                    fontSize: 12,
+                                                                    color: Colors.grey[600],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+
+                                // Liked Audiobooks Section
+                                if (likedBooks.isNotEmpty) ...[
+                                  Text(
+                                    'Liked Audiobooks',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _LibraryFolder(
+                                    title: 'My Liked Audiobooks',
+                                    icon: Icons.favorite_sharp,
+                                    color: Colors.red,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlaylistDetailPage(
+                                            title: 'Liked Audiobooks',
+                                            books: likedBooks,
+                                            playlistId: 'liked',
+                                            isLikedPlaylist: true,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
+
+                                // User Playlists Section
+                                if (playlists.isNotEmpty) ...[
+                                  Text(
+                                    'My Playlists',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...playlists.map((playlist) {
+                                    final List<Book> playlistBooks = List<Book>.from(
+                                      playlist['books'] ?? [],
+                                    );
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: _LibraryFolder(
+                                        title: playlist['name'],
+                                        icon: 'assets/icons/playlist.svg',
+                                        color: Colors.blue,
+                                        isSvg: true,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => PlaylistDetailPage(
+                                                title: playlist['name'],
+                                                books: playlistBooks,
+                                                playlistId: playlist['id'] ?? '',
+                                                isLikedPlaylist: false,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -168,9 +453,9 @@ class _SavedAudiobooksTab extends StatelessWidget {
                     icon: 'assets/icons/playlist.svg',
                     color: Colors.blue,
                     isSvg: true,
-              onTap: () {
+                    onTap: () {
                       Navigator.push(
-                  context,
+                        context,
                         MaterialPageRoute(
                           builder: (context) => PlaylistDetailPage(
                             title: playlist['name'],
@@ -214,24 +499,24 @@ class _LibraryFolder extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
+          boxShadow: [
+            BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
+            ),
+          ],
+        ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: isSvg
                   ? SvgPicture.asset(
@@ -494,7 +779,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                           const Spacer(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              // Implement play all functionality
+                              // Navigate to media player with the first book
+                              if (widget.books.isNotEmpty) {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/media',
+                                  arguments: {
+                                    'bookId': widget.books.first.id,
+                                    'playlist': widget.books.map((book) => book.id).toList(),
+                                  },
+                                );
+                              }
                             },
                             icon: const Icon(Icons.play_arrow),
                             label: Text(
@@ -634,7 +929,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                             onPressed: () {
                               Navigator.pushNamed(
                                 context,
-                                '/player',
+                                '/media',
                                 arguments: {'bookId': book.id},
                               );
                             },
@@ -682,21 +977,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 }
 
-class _ListeningHistoryTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('lib/images/history.png', width: 84, height: 84),
-          const SizedBox(height: 16),
-          Text(
-            'Listening history coming soon',
-            style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
+String _formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  final hours = twoDigits(duration.inHours);
+  final minutes = twoDigits(duration.inMinutes.remainder(60));
+  final seconds = twoDigits(duration.inSeconds.remainder(60));
+  return duration.inHours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
 } 

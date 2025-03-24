@@ -49,10 +49,18 @@ dependencies:
   firebase_app_check: ^0.3.2+4
   shared_preferences: ^2.5.2
   flutter_launcher_icons: ^0.14.3
+  fl_chart: ^0.70.2
+  share_plus: ^10.1.4
+  firebase_dynamic_links: ^6.1.4
+  file_picker: ^9.2.1
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
+  firebase_messaging: ^15.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_rating_bar: ^4.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -78,7 +86,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - lib/images/
+    - lib/images/madoldoowa.jpg
+    - lib/assets/icons/
     - assets/icons/
+    - assets/images/
 
   #   - images/a_dot_ham.jpeg
 
