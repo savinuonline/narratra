@@ -14,12 +14,9 @@ class ActionsPage extends StatefulWidget {
 }
 
 class _ActionsPageState extends State<ActionsPage> {
-  bool isDarkMode = false;
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final provider = Provider.of<ThemeProvider>(context, listen: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +62,7 @@ class _ActionsPageState extends State<ActionsPage> {
                 Switch.adaptive(
                   value: themeProvider.isDarkMode,
                   onChanged: (value) {
-                    provider.toggleTheme(value);
+                    themeProvider.toggleTheme(value);
                   },
                   activeColor: const Color.fromARGB(255, 20, 195, 20),
                 ),

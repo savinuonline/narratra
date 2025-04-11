@@ -33,7 +33,7 @@ dependencies:
   flutter_rating_bar: 4.0.1
   firebase_core: ^3.12.1
   cloud_firestore: ^5.6.5
-  image_picker: ^1.0.7 # Check for latest version
+  image_picker: ^1.0.7
   flutter_svg: ^2.0.5
   font_awesome_flutter: ^10.1.0
   google_fonts: ^6.2.1

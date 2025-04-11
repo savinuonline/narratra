@@ -6,6 +6,7 @@ import '../models/book.dart';
 import '../services/firebase_service.dart';
 import 'dart:ui';
 import 'category_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BookInfoPage extends StatefulWidget {
   final String bookId;
@@ -48,8 +49,22 @@ class _BookInfoPageState extends State<BookInfoPage>
   Future<void> _loadBook() async {
     try {
       final book = await _firebaseService.getBookById(widget.bookId);
+      
+      // Get the authenticated user's ID
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print('Error: No authenticated user found when loading book');
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Error: You need to be logged in to view this book';
+            _isLoadingBook = false;
+          });
+        }
+        return;
+      }
+      
       final lastPosition = await _firebaseService.getListeningProgress(
-        'USER_ID',
+        user.uid,
         widget.bookId,
       );
 
@@ -129,10 +144,12 @@ class _BookInfoPageState extends State<BookInfoPage>
   }
 
   Future<void> _checkIfLiked() async {
-    final userId = 'USER_ID';
-    final liked = await _firebaseService.isBookLiked(userId, widget.bookId);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    
+    final liked = await _firebaseService.isBookLiked(user.uid, widget.bookId);
     final bookmarked = await _firebaseService.isBookBookmarked(
-      userId,
+      user.uid,
       widget.bookId,
     );
     if (mounted) {
@@ -146,14 +163,16 @@ class _BookInfoPageState extends State<BookInfoPage>
   Future<void> _toggleLike() async {
     if (isLoading) return;
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     setState(() {
       isLoading = true;
     });
 
     try {
-      final userId = 'USER_ID'; // Replace with actual user ID
       final liked = await _firebaseService.toggleBookLike(
-        userId,
+        user.uid,
         widget.bookId,
       );
 
@@ -197,11 +216,14 @@ class _BookInfoPageState extends State<BookInfoPage>
   }
 
   Future<void> _showCreatePlaylistDialog() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    
     return showDialog(
       context: context,
       builder: (context) {
         return StreamBuilder<Map<String, dynamic>>(
-          stream: _firebaseService.getUserLibraryStream('USER_ID'),
+          stream: _firebaseService.getUserLibraryStream(user.uid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -275,7 +297,7 @@ class _BookInfoPageState extends State<BookInfoPage>
                           ),
                           onTap: () async {
                             await _firebaseService.addBookToPlaylist(
-                              'USER_ID',
+                              user.uid,
                               playlist['id'],
                               widget.bookId,
                             );
@@ -368,14 +390,16 @@ class _BookInfoPageState extends State<BookInfoPage>
   Future<void> _createPlaylist(String playlistName) async {
     if (isBookmarkLoading) return;
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     setState(() {
       isBookmarkLoading = true;
     });
 
     try {
-      final userId = 'USER_ID'; // Replace with actual user ID
       final playlistId = await _firebaseService.createPlaylist(
-        userId,
+        user.uid,
         playlistName,
         widget.bookId,
       );
@@ -735,14 +759,14 @@ class _BookInfoPageState extends State<BookInfoPage>
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.04),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            '8h 45m',
+                            _calculateTotalDuration(book.chapters),
                             textAlign: TextAlign.left,
                             style: GoogleFonts.nunitoSans(
                               color: const Color.fromARGB(255, 0, 0, 0),
@@ -769,7 +793,7 @@ class _BookInfoPageState extends State<BookInfoPage>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 2),
                   ],
                 ),
               ),
@@ -1120,5 +1144,20 @@ class _BookInfoPageState extends State<BookInfoPage>
       final progress = (_scrollOffset / threshold).clamp(0.0, 1.0);
       return maxPosition - (maxPosition - minPosition) * progress;
     }
+  }
+
+  String _calculateTotalDuration(List<Chapter> chapters) {
+    int totalSeconds = 0;
+    for (var chapter in chapters) {
+      totalSeconds += chapter.duration.inSeconds;
+    }
+
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    }
+    return '${minutes}m';
   }
 }

@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/reward_service.dart';
 import '../../models/user_reward.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PointsTab extends StatelessWidget {
@@ -83,12 +82,13 @@ class PointsTab extends StatelessWidget {
         final currentUser = FirebaseAuth.instance.currentUser;
 
         return StreamBuilder<DocumentSnapshot>(
-          stream: currentUser != null 
-            ? FirebaseFirestore.instance
-                .collection('Users')
-                .doc(currentUser.uid)
-                .snapshots()
-            : null,
+          stream:
+              currentUser != null
+                  ? FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(currentUser.uid)
+                      .snapshots()
+                  : null,
           builder: (context, userSnapshot) {
             String userName = "User";
             if (userSnapshot.hasData && userSnapshot.data?.exists == true) {
@@ -98,7 +98,8 @@ class PointsTab extends StatelessWidget {
               }
             }
 
-            final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : "U";
+            final userInitial =
+                userName.isNotEmpty ? userName[0].toUpperCase() : "U";
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -299,13 +300,15 @@ class PointsTab extends StatelessWidget {
                               backgroundColor:
                                   rewards.canClaimDailyBonus
                                       ? const Color(0xFF3A5EF0)
-                                      : Colors.grey,
-                              foregroundColor: Colors.white,
+                                      : Colors.grey[300],
+                              foregroundColor:
+                                  rewards.canClaimDailyBonus
+                                      ? Colors.white
+                                      : Colors.grey[600],
+                              elevation: rewards.canClaimDailyBonus ? 2 : 0,
                             ),
                             child: Text(
-                              rewards.canClaimDailyBonus
-                                  ? 'Claim'
-                                  : 'Claimed',
+                              rewards.canClaimDailyBonus ? 'Claim' : 'Claimed',
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -460,8 +463,7 @@ class PointsTab extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceAround,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Expanded(
                                   child: _buildRewardItem(

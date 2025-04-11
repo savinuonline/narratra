@@ -14,10 +14,7 @@ class GenreData {
 class GenresSelectionPage extends StatefulWidget {
   final String uid;
 
-  const GenresSelectionPage({
-    super.key, 
-    required this.uid,
-  });
+  const GenresSelectionPage({super.key, required this.uid});
 
   @override
   _GenresSelectionPageState createState() => _GenresSelectionPageState();
@@ -106,22 +103,25 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
                 child: Wrap(
                   spacing: 16,
                   runSpacing: 16,
-                  children: allGenres.map((genre) {
-                    final bool isSelected = selectedGenres.contains(genre.name);
-                    return GenreButton(
-                      genre: genre,
-                      selected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedGenres.remove(genre.name);
-                          } else {
-                            selectedGenres.add(genre.name);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
+                  children:
+                      allGenres.map((genre) {
+                        final bool isSelected = selectedGenres.contains(
+                          genre.name,
+                        );
+                        return GenreButton(
+                          genre: genre,
+                          selected: isSelected,
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                selectedGenres.remove(genre.name);
+                              } else {
+                                selectedGenres.add(genre.name);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -130,51 +130,53 @@ class _GenresSelectionPageState extends State<GenresSelectionPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 70),
               child: ElevatedButton(
-                onPressed: selectedGenres.isEmpty
-                    ? null
-                    : () async {
-                        try {
-                          // Show loading indicator
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-
-                          // Update user preferences
-                          await _firebaseService.updateUserGenres(
-                            widget.uid,
-                            selectedGenres.toList(),
-                          );
-
-                          // Pop loading indicator
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
-
-                          // Navigate to main screen
-                          if (context.mounted) {
-                            Navigator.pushReplacementNamed(context, '/main');
-                          }
-                        } catch (e) {
-                          // Pop loading indicator
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
-
-                          // Show error message
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error saving preferences: $e'),
-                                backgroundColor: Colors.red,
-                              ),
+                onPressed:
+                    selectedGenres.isEmpty
+                        ? null
+                        : () async {
+                          try {
+                            // Show loading indicator
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder:
+                                  (context) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
                             );
+
+                            // Update user preferences
+                            await _firebaseService.updateUserGenres(
+                              widget.uid,
+                              selectedGenres.toList(),
+                            );
+
+                            // Pop loading indicator
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+
+                            // Navigate to main screen
+                            if (context.mounted) {
+                              Navigator.pushReplacementNamed(context, '/main');
+                            }
+                          } catch (e) {
+                            // Pop loading indicator
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+
+                            // Show error message
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error saving preferences: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           }
-                        }
-                      },
+                        },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   padding: const EdgeInsets.symmetric(

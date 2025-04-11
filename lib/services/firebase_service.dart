@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:frontend/models/user_profile.dart';
+import 'package:frontend/models/user_progress.dart';
 import 'dart:io';
 import '../models/book.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -18,6 +21,155 @@ class FirebaseService {
     "Romance",
     "Adventure",
   ];
+
+  /// Get user progress data
+  Future<UserProgress> getUserProgress(String userId) async {
+    try {
+      final doc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('progress')
+              .doc('data')
+              .get();
+
+      if (doc.exists) {
+        return UserProgress.fromMap(doc.data()!);
+      } else {
+        // Create a new progress document if it doesn't exist
+        final newProgress = UserProgress(
+          userId: userId,
+          inProgressBooks: [],
+          completedBooks: [],
+          lastUpdated: DateTime.now(),
+        );
+
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('progress')
+            .doc('data')
+            .set(newProgress.toMap());
+
+        return newProgress;
+      }
+    } catch (e) {
+      print('Error getting user progress: $e');
+      // Return a default progress object if there's an error
+      return UserProgress(
+        userId: userId,
+        inProgressBooks: [],
+        completedBooks: [],
+        lastUpdated: DateTime.now(),
+      );
+    }
+  }
+
+  /// Get a stream of user progress for real-time updates
+  Stream<UserProgress> getUserProgressStream(String userId) {
+    print("Getting user progress stream for user: $userId"); // Debug
+
+    if (userId.isEmpty) {
+      print("Empty userId provided to getUserProgressStream");
+      return Stream.value(
+        UserProgress(
+          userId: '',
+          inProgressBooks: [],
+          completedBooks: [],
+          lastUpdated: DateTime.now(),
+        ),
+      );
+    }
+
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('progress')
+        .doc('data')
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists) {
+            print("User progress snapshot exists: ${snapshot.data()}");
+            return UserProgress.fromMap(snapshot.data()!);
+          } else {
+            print("No user progress found, creating a new one");
+            // If the document doesn't exist, create a new one
+            final newProgress = UserProgress(
+              userId: userId,
+              inProgressBooks: [],
+              completedBooks: [],
+              lastUpdated: DateTime.now(),
+            );
+
+            // We don't wait for this to complete since it's a stream
+            _firestore
+                .collection('users')
+                .doc(userId)
+                .collection('progress')
+                .doc('data')
+                .set(newProgress.toMap())
+                .catchError((e) => print('Error creating user progress: $e'));
+
+            return newProgress;
+          }
+        });
+  }
+
+  /// Get liked books for a user
+  Future<List<Book>> getLikedBooks(String userId) async {
+    try {
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('liked_books')
+              .get();
+
+      List<Book> likedBooks = [];
+      for (var doc in snapshot.docs) {
+        final bookId = doc.id;
+        final book = await getBookById(bookId);
+        if (book != null) {
+          likedBooks.add(book);
+        }
+      }
+      return likedBooks;
+    } catch (e) {
+      print('Error getting liked books: $e');
+      return [];
+    }
+  }
+
+  /// Search for books across all categories
+  Future<List<Book>> searchBooks(String query) async {
+    final List<Book> results = [];
+    final searchQuery = query.toLowerCase();
+
+    for (final cat in categories) {
+      final subcollectionRef = _firestore
+          .collection('books')
+          .doc(cat)
+          .collection('books');
+
+      final querySnapshot = await subcollectionRef.get();
+
+      for (final doc in querySnapshot.docs) {
+        final bookData = doc.data();
+        final title = bookData['title']?.toString().toLowerCase() ?? '';
+        final author = bookData['author']?.toString().toLowerCase() ?? '';
+        final description =
+            bookData['description']?.toString().toLowerCase() ?? '';
+
+        if (title.contains(searchQuery) ||
+            author.contains(searchQuery) ||
+            description.contains(searchQuery)) {
+          results.add(Book.fromMap({...bookData, 'genre': cat}, doc.id));
+        }
+      }
+    }
+
+    return results;
+  }
 
   /// "Trending" books: docs with likeCount >= 1 in each subcollection,
 
@@ -204,14 +356,18 @@ class FirebaseService {
           final authorDetails = await getAuthorByName(bookData['author'] ?? '');
 
           // Get chapters data and construct audio URLs
-          final List<Map<String, dynamic>> chaptersData = 
+          final List<Map<String, dynamic>> chaptersData =
               List<Map<String, dynamic>>.from(bookData['chapters'] ?? []);
 
           // Update each chapter with the correct audio URLs
           for (int i = 0; i < chaptersData.length; i++) {
             final chapterNum = i + 1;
-            final storageRef = _storage.ref().child('audio/$title/chapter${chapterNum}_voice1.mp3');
-            final alternateStorageRef = _storage.ref().child('audio/$title/chapter${chapterNum}_voice2.mp3');
+            final storageRef = _storage.ref().child(
+              'audio/$title/chapter${chapterNum}_voice1.mp3',
+            );
+            final alternateStorageRef = _storage.ref().child(
+              'audio/$title/chapter${chapterNum}_voice2.mp3',
+            );
 
             try {
               final audioUrl = await storageRef.getDownloadURL();
@@ -219,9 +375,12 @@ class FirebaseService {
               print('Audio URL for chapter $chapterNum: $audioUrl');
 
               try {
-                final alternateAudioUrl = await alternateStorageRef.getDownloadURL();
+                final alternateAudioUrl =
+                    await alternateStorageRef.getDownloadURL();
                 chaptersData[i]['alternateAudioUrl'] = alternateAudioUrl;
-                print('Alternate audio URL for chapter $chapterNum: $alternateAudioUrl');
+                print(
+                  'Alternate audio URL for chapter $chapterNum: $alternateAudioUrl',
+                );
               } catch (e) {
                 print('No alternate voice available for chapter $chapterNum');
                 chaptersData[i]['alternateAudioUrl'] = '';
@@ -370,35 +529,46 @@ class FirebaseService {
 
   /// Check if a book is liked by the user.
   Future<bool> isBookLiked(String userId, String bookId) async {
-    final doc =
-        await _firestore
-            .collection('users')
-            .doc(userId)
-            .collection('liked_books')
-            .doc(bookId)
-            .get();
-
-    return doc.exists;
+    try {
+      final doc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('liked_books')
+              .doc(bookId)
+              .get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if book is liked: $e');
+      return false;
+    }
   }
 
   /// Toggle like status for a book.
   Future<bool> toggleBookLike(String userId, String bookId) async {
-    final likedBooksRef = _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('liked_books')
-        .doc(bookId);
+    try {
+      final docRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('liked_books')
+          .doc(bookId);
 
-    final doc = await likedBooksRef.get();
+      final doc = await docRef.get();
 
-    if (doc.exists) {
-      // Unlike the book
-      await likedBooksRef.delete();
-      return false;
-    } else {
-      // Like the book
-      await likedBooksRef.set({'timestamp': FieldValue.serverTimestamp()});
-      return true;
+      if (doc.exists) {
+        // Unlike: Remove the book from liked_books collection
+        await docRef.delete();
+        print("Unliked book $bookId for user $userId");
+        return false;
+      } else {
+        // Like: Add the book to liked_books collection
+        await docRef.set({'likedAt': FieldValue.serverTimestamp()});
+        print("Liked book $bookId for user $userId");
+        return true;
+      }
+    } catch (e) {
+      print('Error toggling book like: $e');
+      throw e;
     }
   }
 
@@ -490,16 +660,97 @@ class FirebaseService {
     String bookId,
     Duration position,
   ) async {
+    // Use the current authenticated user's ID if a hardcoded value is passed
+    if (userId == 'USER_ID') {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        userId = user.uid;
+      } else {
+        print(
+          'Error: No authenticated user found when saving listening progress',
+        );
+        return;
+      }
+    }
+
     await _firestore
         .collection('users')
         .doc(userId)
         .collection('listening_progress')
         .doc(bookId)
         .set({'position': position.inSeconds, 'updatedAt': DateTime.now()});
+
+    // Also add this book to the user's in-progress books list
+    await addBookToInProgress(userId, bookId);
+  }
+
+  /// Add a book to the user's in-progress list if it's not already there
+  Future<void> addBookToInProgress(String userId, String bookId) async {
+    try {
+      // Get the current progress document
+      final progressDoc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('progress')
+              .doc('data')
+              .get();
+
+      if (progressDoc.exists) {
+        // Update the in-progress books list if the book is not already in it
+        final inProgressBooks = List<String>.from(
+          progressDoc.data()?['inProgressBooks'] ?? [],
+        );
+        if (!inProgressBooks.contains(bookId)) {
+          inProgressBooks.add(bookId);
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('progress')
+              .doc('data')
+              .update({
+                'inProgressBooks': inProgressBooks,
+                'lastUpdated': FieldValue.serverTimestamp(),
+              });
+          print('Added book $bookId to in-progress list for user $userId');
+        }
+      } else {
+        // Create a new progress document if it doesn't exist
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('progress')
+            .doc('data')
+            .set({
+              'userId': userId,
+              'inProgressBooks': [bookId],
+              'completedBooks': [],
+              'lastUpdated': FieldValue.serverTimestamp(),
+            });
+        print(
+          'Created new progress document with book $bookId for user $userId',
+        );
+      }
+    } catch (e) {
+      print('Error adding book to in-progress list: $e');
+    }
   }
 
   /// Get listening progress for an audiobook.
   Future<Duration?> getListeningProgress(String userId, String bookId) async {
+    // Use the current authenticated user's ID if a hardcoded value is passed
+    if (userId == 'USER_ID') {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        userId = user.uid;
+      } else {
+        print(
+          'Error: No authenticated user found when getting listening progress',
+        );
+        return null;
+      }
+    }
+
     final doc =
         await _firestore
             .collection('users')
@@ -571,45 +822,35 @@ class FirebaseService {
     return doc.exists;
   }
 
-  /// Get a stream of the user's library including liked books and playlists
+  /// Get user's library stream (liked books and playlists)
   Stream<Map<String, dynamic>> getUserLibraryStream(String userId) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
     return Rx.combineLatest2(
-      getLikedBooksStream(userId),
+      getLikedBooksStream(user.uid),
       _firestore
           .collection('users')
-          .doc(userId)
+          .doc(user.uid)
           .collection('playlists')
-          .snapshots(),
-      (List<Book> likedBooks, QuerySnapshot playlistsSnapshot) async {
-        final playlists = await Future.wait(
-          playlistsSnapshot.docs.map((doc) async {
-            final playlistData = doc.data() as Map<String, dynamic>;
-            final bookIds = List<String>.from(playlistData['books'] ?? []);
-
-            // Fetch all books in the playlist
-            final books = await Future.wait(
-              bookIds.map((bookId) async {
-                final book = await getBookById(bookId);
-                return book;
-              }),
-            );
-
-            // Filter out null books and create playlist map
-            final validBooks =
-                books.where((book) => book != null).cast<Book>().toList();
-
-            return {
-              'id': doc.id,
-              'name': playlistData['name'],
-              'books': validBooks,
-              'createdAt': playlistData['createdAt'],
-            };
-          }),
-        );
-
-        return {'likedBooks': likedBooks, 'playlists': playlists};
+          .snapshots()
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map(
+                      (doc) => {
+                        'id': doc.id,
+                        'name': doc.data()['name'] as String,
+                        'books': List<String>.from(doc.data()['books'] ?? []),
+                      },
+                    )
+                    .toList(),
+          ),
+      (List<Book> likedBooks, List<Map<String, dynamic>> playlists) => {
+        'likedBooks': likedBooks,
+        'playlists': playlists,
       },
-    ).asyncMap((future) => future);
+    );
   }
 
   /// Create a new playlist
@@ -618,36 +859,24 @@ class FirebaseService {
     String name,
     String bookId,
   ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
     try {
-      final userRef = _firestore.collection('users').doc(userId);
-      final userDoc = await userRef.get();
+      final playlistRef =
+          _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('playlists')
+              .doc();
 
-      if (!userDoc.exists) {
-        await userRef.set({
-          'playlists': [
-            {
-              'id': DateTime.now().millisecondsSinceEpoch.toString(),
-              'name': name,
-              'books': [bookId],
-            },
-          ],
-        });
-        return DateTime.now().millisecondsSinceEpoch.toString();
-      }
-
-      final playlists = List<Map<String, dynamic>>.from(
-        userDoc.data()?['playlists'] ?? [],
-      );
-      final newPlaylist = {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      await playlistRef.set({
         'name': name,
         'books': [bookId],
-      };
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-      playlists.add(newPlaylist);
-      await userRef.update({'playlists': playlists});
-
-      return newPlaylist['id'] as String;
+      return playlistRef.id;
     } catch (e) {
       print('Error creating playlist: $e');
       return '';
@@ -679,26 +908,26 @@ class FirebaseService {
     String playlistId,
     String bookId,
   ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
     try {
-      final userRef = _firestore.collection('users').doc(userId);
-      final userDoc = await userRef.get();
+      final playlistRef = _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('playlists')
+          .doc(playlistId);
 
-      if (!userDoc.exists) return;
+      final playlistDoc = await playlistRef.get();
 
-      final playlists = List<Map<String, dynamic>>.from(
-        userDoc.data()?['playlists'] ?? [],
-      );
-      final playlistIndex = playlists.indexWhere((p) => p['id'] == playlistId);
+      if (!playlistDoc.exists) {
+        throw Exception('Playlist not found');
+      }
 
-      if (playlistIndex != -1) {
-        final books = List<String>.from(
-          playlists[playlistIndex]['books'] ?? [],
-        );
-        if (!books.contains(bookId)) {
-          books.add(bookId);
-          playlists[playlistIndex]['books'] = books;
-          await userRef.update({'playlists': playlists});
-        }
+      final books = List<String>.from(playlistDoc.data()?['books'] ?? []);
+      if (!books.contains(bookId)) {
+        books.add(bookId);
+        await playlistRef.update({'books': books});
       }
     } catch (e) {
       print('Error adding book to playlist: $e');
@@ -749,11 +978,219 @@ class FirebaseService {
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map(
-                (doc) =>
-                    Book.fromMap(doc.data() as Map<String, dynamic>, doc.id),
-              )
+              .map((doc) => Book.fromMap(doc.data(), doc.id))
               .toList();
         });
+  }
+
+  // Get user profile
+  Future<UserProfile> getUserProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final doc = await _firestore.collection('Users').doc(user.uid).get();
+
+    if (doc.exists) {
+      return UserProfile.fromMap(doc.data()!);
+    } else {
+      // Create new profile if it doesn't exist
+      final newProfile = UserProfile(
+        userId: user.uid,
+        email: user.email ?? '',
+        firstName: '',
+        lastName: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .set(newProfile.toMap());
+
+      return newProfile;
+    }
+  }
+
+  // Update user profile
+  Future<void> updateUserProfile(UserProfile profile) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore.collection('Users').doc(user.uid).set(profile.toMap());
+  }
+
+  Stream<List<Book>> getLikedBooksAsStream(String userId) {
+    print("Getting liked books stream for user: $userId"); // Debug
+
+    if (userId.isEmpty) {
+      print("Empty userId provided to getLikedBooksAsStream");
+      return Stream.value([]);
+    }
+
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('liked_books')
+        .snapshots()
+        .asyncMap((snapshot) async {
+          print("Liked books snapshot: ${snapshot.docs.length} docs");
+          List<Book> books = [];
+          for (var doc in snapshot.docs) {
+            final bookId = doc.id;
+            print("Fetching liked book with ID: $bookId");
+            final book = await getBookById(bookId);
+            if (book != null) {
+              books.add(book);
+            }
+          }
+          print("Returning ${books.length} liked books");
+          return books;
+        });
+  }
+
+  /// Get a sample book for testing purposes
+  Future<Book?> getSampleBook() async {
+    try {
+      // Get the trending books
+      final trendingBooks = await getTrendingBooks();
+      if (trendingBooks.isNotEmpty) {
+        return trendingBooks.first;
+      }
+
+      // Fallback to any book from any genre
+      for (final genre in categories) {
+        final snapshot =
+            await _firestore
+                .collection('books')
+                .doc(genre)
+                .collection('books')
+                .limit(1)
+                .get();
+
+        if (snapshot.docs.isNotEmpty) {
+          final doc = snapshot.docs.first;
+          return Book.fromMap({...doc.data(), 'genre': genre}, doc.id);
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('Error getting sample book: $e');
+      return null;
+    }
+  }
+
+  /// Add a sample book to the user's in-progress list for testing
+  Future<void> addSampleBookToInProgress(String userId) async {
+    try {
+      final sampleBook = await getSampleBook();
+      if (sampleBook != null) {
+        await addBookToInProgress(userId, sampleBook.id);
+        print(
+          'Added sample book ${sampleBook.id} to in-progress for user $userId',
+        );
+      }
+    } catch (e) {
+      print('Error adding sample book: $e');
+    }
+  }
+
+  /// Mark a book as completed, moving it from inProgressBooks to completedBooks
+  Future<void> markBookAsCompleted(String userId, String bookId) async {
+    try {
+      // Get the current progress document
+      final progressDoc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('progress')
+              .doc('data')
+              .get();
+
+      if (progressDoc.exists) {
+        final data = progressDoc.data()!;
+        final inProgressBooks = List<String>.from(
+          data['inProgressBooks'] ?? [],
+        );
+        final completedBooks = List<String>.from(data['completedBooks'] ?? []);
+
+        // Remove from inProgressBooks if present
+        if (inProgressBooks.contains(bookId)) {
+          inProgressBooks.remove(bookId);
+        }
+
+        // Add to completedBooks if not already there
+        if (!completedBooks.contains(bookId)) {
+          completedBooks.add(bookId);
+        }
+
+        // Update the progress document
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('progress')
+            .doc('data')
+            .update({
+              'inProgressBooks': inProgressBooks,
+              'completedBooks': completedBooks,
+              'lastUpdated': FieldValue.serverTimestamp(),
+            });
+
+        print('Marked book $bookId as completed for user $userId');
+      } else {
+        // Create a new progress document if it doesn't exist
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('progress')
+            .doc('data')
+            .set({
+              'userId': userId,
+              'inProgressBooks': [],
+              'completedBooks': [bookId],
+              'lastUpdated': FieldValue.serverTimestamp(),
+            });
+        print(
+          'Created new progress document with completed book $bookId for user $userId',
+        );
+      }
+    } catch (e) {
+      print('Error marking book as completed: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateSubscription(
+    String userId,
+    Map<String, dynamic> subscription,
+  ) async {
+    try {
+      await _firestore.collection('Users').doc(userId).update({
+        'subscription': subscription,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error updating subscription: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getSubscription(String userId) async {
+    try {
+      final doc = await _firestore.collection('Users').doc(userId).get();
+      return doc.data()?['subscription'] as Map<String, dynamic>?;
+    } catch (e) {
+      print('Error getting subscription: $e');
+      return null;
+    }
+  }
+
+  Stream<Map<String, dynamic>?> getSubscriptionStream(String userId) {
+    return _firestore
+        .collection('Users')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.data()?['subscription'] as Map<String, dynamic>?);
   }
 }

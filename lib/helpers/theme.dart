@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 
-class MyTheme{
+class MyTheme {
   static final darkTheme = ThemeData(
-    scaffoldBackgroundColor: const Color(0xff171725),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 0, 0, 0),
     primaryColor: Colors.white,
     colorScheme: const ColorScheme.dark(),
-    iconTheme: const IconThemeData(color: Colors.white,opacity: 0.8),
-
+    iconTheme: const IconThemeData(color: Colors.white, opacity: 0.8),
   );
 
-   static final lightTheme = ThemeData(
+  static final lightTheme = ThemeData(
     scaffoldBackgroundColor: Colors.white,
     primaryColor: const Color(0xff171725),
     colorScheme: const ColorScheme.light(),
-    iconTheme: const IconThemeData(color: Color(0xff171725),opacity: 0.8),
-    
+    iconTheme: const IconThemeData(color: Color(0xff171725), opacity: 0.8),
   );
 }
 
 extension ThemeExtensions on ThemeData {
-  Color get chevronColor => brightness == Brightness.dark ? Colors.black : const Color(0xff171725);
+  Color get chevronColor =>
+      brightness == Brightness.dark ? Colors.black : const Color(0xff171725);
 }

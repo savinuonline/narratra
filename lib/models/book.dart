@@ -35,6 +35,7 @@ class Book {
   int likeCount;
   final String description;
   final String authorDescription;
+  final double rating;
 
   Book({
     required this.id,
@@ -46,7 +47,18 @@ class Book {
     this.likeCount = 0,
     required this.description,
     this.authorDescription = '',
+    this.rating = 0.0,
   });
+
+  Duration get totalDuration => Duration(
+    seconds: chapters.fold(
+      0,
+      (sum, chapter) => sum + chapter.duration.inSeconds,
+    ),
+  );
+
+  int get totalDurationInSeconds =>
+      chapters.fold(0, (sum, chapter) => sum + chapter.duration.inSeconds);
 
   factory Book.fromMap(Map<String, dynamic> map, String id) {
     return Book(
@@ -55,12 +67,31 @@ class Book {
       author: map['author'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       genre: map['genre'] ?? '',
-      chapters: (map['chapters'] as List<dynamic>?)
-          ?.map((chapter) => Chapter.fromMap(chapter))
-          .toList() ?? [],
+      chapters:
+          (map['chapters'] as List<dynamic>?)
+              ?.map((chapter) => Chapter.fromMap(chapter))
+              .toList() ??
+          [],
       likeCount: map['likeCount'] ?? 0,
       description: map['description'] ?? '',
       authorDescription: map['authorDescription'] ?? '',
+      rating: (map['rating'] ?? 0.0).toDouble(),
+    );
+  }
+
+  // Add an empty Book factory constructor for null safety handling
+  factory Book.empty() {
+    return Book(
+      id: '',
+      title: '',
+      author: '',
+      imageUrl: '',
+      genre: '',
+      chapters: [],
+      likeCount: 0,
+      description: '',
+      authorDescription: '',
+      rating: 0.0,
     );
   }
 }

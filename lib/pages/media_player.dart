@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import '../models/book.dart';
 import '../services/firebase_service.dart';
-import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MediaPlayerPage extends StatefulWidget {
   const MediaPlayerPage({Key? key}) : super(key: key);
@@ -51,30 +50,31 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
 
   Future<void> _loadBook() async {
     try {
-      print('Starting to load book...');
-
       final args =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-      print('Received arguments: $args');
 
       final bookId = args['bookId'] as String;
-      print('Book ID: $bookId');
 
       final initialChapterIndex = args['chapterIndex'] as int? ?? 0;
-      print('Initial chapter index: $initialChapterIndex');
 
-      print('Fetching book data from Firebase...');
       final book = await _firebaseService.getBookById(bookId);
       if (book == null) {
-        print('Error: Book data is null');
         throw Exception('Book not found');
       }
-      print('Book data received: $book');
-      print('Book details:');
-      print('- Number of chapters: ${book.chapters.length}');
+
+      if (book.chapters.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _book = book;
+            _errorMessage =
+                "Oops! We don't have this audiobook yet...\n\nBut we are working hard to get it.\nThank you for your patience!";
+            _isLoading = false;
+          });
+        }
+        return;
+      }
 
       if (mounted) {
-        print('Setting state with book data...');
         setState(() {
           _book = book;
           _currentChapterIndex = initialChapterIndex;
@@ -82,28 +82,26 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
         });
       }
 
-      print('Loading initial chapter...');
       await _loadChapter(initialChapterIndex);
 
       print('Fetching last listening position...');
+      // Get the authenticated user's ID
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (userId.isEmpty) {
+        print('Warning: No authenticated user found in media player');
+      }
+
       final lastPosition = await _firebaseService.getListeningProgress(
-        'USER_ID',
+        userId,
         bookId,
       );
       if (lastPosition != null) {
-        print('Last position found: ${lastPosition.inSeconds} seconds');
         await _audioPlayer.seek(lastPosition);
-      } else {
-        print('No last position found, starting from beginning');
       }
 
-      print('Setting up position tracking...');
       _audioPlayer.positionStream.listen((position) {
-        print('Current position: ${position.inSeconds} seconds');
-        _firebaseService.saveListeningProgress('USER_ID', bookId, position);
+        _firebaseService.saveListeningProgress(userId, bookId, position);
       });
-
-      print('Book loading completed successfully');
     } catch (e, stackTrace) {
       print('Error in _loadBook:');
       print('Error message: $e');
@@ -111,7 +109,8 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
 
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error loading audiobook: $e';
+          _errorMessage =
+              "Oops! We don't have this audiobook yet...\n\nBut we are working hard to get it.\nThank you for your patience!";
           _isLoading = false;
         });
       }
@@ -135,15 +134,16 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
 
     try {
       final chapter = _book!.chapters[index];
-      print('Chapter details:');
-      print('- Title: ${chapter.title}');
-      print('- Duration: ${chapter.duration.inMinutes} minutes');
-      print('- Primary audio URL: ${chapter.audioUrl}');
-      print('- Alternate audio URL: ${chapter.alternateAudioUrl}');
-      print('- Has alternate voice: ${chapter.alternateAudioUrl.isNotEmpty}');
 
       if (chapter.audioUrl.isEmpty) {
-        throw Exception('Primary audio URL is empty');
+        if (mounted) {
+          setState(() {
+            _errorMessage =
+                "Oops! We don't have this audiobook yet...\n\nBut we are working hard to get it.\nThank you for your patience!";
+            _isLoading = false;
+          });
+        }
+        return;
       }
 
       final audioUrl =
@@ -152,27 +152,26 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
               : chapter.audioUrl;
 
       if (audioUrl.isEmpty) {
-        throw Exception('Selected audio URL is empty');
+        if (mounted) {
+          setState(() {
+            _errorMessage =
+                "Oops! We don't have this audiobook yet...\n\nBut we are working hard to get it.\nThank you for your patience!";
+            _isLoading = false;
+          });
+        }
+        return;
       }
 
       await _audioPlayer.setUrl(audioUrl);
 
-      print('Starting playback...');
       _audioPlayer.play();
-      print('Playback started');
     } catch (e, stackTrace) {
-      print('Error in _loadChapter:');
-      print('Error message: $e');
-      print('Stack trace: $stackTrace');
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading chapter: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        setState(() {
+          _errorMessage =
+              "Oops! We don't have this audiobook yet...\n\nBut we are working hard to get it.\nThank you for your patience!";
+          _isLoading = false;
+        });
       }
     }
   }
@@ -252,10 +251,50 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                     )
                     : _errorMessage != null
                     ? Center(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.headphones_outlined,
+                              size: 80,
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              _errorMessage!,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 18,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 32),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF402e7a),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              child: Text(
+                                'Go Back',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                     : Column(
@@ -281,10 +320,12 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              if (_book!
-                                  .chapters[_currentChapterIndex]
-                                  .alternateAudioUrl
-                                  .isNotEmpty)
+                              if (_book != null &&
+                                  _book!.chapters.isNotEmpty &&
+                                  _book!
+                                      .chapters[_currentChapterIndex]
+                                      .alternateAudioUrl
+                                      .isNotEmpty)
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.2),
@@ -522,15 +563,17 @@ class _MediaPlayerPageState extends State<MediaPlayerPage> {
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                'Chapter ${_currentChapterIndex + 1}: ${_book!.chapters[_currentChapterIndex].title}',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white70,
-                                  fontSize: 16,
+                              if (_book!.chapters.isNotEmpty)
+                                Text(
+                                  'Chapter ${_currentChapterIndex + 1}: ${_book!.chapters[_currentChapterIndex].title}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
                               if (_book != null &&
+                                  _book!.chapters.isNotEmpty &&
                                   _book!
                                       .chapters[_currentChapterIndex]
                                       .alternateAudioUrl

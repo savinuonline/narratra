@@ -189,12 +189,7 @@ class UserReward {
     );
     final today = DateTime(now.year, now.month, now.day);
     
-    // Debug print to check the dates
-    print('Last claim date: $lastClaimDate');
-    print('Today: $today');
-    print('Can claim: ${!isSameDay(lastClaimDate, today)}');
-    
-    // Can claim if it's not the same day
+    // Can claim if it's a different day (after midnight)
     return !isSameDay(lastClaimDate, today);
   }
 
@@ -268,6 +263,16 @@ class UserReward {
       "Share your favorite books with friends",
       "Try different genres to keep things interesting",
       "Listen before bed to help you relax"
+      'Use the sleep timer feature to listen before bed without worrying',
+      'Rewind a little when distracted to stay engaged',
+      'Try active listening by taking short notes or summarizing',
+      'Switch to dark mode to reduce eye strain while listening at night',
+      'Listen during your commute to make the most of travel time',
+      'Pair listening with a relaxing walk outdoors',
+      'Follow along with a physical or digital copy of the book',
+      'Download audiobooks for offline listening on the go',
+      'Choose genres that match your current mood for better focus',
+      'Schedule daily listening times to build a habit',
     ];
     tips.shuffle();
     return tips.take(5).toList();
@@ -285,6 +290,16 @@ class UserReward {
       "Your commitment to learning is admirable!",
       "Keep pushing your boundaries with new stories!",
       "You're becoming a better listener every day!"
+      "You’ve got this! One chapter at a time.",
+      "Every story you hear adds something new to you.",
+      "Even 5 minutes today is a step forward.",
+      "Big journeys begin with small steps – keep listening!",
+      "You're feeding your mind with every play button you hit.",
+      "Let your curiosity lead the way!",
+      "The more you listen, the more you grow.",
+      "Stay curious, stay motivated!",
+      "You’re turning time into knowledge—amazing!",
+      "Your future self will thank you for this moment.",
     ];
     return motivations[DateTime.now().millisecondsSinceEpoch % motivations.length];
   }

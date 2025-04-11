@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/book_card.dart';
 import 'package:frontend/components/recent_book_card.dart';
+import 'package:frontend/services/firebase_service.dart';
+import 'package:frontend/models/book.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -10,230 +13,208 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final List booksForYou = [
-    [
-      "Madol Doowa",
-      "Martin Wickramasinghe",
-      'lib/images/madoldoowa.jpg',
-      4.5,
-      "2h 45min",
-    ],
-    [
-      "Sherlock Holmes",
-      "Sir Arthur Conan Doyle",
-      'lib/images/sherlockHolmes.jpeg',
-      4.9,
-      "3h 40min",
-    ],
-    [
-      "Robinson Crusoe",
-      "Daniel Defoe",
-      'lib/images/robinson.jpg',
-      4.2,
-      "2h 50min",
-    ],
-  ];
+  final FirebaseService _firebaseService = FirebaseService();
+  final TextEditingController _searchController = TextEditingController();
+  List<Book> _searchResults = [];
+  bool _isSearching = false;
+  bool _isLoading = false;
 
-  final List recentBooks = [
-    [
-      "Sinhala Holman Katha",
-      "Nissanka Perera",
-      'lib/images/horror.jpg',
-      4.2,
-      "2h 45min",
-    ],
-    [
-      "Sherlock Holmes",
-      "Sir Arthur Conan Doyle",
-      'lib/images/sherlockHolmes.jpeg',
-      4.9,
-      "3h 40min",
-    ],
-    [
-      "Baththalangunduwa",
-      "Manjula Wediwardena",
-      'lib/images/Baththalangunduwa.jpg',
-      4.5,
-      "2h 50min",
-    ],
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendedBooks();
+  }
+
+  Future<void> _loadRecommendedBooks() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final books = await _firebaseService.getTodayForYouBooks();
+      if (!mounted) return;
+      setState(() {
+        _searchResults = books;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading books: $e')));
+      }
+    }
+  }
+
+  Future<void> _performSearch(String query) async {
+    if (query.isEmpty) {
+      _loadRecommendedBooks();
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      final results = await _firebaseService.searchBooks(query);
+      if (!mounted) return;
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSearching = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error searching books: $e')));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 50),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
 
-          // Static App Bar
-          Padding(
-            padding: const EdgeInsets.only(left: 25),
-            child: Container(
-              height: 50,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[200],
-              ),
-              child: Image.asset(
-                'lib/images/menu.png',
-                height: 30,
-                color: Colors.grey[800],
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              child: Text(
+                "Discover a New Story",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 25),
 
-          // Static Title
-          Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: Text(
-              "Discover a New Story",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
-            ),
-          ),
-
-          const SizedBox(height: 25),
-
-          // Static Search Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Container(
-                            height: 30,
-                            child: Image.asset(
-                              'lib/images/search.png',
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ),
-                        const Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Search for a book",
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  border: Border.all(color: Colors.white),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 10),
-                Container(
-                  height: 50,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 129, 27, 213),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Image.asset(
-                    'lib/images/preferences.png',
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Scrollable Section starts here
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // For You Title
-                  Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: Text(
-                      "For You",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 26,
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Icon(Icons.search, color: Colors.grey),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Search for a book",
+                          suffixIcon:
+                              _isSearching
+                                  ? const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                  : null,
+                        ),
+                        onChanged: (value) {
+                          _performSearch(value);
+                        },
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Horizontal Book Cards
-                  Container(
-                    height: 250,
-                    child: ListView.builder(
-                      itemCount: booksForYou.length,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return BookCard(
-                          bookName: booksForYou[index][0],
-                          authorName: booksForYou[index][1],
-                          bookImagePath: booksForYou[index][2],
-                          rating: booksForYou[index][3],
-                          duration: booksForYou[index][4],
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // Recently Added Title
-                  Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: Text(
-                      "Recently Added",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 26,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 0),
-
-                  // Non-scrollable Recent Books List
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: ListView.builder(
-                      itemCount: recentBooks.length,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return RecentBookCard(
-                          bookName: recentBooks[index][0],
-                          authorName: recentBooks[index][1],
-                          bookImagePath: recentBooks[index][2],
-                          rating: recentBooks[index][3],
-                          duration: recentBooks[index][4],
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 20),
+
+            // Results Section
+            Expanded(
+              child:
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _searchResults.isEmpty
+                      ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No books found',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          final book = _searchResults[index];
+                          return RecentBookCard(
+                            bookName: book.title,
+                            authorName: book.author,
+                            bookImagePath: book.imageUrl,
+                            rating: book.rating,
+                            duration: _formatDuration(
+                              book.totalDuration.inSeconds,
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    if (hours > 0) {
+      return '${hours}h ${minutes}min';
+    }
+    return '${minutes}min';
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
